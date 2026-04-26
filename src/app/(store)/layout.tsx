@@ -8,7 +8,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
-  let portalLink = '/auth/signin'
+  let portalLink = '/login'
   let portalLabel = 'Sign In'
 
   if (user) {
@@ -98,7 +98,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
             <div>
               <h3 className="font-semibold text-neutral-900 mb-4">Company</h3>
               <ul className="space-y-2 text-sm text-neutral-500">
-                <li><Link href="/auth/partner/register" className="hover:text-brand-primary">Become a Partner</Link></li>
+                <li><Link href="/partner/register" className="hover:text-brand-primary">Become a Partner</Link></li>
                 <li><Link href="/" className="hover:text-brand-primary">About Us</Link></li>
                 <li><Link href="/" className="hover:text-brand-primary">Contact</Link></li>
               </ul>

@@ -89,11 +89,11 @@ export default function ResetPasswordPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-neutral-500">
-        <Link href="/auth/login" className="text-brand-primary hover:text-amber-400 transition-colors">
+      <div className="mt-8 text-center">
+        <Link href="/login" className="text-sm text-neutral-500 hover:text-brand-primary transition-colors">
           Back to login
         </Link>
-      </p>
+      </div>
     </div>
   )
 }

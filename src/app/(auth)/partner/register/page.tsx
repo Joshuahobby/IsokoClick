@@ -150,7 +150,7 @@ export default function PartnerRegistrationPage() {
 
         <p className="text-center text-sm text-neutral-500">
           Already a partner?{' '}
-          <Link href="/auth/signin" className="font-semibold text-brand-primary hover:text-brand-primary/80">
+          <Link href="/login" className="font-semibold text-brand-primary hover:text-brand-primary/80">
             Sign in
           </Link>
         </p>

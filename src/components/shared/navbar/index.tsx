@@ -69,13 +69,13 @@ export function Navbar() {
             <CartBadge />
           </Link>
 
-          <Link href="/auth/login" className="hidden sm:block">
+          <Link href="/login" className="hidden sm:block">
             <Button variant="ghost" size="sm" className="text-neutral-300 hover:text-white">
               Login
             </Button>
           </Link>
 
-          <Link href="/auth/signup" className="hidden sm:block">
+          <Link href="/signup" className="hidden sm:block">
             <Button size="sm" className="bg-white text-neutral-900 hover:bg-neutral-100 rounded-full font-semibold">
               Sign up
             </Button>
@@ -109,10 +109,10 @@ export function Navbar() {
             ))}
           </nav>
           <div className="mt-4 flex gap-2">
-            <Link href="/auth/login" className="flex-1" onClick={() => setMobileOpen(false)}>
+            <Link href="/login" className="flex-1" onClick={() => setMobileOpen(false)}>
               <Button variant="outline" className="w-full border-neutral-700 text-white">Login</Button>
             </Link>
-            <Link href="/auth/signup" className="flex-1" onClick={() => setMobileOpen(false)}>
+            <Link href="/signup" className="flex-1" onClick={() => setMobileOpen(false)}>
               <Button className="w-full bg-brand-primary text-white hover:bg-amber-600">Sign up</Button>
             </Link>
           </div>
