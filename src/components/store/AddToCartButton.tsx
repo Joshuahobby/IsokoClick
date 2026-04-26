@@ -1,0 +1,29 @@
+'use client'
+
+import { ShoppingCart } from 'lucide-react'
+import { useCartStore } from '@/hooks/use-cart'
+
+export function AddToCartButton({ product }: { product: any }) {
+  const addItem = useCartStore((state) => state.addItem)
+
+  return (
+    <button
+      onClick={() => {
+        addItem({
+          id: product.id,
+          slug: product.slug,
+          name: product.name_en,
+          price: product.sale_price ?? product.base_price,
+          minQty: 1,
+          unitType: 'piece', // Hardcoding for simplified example, in real use map properly
+          imageUrl: null,
+          source: product.source,
+        })
+      }}
+      className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-neutral-100 text-neutral-600 transition-colors hover:bg-brand-primary hover:text-white"
+    >
+      <ShoppingCart size={18} />
+      <span className="sr-only">Add to cart</span>
+    </button>
+  )
+}

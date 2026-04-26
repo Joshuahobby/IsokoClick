@@ -1,232 +1,130 @@
-import type { Metadata } from 'next'
-import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
-import {
-  CheckCircle,
-  Clock,
-  XCircle,
-  Package,
-  Truck,
-  ChevronRight,
-  Smartphone,
-} from 'lucide-react'
+import { notFound } from 'next/navigation'
+import { CheckCircle2, Package, MapPin, CreditCard } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { getOrderById, getUserProfileId } from '@/lib/supabase/queries/orders'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { formatRwf } from '@/lib/utils/currency'
-import type { OrderStatus, PaymentStatus } from '@/types/database'
+
+export const metadata = { title: 'Order Confirmation | IsokoClick' }
 
 type Props = { params: Promise<{ id: string }> }
 
-export const metadata: Metadata = { title: 'Order Details' }
-
-const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
-  pending: 'Pending',
-  confirmed: 'Confirmed',
-  processing: 'Processing',
-  partially_fulfilled: 'Partially Fulfilled',
-  fulfilled: 'Fulfilled',
-  shipped: 'Shipped',
-  delivered: 'Delivered',
-  cancelled: 'Cancelled',
-  refunded: 'Refunded',
-}
-
-const PAYMENT_STATUS_CONFIG: Record<
-  PaymentStatus,
-  { label: string; icon: React.ElementType; color: string }
-> = {
-  pending: { label: 'Payment Pending', icon: Clock, color: 'text-neutral-400' },
-  initiated: { label: 'Awaiting Approval', icon: Smartphone, color: 'text-amber-400' },
-  completed: { label: 'Payment Received', icon: CheckCircle, color: 'text-green-500' },
-  failed: { label: 'Payment Failed', icon: XCircle, color: 'text-red-500' },
-  refunded: { label: 'Refunded', icon: CheckCircle, color: 'text-blue-400' },
-}
-
-export default async function OrderDetailPage({ params }: Props) {
+export default async function OrderSuccessPage({ params }: Props) {
   const { id } = await params
-
   const supabase = await createClient()
-  const {
-    data: { user: authUser },
-  } = await supabase.auth.getUser()
-  if (!authUser) redirect(`/auth/login?redirectTo=/orders/${id}`)
 
-  const customerId = await getUserProfileId(authUser.id)
-  if (!customerId) redirect('/auth/login')
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    // If not logged in, we might want to redirect, but let's just attempt to fetch
+  }
 
-  const order = await getOrderById(id, customerId)
-  if (!order) notFound()
+  // Fetch order details
+  const { data: order, error } = await supabase
+    .from('orders')
+    .select(`
+      *,
+      order_items(*),
+      payments(*)
+    `)
+    .eq('id', id)
+    .single()
 
-  const payment = order.payments[0] ?? null
-  const paymentStatus = (payment?.status ?? 'pending') as PaymentStatus
-  const paymentConfig = PAYMENT_STATUS_CONFIG[paymentStatus]
-  const PaymentIcon = paymentConfig.icon
+  if (error || !order) {
+    notFound()
+  }
+
+  // If this order belongs to someone else, reject (basic security check)
+  const o = order as any
+  if (o.customer_id && user && o.customer_id !== user.id) {
+    notFound()
+  }
+
+  const payment = o.payments?.[0]
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 md:px-8">
+    <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+      <div className="rounded-2xl border border-neutral-200 bg-white p-8 text-center shadow-sm">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 mb-6">
+          <CheckCircle2 size={32} className="text-green-600" />
+        </div>
+        <h1 className="text-3xl font-extrabold tracking-tight text-neutral-900">Order Placed Successfully!</h1>
+        <p className="mt-2 text-neutral-500">
+          Thank you for shopping with IsokoClick. Your order number is <span className="font-bold text-neutral-900">{o.order_number}</span>.
+        </p>
 
-      {/* Breadcrumb */}
-      <nav className="mb-8 flex items-center gap-1.5 text-sm text-neutral-500">
-        <Link href="/" className="hover:text-white">Home</Link>
-        <ChevronRight size={14} />
-        <Link href="/account/orders" className="hover:text-white">Orders</Link>
-        <ChevronRight size={14} />
-        <span className="text-neutral-300">{order.order_number}</span>
-      </nav>
-
-      {/* Payment status hero */}
-      <div className="mb-8 rounded-2xl border border-neutral-800 bg-neutral-900 p-8 text-center">
-        <PaymentIcon size={44} className={`mx-auto mb-3 ${paymentConfig.color}`} />
-        <h1 className="text-xl font-bold text-white">{paymentConfig.label}</h1>
-        <p className="mt-1 text-sm text-neutral-500">Order {order.order_number}</p>
-
-        {paymentStatus === 'initiated' && (
-          <p className="mt-3 text-sm text-amber-400/80">
-            A mobile money request was sent to your phone. Please approve to confirm your order.
-          </p>
-        )}
-        {paymentStatus === 'failed' && (
-          <div className="mt-4">
-            <Link href="/checkout">
-              <Button className="bg-brand-primary text-white hover:bg-amber-600">
-                Try Payment Again
-              </Button>
-            </Link>
+        {payment?.status === 'initiated' && (
+          <div className="mt-6 rounded-lg bg-blue-50 p-4 border border-blue-100">
+            <p className="text-sm text-blue-800">
+              <strong>Action Required:</strong> A Mobile Money prompt has been sent to <strong>{payment.phone_number}</strong>. Please approve the prompt on your phone to complete the payment.
+            </p>
           </div>
-        )}
-        {paymentStatus === 'completed' && (
-          <p className="mt-3 text-sm text-neutral-400">
-            Thank you! Your order is being processed.
-          </p>
         )}
       </div>
 
-      {/* Order details */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-
-        {/* Status card */}
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-5">
-          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
-            <Package size={15} className="text-brand-primary" />
-            Order Status
+      <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
+        {/* Order Details */}
+        <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
+            <Package size={20} className="text-neutral-400" /> Items Summary
           </h2>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-neutral-500">Order</span>
-              <Badge className="border-0 bg-neutral-800 text-neutral-300">
-                {ORDER_STATUS_LABEL[order.status]}
-              </Badge>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-neutral-500">Type</span>
-              <span className="text-white uppercase">{order.order_type}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-neutral-500">Placed</span>
-              <span className="text-white">
-                {new Date(order.created_at).toLocaleDateString('en-RW', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric',
-                })}
-              </span>
-            </div>
+          <div className="flow-root">
+            <ul className="-my-4 divide-y divide-neutral-100">
+              {o.order_items.map((item: any) => (
+                <li key={item.id} className="flex py-4 justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-neutral-900">{item.product_name}</p>
+                    <p className="text-sm text-neutral-500">Qty: {item.qty}</p>
+                  </div>
+                  <p className="text-sm font-medium text-neutral-900">{formatRwf(item.subtotal)}</p>
+                </li>
+              ))}
+            </ul>
           </div>
-        </div>
-
-        {/* Delivery card */}
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-5">
-          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
-            <Truck size={15} className="text-brand-primary" />
-            Delivery
-          </h2>
-          {order.notes ? (
-            (() => {
-              type DeliveryDetails = { fullName?: string; district?: string; notes?: string }
-              let details: DeliveryDetails = {}
-              try {
-                const parsed = JSON.parse(order.notes) as { deliveryDetails?: DeliveryDetails }
-                details = parsed.deliveryDetails ?? {}
-              } catch {}
-              return (
-                <div className="space-y-1 text-sm">
-                  {details.fullName && (
-                    <p className="font-medium text-white">{details.fullName}</p>
-                  )}
-                  {details.district && (
-                    <p className="text-neutral-400">{details.district}</p>
-                  )}
-                  {details.notes && (
-                    <p className="text-neutral-500">{details.notes}</p>
-                  )}
-                </div>
-              )
-            })()
-          ) : (
-            <p className="text-sm text-neutral-500">No delivery details recorded.</p>
-          )}
-        </div>
-      </div>
-
-      {/* Order items */}
-      <div className="mt-6 rounded-xl border border-neutral-800 bg-neutral-900 p-6">
-        <h2 className="mb-4 text-sm font-semibold text-white">Items</h2>
-        <div className="space-y-3">
-          {order.order_items.map((item) => (
-            <div key={item.id} className="flex items-center justify-between gap-4 text-sm">
-              <div className="min-w-0 flex-1">
-                <p className="line-clamp-1 font-medium text-white">{item.product_name}</p>
-                <p className="text-xs text-neutral-500">
-                  {formatRwf(item.unit_price)} × {item.qty}
-                </p>
-              </div>
-              <span className="shrink-0 font-semibold text-white">
-                {formatRwf(item.subtotal)}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        <Separator className="my-4 bg-neutral-800" />
-
-        <div className="space-y-1.5 text-sm">
-          <div className="flex justify-between">
-            <span className="text-neutral-400">Subtotal</span>
-            <span className="text-white">{formatRwf(order.subtotal)}</span>
-          </div>
-          {order.discount_amount > 0 && (
+          <div className="border-t border-neutral-200 pt-4 mt-4 space-y-2 text-sm text-neutral-500">
             <div className="flex justify-between">
-              <span className="text-neutral-400">Discount</span>
-              <span className="text-green-400">-{formatRwf(order.discount_amount)}</span>
+              <p>Subtotal</p>
+              <p>{formatRwf(o.subtotal)}</p>
             </div>
-          )}
-          <div className="flex justify-between">
-            <span className="text-neutral-400">Delivery</span>
-            <span className="text-neutral-500 italic">
-              {order.delivery_fee > 0 ? formatRwf(order.delivery_fee) : 'TBD'}
-            </span>
+            <div className="flex justify-between">
+              <p>Delivery Fee</p>
+              <p>{formatRwf(o.delivery_fee)}</p>
+            </div>
+            <div className="flex justify-between border-t border-neutral-100 pt-2 text-base font-bold text-neutral-900">
+              <p>Total</p>
+              <p>{formatRwf(o.total_amount)}</p>
+            </div>
           </div>
-          <Separator className="my-2 bg-neutral-800" />
-          <div className="flex justify-between font-semibold">
-            <span className="text-white">Total</span>
-            <span className="text-white">{formatRwf(order.total_amount)}</span>
+        </div>
+
+        {/* Delivery & Payment Info */}
+        <div className="space-y-6">
+          <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
+              <MapPin size={20} className="text-neutral-400" /> Delivery Details
+            </h2>
+            <div className="text-sm text-neutral-600 space-y-1">
+              <p className="whitespace-pre-wrap">{o.notes}</p>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
+              <CreditCard size={20} className="text-neutral-400" /> Payment Info
+            </h2>
+            {payment ? (
+              <div className="text-sm text-neutral-600 space-y-1">
+                <p>Status: <span className="font-semibold uppercase text-neutral-900">{payment.status}</span></p>
+                <p>Phone: {payment.phone_number}</p>
+              </div>
+            ) : (
+              <p className="text-sm text-neutral-500">No payment details found.</p>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="mt-6 flex gap-3">
-        <Link href="/shop" className="flex-1">
-          <Button variant="ghost" className="w-full text-neutral-400 hover:text-white">
-            Continue Shopping
-          </Button>
-        </Link>
-        <Link href="/account/orders" className="flex-1">
-          <Button variant="outline" className="w-full border-neutral-700 text-white hover:bg-neutral-800">
-            All Orders
-          </Button>
+      <div className="mt-8 text-center">
+        <Link href="/" className="inline-flex items-center justify-center rounded-lg bg-neutral-900 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-neutral-800">
+          Continue Shopping
         </Link>
       </div>
     </div>

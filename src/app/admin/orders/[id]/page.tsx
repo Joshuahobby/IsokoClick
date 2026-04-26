@@ -1,5 +1,3 @@
-'use server'
-
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -11,6 +9,7 @@ import { Separator } from '@/components/ui/separator'
 import { formatRwf } from '@/lib/utils/currency'
 import type { OrderStatus, PaymentStatus } from '@/types/database'
 
+export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { title: 'Order Detail — Admin' }
 
 const ORDER_STATUS_BADGE: Record<OrderStatus, { label: string; className: string }> = {

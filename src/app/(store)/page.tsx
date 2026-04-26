@@ -1,150 +1,125 @@
 import Link from 'next/link'
-import { ArrowRight, ChevronRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { ShoppingCart } from 'lucide-react'
+import { getStoreProducts } from '@/lib/supabase/queries/store'
+import { formatRwf } from '@/lib/utils/currency'
 import { Badge } from '@/components/ui/badge'
-import { ProductCard } from '@/components/store/product-card'
-import { CONSTRUCTION_CATEGORIES } from '@/constants/app'
-import { getFeaturedProducts, getBestSellers } from '@/lib/supabase/queries/products'
-import type { ProductWithImages } from '@/lib/supabase/queries/products'
+import { AddToCartButton } from '@/components/store/AddToCartButton'
 
-export default async function HomePage() {
-  const [featured, bestSellers] = await Promise.all([
-    getFeaturedProducts(3).catch(() => [] as ProductWithImages[]),
-    getBestSellers(3).catch(() => [] as ProductWithImages[]),
-  ])
+export const metadata = {
+  title: 'IsokoClick | Premium Wholesale & Dropshipping',
+  description: 'Rwanda\'s premier destination for wholesale, B2B, and dropship products.',
+}
+
+export default async function StoreHomePage() {
+  const { products } = await getStoreProducts(1, 24)
 
   return (
-    <div className="min-h-screen">
-
-      {/* ── Hero Section ── */}
-      <section className="relative overflow-hidden bg-neutral-950 px-4 py-20 text-center md:py-32">
-        <div className="bg-grid-texture pointer-events-none absolute inset-0 opacity-[0.03]" />
-
-        <div className="relative mx-auto max-w-4xl">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-neutral-800 bg-neutral-900 px-4 py-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-brand-primary animate-pulse" />
-            <span className="text-sm text-neutral-300">New Stock Arrived — Cement, Tiles & Steel</span>
-          </div>
-
-          <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-            Build Rwanda,{' '}
-            <span className="text-brand-primary">One Click</span>{' '}
-            at a Time
-          </h1>
-
-          <p className="mx-auto mt-6 max-w-2xl text-base text-neutral-400 sm:text-lg">
-            Quality construction materials delivered to your site. Cement, steel, tiles, and more
-            — from IsokoClick warehouses and trusted partners across Rwanda.
-          </p>
-
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href="/shop">
-              <Button size="lg" className="gap-2 rounded-full bg-white px-8 font-semibold text-neutral-900 hover:bg-neutral-100">
-                Shop Now <ArrowRight size={16} />
-              </Button>
-            </Link>
-            <Link href="/shop?category=structure">
-              <Button size="lg" variant="ghost" className="gap-2 rounded-full border border-neutral-700 px-8 text-neutral-300 hover:border-neutral-500 hover:text-white">
-                Browse Categories
-              </Button>
-            </Link>
-          </div>
-
-          <div className="mt-14 flex flex-wrap items-center justify-center gap-8 text-center">
-            {[
-              { value: '2,000+',   label: 'Products' },
-              { value: '50+',      label: 'Partners' },
-              { value: 'Same-day', label: 'Dispatch (Kigali)' },
-              { value: 'PawaPay',  label: 'Mobile Money' },
-            ].map((stat) => (
-              <div key={stat.label}>
-                <div className="text-xl font-bold text-white">{stat.value}</div>
-                <div className="text-xs text-neutral-500 mt-0.5">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Category Grid ── */}
-      <section className="mx-auto max-w-7xl px-4 py-16 md:px-8">
-        <div className="mb-8 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-white">Shop by Category</h2>
-          <Link href="/shop" className="flex items-center gap-1 text-sm text-neutral-400 hover:text-white transition-colors">
-            View all <ChevronRight size={14} />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
-          {CONSTRUCTION_CATEGORIES.map((cat) => (
-            <Link
-              key={cat.slug}
-              href={`/shop?category=${cat.slug}`}
-              className="group flex flex-col items-center gap-2 rounded-xl border border-neutral-800 bg-neutral-900 p-4 text-center transition-all hover:border-brand-primary/50 hover:bg-neutral-800"
-            >
-              <span className="text-2xl">{cat.icon}</span>
-              <span className="text-xs font-medium text-neutral-300 group-hover:text-white leading-tight">
-                {cat.name_en}
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Featured Products ── */}
-      {featured.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 pb-16 md:px-8">
-          <div className="mb-8 flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-white">Featured Products</h2>
-            <Link href="/shop?sort=featured" className="flex items-center gap-1 text-sm text-neutral-400 hover:text-white transition-colors">
-              View all <ChevronRight size={14} />
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {featured.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ── Promotional Banner ── */}
-      <section className="mx-auto max-w-7xl px-4 pb-16 md:px-8">
-        <div className="relative overflow-hidden rounded-2xl bg-brand-primary px-8 py-12 text-center">
-          <div className="bg-stripe-texture pointer-events-none absolute inset-0 opacity-10" />
-          <div className="relative">
-            <Badge className="mb-4 bg-white/20 text-white border-0">B2B & Bulk Orders</Badge>
-            <h2 className="text-2xl font-bold text-white sm:text-3xl">
-              Building a project? Get trade prices.
-            </h2>
-            <p className="mt-3 text-amber-100">
-              Contractors and businesses get access to bulk pricing, credit terms, and dedicated support.
+    <div className="flex flex-col min-h-screen">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-brand-primary">
+        <div className="absolute inset-0 bg-[url('/hero-pattern.svg')] opacity-10 mix-blend-overlay"></div>
+        <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
+          <div className="max-w-2xl text-white">
+            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+              Quality products, <br className="hidden sm:block" />
+              unbeatable wholesale prices.
+            </h1>
+            <p className="mt-6 max-w-xl text-lg text-brand-primary-foreground/90">
+              Source premium goods directly from verified partners and our own internal warehouses. Designed for businesses and smart shoppers across Rwanda.
             </p>
-            <Link href="/b2b" className="mt-6 inline-block">
-              <Button size="lg" className="rounded-full bg-white px-8 font-semibold text-orange-600 hover:bg-orange-50">
-                Apply for B2B Account
-              </Button>
-            </Link>
+            <div className="mt-10 flex gap-4">
+              <Link
+                href="#products"
+                className="rounded-full bg-white px-8 py-3.5 text-sm font-bold text-brand-primary transition-transform hover:scale-105"
+              >
+                Start Shopping
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Best Sellers ── */}
-      {bestSellers.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 pb-20 md:px-8">
-          <div className="mb-8 flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-white">Best Sellers</h2>
-            <Link href="/shop?sort=newest" className="flex items-center gap-1 text-sm text-neutral-400 hover:text-white transition-colors">
-              View more <ChevronRight size={14} />
-            </Link>
+      {/* Featured Categories (Static for now) */}
+      <section className="bg-white py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-end mb-8">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight text-neutral-900">Shop by Category</h2>
+              <p className="text-sm text-neutral-500 mt-1">Explore our wide range of wholesale supplies.</p>
+            </div>
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {bestSellers.map((product) => (
-              <ProductCard key={product.id} product={product} />
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            {['Agriculture', 'Construction', 'Electronics', 'Groceries', 'Hardware', 'Textiles'].map((cat) => (
+              <Link key={cat} href={`/category/${cat.toLowerCase()}`} className="group relative flex h-32 flex-col items-center justify-center overflow-hidden rounded-2xl bg-neutral-100 transition-colors hover:bg-brand-primary/10">
+                <span className="font-semibold text-neutral-700 transition-colors group-hover:text-brand-primary">{cat}</span>
+              </Link>
             ))}
           </div>
-        </section>
-      )}
+        </div>
+      </section>
+
+      {/* Product Grid */}
+      <section id="products" className="bg-neutral-50 py-16 flex-1">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-end mb-8">
+            <h2 className="text-3xl font-bold tracking-tight text-neutral-900">Latest Arrivals</h2>
+          </div>
+
+          {products.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <ShoppingCart size={48} className="text-neutral-300 mb-4" />
+              <h3 className="text-lg font-medium text-neutral-900">No products available</h3>
+              <p className="mt-1 text-sm text-neutral-500">Check back later or apply to become a partner to list your products.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+              {products.map((product) => (
+                <div key={product.id} className="group relative flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition-shadow hover:shadow-lg">
+                  {/* Image Placeholder */}
+                  <div className="aspect-[4/3] bg-neutral-100 flex items-center justify-center relative">
+                    <span className="text-neutral-400 font-medium">No Image</span>
+                    {product.sale_price && (
+                      <div className="absolute top-3 left-3">
+                        <Badge className="bg-red-500 text-white hover:bg-red-600 border-0">Sale</Badge>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Details */}
+                  <div className="flex flex-1 flex-col p-5">
+                    <div className="flex justify-between items-start gap-4 mb-2">
+                      <h3 className="text-base font-semibold text-neutral-900 line-clamp-2">
+                        <Link href={`/products/${product.slug}`}>
+                          <span aria-hidden="true" className="absolute inset-0"></span>
+                          {product.name_en}
+                        </Link>
+                      </h3>
+                    </div>
+                    
+                    <p className="text-sm text-neutral-500 mb-4">{product.brand || product.category || 'Uncategorized'}</p>
+                    
+                    <div className="mt-auto flex items-end justify-between">
+                      <div>
+                        {product.sale_price ? (
+                          <div className="flex flex-col">
+                            <span className="text-sm text-neutral-400 line-through">{formatRwf(product.base_price)}</span>
+                            <span className="text-lg font-bold text-neutral-900">{formatRwf(product.sale_price)}</span>
+                          </div>
+                        ) : (
+                          <span className="text-lg font-bold text-neutral-900">{formatRwf(product.base_price)}</span>
+                        )}
+                        <span className="text-xs text-neutral-500 block mt-0.5">/{product.unit_label_en}</span>
+                      </div>
+                      
+                      <AddToCartButton product={product} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   )
 }

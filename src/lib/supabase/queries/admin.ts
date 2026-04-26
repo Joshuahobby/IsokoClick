@@ -246,6 +246,54 @@ export async function updateOrderStatus(
   return !error
 }
 
+// ─── Admin partner detail & actions ──────────────────────────────────────────
+
+export async function getAdminPartnerById(id: string) {
+  const admin = await createAdminClient()
+  const { data, error } = await admin
+    .from('partners')
+    .select('*, user:user_id(full_name, email, phone)')
+    .eq('id', id)
+    .is('deleted_at', null)
+    .single()
+
+  if (error) return null
+  return data
+}
+
+export async function updatePartnerStatus(
+  partnerId: string,
+  status: PartnerStatus,
+  userId: string
+): Promise<boolean> {
+  const admin = await createAdminClient()
+  
+  // 1. Update partner status
+  const { error: partnerError } = await admin
+    .from('partners')
+    .update({ status })
+    .eq('id', partnerId)
+    
+  if (partnerError) return false
+
+  // 2. If approved, update user role to 'partner'
+  if (status === 'approved') {
+    await admin.from('users').update({ role: 'partner' }).eq('id', userId)
+    // Update auth metadata as well so the session role is 'partner'
+    await admin.auth.admin.updateUserById(userId, {
+      user_metadata: { role: 'partner' }
+    })
+  } else if (status === 'suspended' || status === 'rejected') {
+    // Revert role to customer
+    await admin.from('users').update({ role: 'customer' }).eq('id', userId)
+    await admin.auth.admin.updateUserById(userId, {
+      user_metadata: { role: 'customer' }
+    })
+  }
+
+  return true
+}
+
 // ─── Recent orders (dashboard widget) ────────────────────────────────────────
 
 export async function getRecentOrders(limit = 8): Promise<AdminOrderRow[]> {
