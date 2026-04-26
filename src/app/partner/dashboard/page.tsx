@@ -24,6 +24,53 @@ export default async function PartnerDashboardPage() {
     )
   }
 
+  if (partner.status === 'pending') {
+    return (
+      <div className="max-w-2xl mx-auto py-12 px-4 text-center">
+        <div className="mb-6 flex justify-center text-amber-500">
+          <Clock size={48} />
+        </div>
+        <h1 className="text-2xl font-bold text-white mb-2">Application Under Review</h1>
+        <p className="text-neutral-400 mb-8">
+          Thank you for applying to be a partner with IsokoClick! Your application for 
+          <span className="text-white font-medium"> {partner.business_name} </span> 
+          is currently being reviewed by our team.
+        </p>
+        <div className="rounded-xl bg-neutral-900 border border-neutral-800 p-6 text-left">
+          <h2 className="text-sm font-semibold text-neutral-300 uppercase tracking-wider mb-4">What happens next?</h2>
+          <ul className="space-y-4 text-sm text-neutral-400">
+            <li className="flex gap-3">
+              <span className="flex-shrink-0 h-5 w-5 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center text-xs">1</span>
+              <span>Our admin team will verify your business details and TIN (if provided).</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="flex-shrink-0 h-5 w-5 rounded-full bg-neutral-800 text-neutral-500 flex items-center justify-center text-xs">2</span>
+              <span>You will receive an email confirmation once your account is activated.</span>
+            </li>
+            <li className="flex gap-3">
+              <span className="flex-shrink-0 h-5 w-5 rounded-full bg-neutral-800 text-neutral-500 flex items-center justify-center text-xs">3</span>
+              <span>After activation, you can start listing products in your catalog.</span>
+            </li>
+          </ul>
+        </div>
+        <div className="mt-10">
+          <Link href="/auth/signout" className="text-sm text-neutral-500 hover:text-white transition-colors">
+            Sign out
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  if (partner.status === 'rejected') {
+    return (
+      <div className="max-w-2xl mx-auto py-12 px-4 text-center">
+        <h1 className="text-2xl font-bold text-white mb-2">Application Rejected</h1>
+        <p className="text-neutral-400">We regret to inform you that your partner application has been rejected. Please contact support for more information.</p>
+      </div>
+    )
+  }
+
   const stats = await getPartnerStats(partner.id)
 
   const STATS_CARDS = [

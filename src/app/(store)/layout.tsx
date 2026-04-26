@@ -1,118 +1,86 @@
 import Link from 'next/link'
-import { User, Search, Menu } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { getPartnerByUserId } from '@/lib/supabase/queries/partners'
-import { CartDrawer } from '@/components/store/CartDrawer'
+import { Header } from '@/components/store/Header'
 
 export default async function StoreLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
   let portalLink = '/login'
-  let portalLabel = 'Sign In'
+  let portalLabel = 'Dashboard'
 
   if (user) {
-    if (user.user_metadata?.role === 'admin') {
+    const role = user.user_metadata?.role
+    if (role === 'admin') {
       portalLink = '/admin/dashboard'
-      portalLabel = 'Admin'
-    } else if (user.user_metadata?.role === 'partner') {
+      portalLabel = 'Admin Dashboard'
+    } else if (role === 'partner') {
       portalLink = '/partner/dashboard'
-      portalLabel = 'Partner'
+      portalLabel = 'Partner Dashboard'
     } else {
-      portalLink = '/account' // Placeholder for customer account
-      portalLabel = 'Account'
+      portalLink = '/orders' // Customer orders
+      portalLabel = 'My Orders'
     }
   }
 
   return (
     <div className="flex min-h-screen flex-col bg-neutral-50 text-neutral-900">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-neutral-200 bg-white/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          
-          <div className="flex items-center gap-4">
-            <button className="lg:hidden text-neutral-600 hover:text-brand-primary">
-              <Menu size={24} />
-            </button>
-            <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary font-black text-white">
-                IC
-              </div>
-              <span className="hidden text-xl font-bold tracking-tight text-neutral-900 sm:block">
-                IsokoClick
-              </span>
-            </Link>
-          </div>
+      <Header user={user} portalLink={portalLink} portalLabel={portalLabel} />
 
-          <div className="hidden flex-1 items-center justify-center px-8 lg:flex">
-            <div className="relative w-full max-w-md">
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="w-full rounded-full border border-neutral-300 bg-neutral-100 py-2 pl-10 pr-4 text-sm focus:border-brand-primary focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-primary"
-              />
-              <Search className="absolute left-3 top-2.5 text-neutral-400" size={18} />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 sm:gap-6">
-            <Link href={portalLink} className="flex items-center gap-2 text-sm font-medium text-neutral-600 hover:text-brand-primary">
-              <User size={20} />
-              <span className="hidden sm:block">{portalLabel}</span>
-            </Link>
-            
-            <CartDrawer />
-          </div>
-
-        </div>
-      </header>
-
-      {/* Main Content */}
       <main className="flex-1">
         {children}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-neutral-200 bg-white py-12">
+      <footer className="border-t border-neutral-200 bg-white py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
+          <div className="grid grid-cols-1 gap-12 md:grid-cols-4">
+            <div className="space-y-4">
+              <Link href="/" className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary font-black text-white">
                   IC
                 </div>
                 <span className="text-xl font-bold text-neutral-900">IsokoClick</span>
-              </div>
-              <p className="text-sm text-neutral-500">
-                Your premier destination for wholesale and dropship products in Rwanda.
+              </Link>
+              <p className="text-sm leading-relaxed text-neutral-500">
+                Rwanda&apos;s leading B2B and wholesale marketplace. Bridging the gap between verified partners and smart businesses.
               </p>
             </div>
+            
             <div>
-              <h3 className="font-semibold text-neutral-900 mb-4">Shop</h3>
-              <ul className="space-y-2 text-sm text-neutral-500">
-                <li><Link href="/" className="hover:text-brand-primary">All Products</Link></li>
-                <li><Link href="/" className="hover:text-brand-primary">New Arrivals</Link></li>
-                <li><Link href="/" className="hover:text-brand-primary">Featured</Link></li>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-900 mb-6">Shop</h3>
+              <ul className="space-y-4 text-sm text-neutral-500">
+                <li><Link href="/" className="hover:text-brand-primary transition-colors">All Products</Link></li>
+                <li><Link href="/category/agriculture" className="hover:text-brand-primary transition-colors">Agriculture</Link></li>
+                <li><Link href="/category/construction" className="hover:text-brand-primary transition-colors">Construction</Link></li>
               </ul>
             </div>
+
             <div>
-              <h3 className="font-semibold text-neutral-900 mb-4">Company</h3>
-              <ul className="space-y-2 text-sm text-neutral-500">
-                <li><Link href="/partner/register" className="hover:text-brand-primary">Become a Partner</Link></li>
-                <li><Link href="/" className="hover:text-brand-primary">About Us</Link></li>
-                <li><Link href="/" className="hover:text-brand-primary">Contact</Link></li>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-900 mb-6">Support</h3>
+              <ul className="space-y-4 text-sm text-neutral-500">
+                <li><Link href="/partner/register" className="hover:text-brand-primary transition-colors">Sell on IsokoClick</Link></li>
+                <li><Link href="/contact" className="hover:text-brand-primary transition-colors">Contact Support</Link></li>
+                <li><Link href="/faq" className="hover:text-brand-primary transition-colors">Help Center</Link></li>
               </ul>
             </div>
+
             <div>
-              <h3 className="font-semibold text-neutral-900 mb-4">Legal</h3>
-              <ul className="space-y-2 text-sm text-neutral-500">
-                <li><Link href="/" className="hover:text-brand-primary">Terms of Service</Link></li>
-                <li><Link href="/" className="hover:text-brand-primary">Privacy Policy</Link></li>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-900 mb-6">Platform</h3>
+              <ul className="space-y-4 text-sm text-neutral-500">
+                <li><Link href="/login" className="hover:text-brand-primary transition-colors">Sign In</Link></li>
+                <li><Link href="/partner/register" className="hover:text-brand-primary transition-colors">Partner Registration</Link></li>
               </ul>
             </div>
           </div>
-          <div className="mt-12 border-t border-neutral-200 pt-8 text-center text-sm text-neutral-500">
-            &copy; {new Date().getFullYear()} IsokoClick. All rights reserved.
+          
+          <div className="mt-16 border-t border-neutral-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-xs text-neutral-400">
+              &copy; {new Date().getFullYear()} IsokoClick. All rights reserved.
+            </p>
+            <div className="flex gap-6">
+              <Link href="/privacy" className="text-xs text-neutral-400 hover:text-neutral-600">Privacy Policy</Link>
+              <Link href="/terms" className="text-xs text-neutral-400 hover:text-neutral-600">Terms of Service</Link>
+            </div>
           </div>
         </div>
       </footer>
