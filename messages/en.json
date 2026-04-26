@@ -1,0 +1,81 @@
+{
+  "common": {
+    "appName": "IsokoClick",
+    "tagline": "Rwanda's Construction Marketplace",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "tryAgain": "Try again",
+    "viewAll": "View all",
+    "viewMore": "View more",
+    "addToCart": "Add to cart",
+    "buyNow": "Buy now",
+    "inStock": "In Stock",
+    "lowStock": "Low Stock",
+    "outOfStock": "Out of Stock",
+    "bestSeller": "Best Seller",
+    "new": "New",
+    "sale": "Sale",
+    "isokoClickStock": "IsokoClick Stock",
+    "partnerStock": "Partner"
+  },
+  "nav": {
+    "home": "Home",
+    "shop": "Shop",
+    "categories": "Categories",
+    "sale": "Sale",
+    "b2b": "B2B",
+    "blog": "Blog",
+    "login": "Login",
+    "signup": "Sign up",
+    "cart": "Cart",
+    "account": "Account"
+  },
+  "home": {
+    "heroEyebrow": "New Stock Arrived",
+    "heroHeadline": "Build Rwanda, One Click at a Time",
+    "heroSubtitle": "Quality construction materials delivered to your site. Cement, steel, tiles, and more — from trusted suppliers across Rwanda.",
+    "heroCta": "Shop Now",
+    "heroCtaSecondary": "Browse Categories",
+    "featuredTitle": "Featured Products",
+    "bestSellersTitle": "Best Sellers",
+    "categoriesTitle": "Shop by Category",
+    "newArrivalsTitle": "New Arrivals"
+  },
+  "product": {
+    "perUnit": "per {unit}",
+    "minOrder": "Min. order: {qty} {unit}",
+    "deliveryEstimate": "Delivery in {min}–{max} days",
+    "heavyGoods": "Heavy goods — scheduled delivery required",
+    "addedToCart": "Added to cart",
+    "specifications": "Specifications",
+    "description": "Description",
+    "reviews": "Reviews",
+    "relatedProducts": "Related Products",
+    "noReviews": "No reviews yet. Be the first to review."
+  },
+  "cart": {
+    "title": "Your Cart",
+    "empty": "Your cart is empty",
+    "emptySubtext": "Browse our products and add items to get started.",
+    "continueShopping": "Continue Shopping",
+    "subtotal": "Subtotal",
+    "deliveryFee": "Delivery Fee",
+    "total": "Total",
+    "checkout": "Proceed to Checkout",
+    "remove": "Remove"
+  },
+  "auth": {
+    "login": "Log in",
+    "signup": "Create account",
+    "email": "Email address",
+    "password": "Password",
+    "fullName": "Full name",
+    "phone": "Phone number",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "orContinueWith": "Or continue with",
+    "google": "Continue with Google",
+    "terms": "By signing up, you agree to our Terms of Service and Privacy Policy."
+  }
+}

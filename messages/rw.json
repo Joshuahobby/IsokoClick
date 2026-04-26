@@ -1,0 +1,81 @@
+{
+  "common": {
+    "appName": "IsokoClick",
+    "tagline": "Isoko ry'Ubwubatsi mu Rwanda",
+    "loading": "Gutegereza...",
+    "error": "Habaye ikibazo",
+    "tryAgain": "Gerageza nanone",
+    "viewAll": "Reba byose",
+    "viewMore": "Reba byinshi",
+    "addToCart": "Ongeraho mu gitebo",
+    "buyNow": "Gura nonaha",
+    "inStock": "Ihari",
+    "lowStock": "Biri gupfa",
+    "outOfStock": "Nta bisigazwe",
+    "bestSeller": "Igurwa cyane",
+    "new": "Gishya",
+    "sale": "Ibiciro bihuje",
+    "isokoClickStock": "Ibika IsokoClick",
+    "partnerStock": "Umugiraneza"
+  },
+  "nav": {
+    "home": "Ahabanza",
+    "shop": "Isoko",
+    "categories": "Inzego",
+    "sale": "Ibiciro bihuje",
+    "b2b": "B2B",
+    "blog": "Amakuru",
+    "login": "Injira",
+    "signup": "Iyandikishe",
+    "cart": "Igitebo",
+    "account": "Konti"
+  },
+  "home": {
+    "heroEyebrow": "Ibicuruzwa bishya byageze",
+    "heroHeadline": "Ubaka Rwanda, Inshuro Imwe ku Gukanda",
+    "heroSubtitle": "Ibikoresho by'ubwubatsi by'ubuziranenge bitumirwa ahabazi wawe.",
+    "heroCta": "Gura nonaha",
+    "heroCtaSecondary": "Reba inzego",
+    "featuredTitle": "Ibicuruzwa Byihariye",
+    "bestSellersTitle": "Ibigurwa Cyane",
+    "categoriesTitle": "Gura ukurikije Inzego",
+    "newArrivalsTitle": "Ibicuruzwa Bishya"
+  },
+  "product": {
+    "perUnit": "buri {unit}",
+    "minOrder": "Ingano ntoya: {qty} {unit}",
+    "deliveryEstimate": "Gutumiza mu minsi {min}–{max}",
+    "heavyGoods": "Ibintu birema — gushyirwaho amasaha bisabwa",
+    "addedToCart": "Byongewe mu gitebo",
+    "specifications": "Ibiranga",
+    "description": "Ibisobanuro",
+    "reviews": "Ibitekerezo",
+    "relatedProducts": "Ibicuruzwa bisa",
+    "noReviews": "Nta bitekerezo bihari. Uba wa mbere gutekereza."
+  },
+  "cart": {
+    "title": "Igitebo cyawe",
+    "empty": "Igitebo cyawe kiratsinze",
+    "emptySubtext": "Reba ibicuruzwa byacu ongeraho ibintu utangire.",
+    "continueShopping": "Komeza kugura",
+    "subtotal": "Igiteranyo",
+    "deliveryFee": "Amafaranga yo gutumiza",
+    "total": "Igiteranyo gikomeye",
+    "checkout": "Komeza kwishyura",
+    "remove": "Siba"
+  },
+  "auth": {
+    "login": "Injira",
+    "signup": "Fungura konti",
+    "email": "Imeyili",
+    "password": "Ijambo banga",
+    "fullName": "Amazina yose",
+    "phone": "Nomero ya telefone",
+    "forgotPassword": "Wibagiwe ijambo banga?",
+    "noAccount": "Nta konti ufite?",
+    "hasAccount": "Usanzwe ufite konti?",
+    "orContinueWith": "Cyangwa komeza na",
+    "google": "Komeza na Google",
+    "terms": "Mu iyandikishe, wemeye Amategeko n'Amabwiriza yacu."
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(node -e \"const t = require\\('./node_modules/@supabase/postgrest-js/dist/cjs/types.js'\\); console.log\\(Object.keys\\(t\\).slice\\(0,20\\)\\)\")"
+    ]
+  }
+}
