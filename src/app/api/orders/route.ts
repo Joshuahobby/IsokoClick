@@ -108,12 +108,13 @@ export async function POST(request: Request) {
   const orderItems = items.map((item) => ({
     order_id: orderId,
     product_id: item.id,
-    product_name: item.name,
-    product_sku: null,
+    variant_id: null,
     source: item.source,
+    partner_id: null,
+    quantity: item.qty,
     unit_price: item.price,
-    qty: item.qty,
-    subtotal: item.price * item.qty,
+    total_price: item.price * item.qty,
+    commission_rate: null,
   }))
 
   const { error: itemsError } = await adminClient.from('order_items').insert(orderItems)

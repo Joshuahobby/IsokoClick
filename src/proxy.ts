@@ -1,7 +1,20 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
-const PUBLIC_ROUTES = ['/', '/shop', '/product', '/auth']
+// Note: the (auth) route group adds no URL segment — its pages resolve to
+// top-level paths like /login, not /auth/login.
+const PUBLIC_ROUTES = [
+  '/',
+  '/shop',
+  '/product',
+  '/auth',
+  '/login',
+  '/signup',
+  '/reset-password',
+  '/update-password',
+  '/callback',
+  '/partner/register',
+]
 const ADMIN_ROUTES = ['/admin']
 const PARTNER_ROUTES = ['/partner']
 const WAREHOUSE_ROUTES = ['/warehouse']
