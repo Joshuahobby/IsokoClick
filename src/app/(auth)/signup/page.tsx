@@ -27,7 +27,7 @@ export default function SignupPage() {
       password,
       options: {
         data: { full_name: fullName },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/callback`,
       },
     })
 
@@ -54,7 +54,7 @@ export default function SignupPage() {
           activate your account.
         </p>
         <Link
-          href="/auth/login"
+          href="/login"
           className="mt-6 inline-block text-sm text-brand-primary hover:text-amber-400 transition-colors"
         >
           Back to login
