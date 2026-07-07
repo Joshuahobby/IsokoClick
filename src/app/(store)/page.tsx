@@ -89,7 +89,7 @@ export default async function StoreHomePage() {
                   <div className="flex flex-1 flex-col p-5">
                     <div className="flex justify-between items-start gap-4 mb-2">
                       <h3 className="text-base font-semibold text-neutral-900 line-clamp-2">
-                        <Link href={`/products/${product.slug}`}>
+                        <Link href={`/product/${product.slug}`}>
                           <span aria-hidden="true" className="absolute inset-0"></span>
                           {product.name_en}
                         </Link>

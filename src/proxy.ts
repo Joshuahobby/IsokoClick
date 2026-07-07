@@ -3,36 +3,45 @@ import { updateSession } from '@/lib/supabase/middleware'
 
 // Note: the (auth) route group adds no URL segment — its pages resolve to
 // top-level paths like /login, not /auth/login.
-const PUBLIC_ROUTES = [
-  '/',
-  '/shop',
-  '/product',
-  '/auth',
-  '/login',
-  '/signup',
-  '/reset-password',
-  '/update-password',
-  '/callback',
+
+// Exemptions for public paths that live under a protected prefix, checked
+// before PROTECTED_ROUTES. /api routes enforce their own auth (401 JSON
+// envelopes) and include server-to-server callbacks like the PawaPay
+// webhook — an HTML login redirect would break both.
+const PUBLIC_EXEMPTIONS = [
   '/partner/register',
-  // API routes enforce their own auth (401 JSON envelopes) and include
-  // server-to-server callbacks like the PawaPay webhook — an HTML login
-  // redirect would break both.
   '/api',
 ]
+
+// The store is public by default: anything not under these prefixes passes
+// through, so unknown paths get Next's 404 instead of a redirect to /login
+// (crawlers probing /impressum, /kontakt, etc. were being bounced to the
+// login page). New authenticated areas must be added here.
+const PROTECTED_ROUTES = [
+  '/admin',
+  '/partner',
+  '/warehouse',
+  '/delivery',
+  '/checkout',
+  '/orders',
+  '/account',
+]
+
 const ADMIN_ROUTES = ['/admin']
 const PARTNER_ROUTES = ['/partner']
 const WAREHOUSE_ROUTES = ['/warehouse']
 const DELIVERY_ROUTES = ['/delivery']
 
-function isPublicRoute(pathname: string): boolean {
-  return PUBLIC_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))
+function matchesRoute(pathname: string, routes: string[]): boolean {
+  return routes.some((r) => pathname === r || pathname.startsWith(r + '/'))
 }
 
 export async function proxy(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request)
   const { pathname } = request.nextUrl
 
-  if (isPublicRoute(pathname)) return supabaseResponse
+  if (matchesRoute(pathname, PUBLIC_EXEMPTIONS)) return supabaseResponse
+  if (!matchesRoute(pathname, PROTECTED_ROUTES)) return supabaseResponse
 
   if (!user) {
     const loginUrl = request.nextUrl.clone()
@@ -67,6 +76,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
