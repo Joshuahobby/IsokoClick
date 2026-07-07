@@ -10,7 +10,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   let portalLabel = 'Dashboard'
 
   if (user) {
-    const role = user.user_metadata?.role
+    const role = user.app_metadata?.role
     if (role === 'admin') {
       portalLink = '/admin/dashboard'
       portalLabel = 'Admin Dashboard'

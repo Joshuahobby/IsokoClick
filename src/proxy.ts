@@ -14,6 +14,10 @@ const PUBLIC_ROUTES = [
   '/update-password',
   '/callback',
   '/partner/register',
+  // API routes enforce their own auth (401 JSON envelopes) and include
+  // server-to-server callbacks like the PawaPay webhook — an HTML login
+  // redirect would break both.
+  '/api',
 ]
 const ADMIN_ROUTES = ['/admin']
 const PARTNER_ROUTES = ['/partner']
@@ -37,8 +41,10 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // Role-based route protection — role stored in user metadata
-  const role = user.user_metadata?.role as string | undefined
+  // Role-based route protection — role must come from app_metadata, which is
+  // only settable with the service key. user_metadata is client-controlled
+  // (signup options / updateUser), so trusting it lets anyone claim admin.
+  const role = user.app_metadata?.role as string | undefined
 
   if (ADMIN_ROUTES.some((r) => pathname.startsWith(r)) && role !== 'admin') {
     return NextResponse.redirect(new URL('/', request.url))

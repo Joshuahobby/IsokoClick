@@ -22,7 +22,7 @@ export default async function PartnerLayout({ children }: { children: React.Reac
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user || user.user_metadata?.role !== 'partner') redirect('/')
+  if (!user || user.app_metadata?.role !== 'partner') redirect('/')
 
   return (
     <div className="flex min-h-screen bg-neutral-950">
