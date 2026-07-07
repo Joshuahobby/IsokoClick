@@ -1,11 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
-import type { ProductRow } from '@/types/database'
+import type { CategoryRow, ProductRow } from '@/types/database'
 
 export type StoreProduct = Pick<
   ProductRow,
   'id' | 'name_en' | 'slug' | 'base_price' | 'sale_price' | 'unit_label_en' | 'brand' | 'source'
 > & {
   category?: string
+}
+
+type StoreProductQueryRow = Pick<
+  ProductRow,
+  'id' | 'name_en' | 'slug' | 'base_price' | 'sale_price' | 'unit_label_en' | 'brand' | 'source'
+> & {
+  categories: Pick<CategoryRow, 'name_en'> | null
 }
 
 export async function getStoreProducts(
@@ -28,8 +35,12 @@ export async function getStoreProducts(
     .range(from, to)
 
   if (error) return { products: [], total: 0 }
-  
-  const formattedProducts = data.map((p: any) => ({
+
+  // The hand-written Database type carries no relationship metadata, so
+  // supabase-js cannot infer the embedded categories join.
+  const rows = data as unknown as StoreProductQueryRow[]
+
+  const formattedProducts: StoreProduct[] = rows.map((p) => ({
     id: p.id,
     name_en: p.name_en,
     slug: p.slug,
@@ -41,5 +52,5 @@ export async function getStoreProducts(
     category: p.categories?.name_en,
   }))
 
-  return { products: formattedProducts as StoreProduct[], total: count ?? 0 }
+  return { products: formattedProducts, total: count ?? 0 }
 }

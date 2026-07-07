@@ -11,7 +11,7 @@ const initialState = { error: '' }
 
 export default function PartnerNewProductPage() {
   const [state, formAction, isPending] = useActionState(
-    async (prevState: any, formData: FormData) => {
+    async (prevState: { error: string }, formData: FormData) => {
       const result = await createPartnerProduct(formData)
       if (result?.error) {
         return { error: result.error }

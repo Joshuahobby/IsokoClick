@@ -5,7 +5,6 @@ import {
   ShoppingBag,
   Clock,
   Package,
-  Users,
   ChevronRight,
 } from 'lucide-react'
 import { getDashboardStats, getRecentOrders } from '@/lib/supabase/queries/admin'

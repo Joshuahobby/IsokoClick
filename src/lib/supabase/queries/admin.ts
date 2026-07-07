@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
-import type { OrderRow, OrderStatus, PaymentStatus, PartnerStatus } from '@/types/database'
+import type { OrderRow, OrderStatus, PartnerRow, PaymentStatus, PartnerStatus, UserRow } from '@/types/database'
 
 // ─── Dashboard stats ──────────────────────────────────────────────────────────
 
@@ -248,7 +248,11 @@ export async function updateOrderStatus(
 
 // ─── Admin partner detail & actions ──────────────────────────────────────────
 
-export async function getAdminPartnerById(id: string) {
+export type AdminPartnerDetail = PartnerRow & {
+  user: Pick<UserRow, 'full_name' | 'email' | 'phone'> | null
+}
+
+export async function getAdminPartnerById(id: string): Promise<AdminPartnerDetail | null> {
   const admin = await createAdminClient()
   const { data, error } = await admin
     .from('partners')
@@ -258,7 +262,9 @@ export async function getAdminPartnerById(id: string) {
     .single()
 
   if (error) return null
-  return data
+  // The hand-written Database type carries no relationship metadata, so
+  // supabase-js cannot infer the embedded user join.
+  return data as unknown as AdminPartnerDetail
 }
 
 export async function updatePartnerStatus(

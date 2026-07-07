@@ -91,8 +91,10 @@ export async function createOrder(formData: FormData) {
     if (paymentError) throw new Error(`Payment init failed: ${paymentError.message}`)
 
     return { success: true, orderId }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Checkout error:', error)
-    return { error: error.message || 'An unexpected error occurred during checkout.' }
+    return {
+      error: error instanceof Error ? error.message : 'An unexpected error occurred during checkout.',
+    }
   }
 }

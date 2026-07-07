@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { User, Search, Menu, LogOut, LayoutDashboard } from 'lucide-react'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { CartDrawer } from '@/components/store/CartDrawer'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,7 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 interface HeaderProps {
-  user: any
+  user: SupabaseUser | null
   portalLink: string
   portalLabel: string
 }
