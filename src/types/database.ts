@@ -177,12 +177,13 @@ export interface OrderItemRow {
   id: string
   order_id: string
   product_id: string
-  product_name: string
-  product_sku: string | null
+  variant_id: string | null
   source: InventorySource
+  partner_id: string | null
+  quantity: number
   unit_price: number
-  qty: number
-  subtotal: number
+  total_price: number
+  commission_rate: number | null
   created_at: string
 }
 export type OrderItemInsert = Omit<OrderItemRow, 'id' | 'created_at'>
