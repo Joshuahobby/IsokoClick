@@ -1,7 +1,18 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
-const PUBLIC_ROUTES = ['/', '/shop', '/product', '/auth']
+const PUBLIC_ROUTES = [
+  '/',
+  '/shop',
+  '/product',
+  '/auth',
+  '/login',
+  '/signup',
+  '/reset-password',
+  '/update-password',
+  '/callback',
+  '/partner/register',
+]
 const ADMIN_ROUTES = ['/admin']
 const PARTNER_ROUTES = ['/partner']
 const WAREHOUSE_ROUTES = ['/warehouse']
@@ -14,6 +25,10 @@ function isPublicRoute(pathname: string): boolean {
 export async function proxy(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request)
   const { pathname } = request.nextUrl
+
+  // API routes authenticate themselves (session cookies or webhook signatures) —
+  // never redirect them to the login page. Session refresh above still applies.
+  if (pathname.startsWith('/api')) return supabaseResponse
 
   if (isPublicRoute(pathname)) return supabaseResponse
 
