@@ -6,15 +6,6 @@ export const MAX_B2B_WITHOUT_APPROVAL = 1_000_000
 export const VAT_RATE = 0.18
 export const DEFAULT_COMMISSION_RATE = 10
 
-export const NAV_LINKS = [
-  { label: 'Home', href: '/' },
-  { label: 'Shop', href: '/shop' },
-  { label: 'Categories', href: '/shop/categories' },
-  { label: 'Sale', href: '/shop?filter=sale' },
-  { label: 'B2B', href: '/b2b' },
-  { label: 'Blog', href: '/blog' },
-]
-
 export const CONSTRUCTION_CATEGORIES = [
   { slug: 'structure', name_en: 'Structure & Concrete', icon: '🏗️' },
   { slug: 'finishes', name_en: 'Tiles & Finishes', icon: '🪨' },
