@@ -13,8 +13,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+type HeaderUser = {
+  email?: string
+  user_metadata?: { full_name?: string }
+}
+
 interface HeaderProps {
-  user: any
+  user: HeaderUser | null
   portalLink: string
   portalLabel: string
 }
@@ -52,14 +57,16 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
         <div className="flex items-center gap-3 sm:gap-4">
           {user ? (
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:bg-neutral-100">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-200 text-neutral-600">
-                    <User size={20} />
-                  </div>
-                </Button>
+              <DropdownMenuTrigger
+                render={
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:bg-neutral-100" />
+                }
+              >
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-200 text-neutral-600">
+                  <User size={20} />
+                </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuContent className="w-56" align="end">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{user.user_metadata?.full_name || 'My Account'}</p>
@@ -67,23 +74,24 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href={portalLink} className="cursor-pointer flex items-center">
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    <span>{portalLabel}</span>
-                  </Link>
+                <DropdownMenuItem
+                  render={<Link href={portalLink} className="flex cursor-pointer items-center" />}
+                >
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  <span>{portalLabel}</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/account/orders" className="cursor-pointer">My Orders</Link>
+                <DropdownMenuItem render={<Link href="/account/orders" className="cursor-pointer" />}>
+                  My Orders
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <form action="/auth/signout" method="POST">
-                  <button type="submit" className="w-full">
-                    <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
-                    </DropdownMenuItem>
-                  </button>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    render={<button type="submit" className="w-full cursor-pointer" />}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
                 </form>
               </DropdownMenuContent>
             </DropdownMenu>
