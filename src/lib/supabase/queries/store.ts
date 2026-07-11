@@ -3,9 +3,22 @@ import type { ProductRow } from '@/types/database'
 
 export type StoreProduct = Pick<
   ProductRow,
-  'id' | 'name_en' | 'slug' | 'base_price' | 'sale_price' | 'unit_label_en' | 'brand' | 'source'
+  | 'id'
+  | 'name_en'
+  | 'slug'
+  | 'base_price'
+  | 'sale_price'
+  | 'unit_label_en'
+  | 'brand'
+  | 'source'
+  | 'min_order_qty'
+  | 'unit_type'
 > & {
   category?: string
+}
+
+type RawStoreProduct = Omit<StoreProduct, 'category'> & {
+  categories: { name_en: string } | null
 }
 
 export async function getStoreProducts(
@@ -19,7 +32,7 @@ export async function getStoreProducts(
   const { data, error, count } = await supabase
     .from('products')
     .select(`
-      id, name_en, slug, base_price, sale_price, unit_label_en, brand, source,
+      id, name_en, slug, base_price, sale_price, unit_label_en, brand, source, min_order_qty, unit_type,
       categories:category_id(name_en)
     `, { count: 'exact' })
     .eq('is_active', true)
@@ -28,18 +41,13 @@ export async function getStoreProducts(
     .range(from, to)
 
   if (error) return { products: [], total: 0 }
-  
-  const formattedProducts = data.map((p: any) => ({
-    id: p.id,
-    name_en: p.name_en,
-    slug: p.slug,
-    base_price: p.base_price,
-    sale_price: p.sale_price,
-    unit_label_en: p.unit_label_en,
-    brand: p.brand,
-    source: p.source,
-    category: p.categories?.name_en,
+
+  // Supabase's embed parsing defeats inference on the placeholder DB types — cast once, then map
+  const rows = (data ?? []) as unknown as RawStoreProduct[]
+  const products = rows.map(({ categories, ...product }) => ({
+    ...product,
+    category: categories?.name_en,
   }))
 
-  return { products: formattedProducts as StoreProduct[], total: count ?? 0 }
+  return { products, total: count ?? 0 }
 }

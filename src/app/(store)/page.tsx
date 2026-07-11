@@ -3,7 +3,7 @@ import { ShoppingCart } from 'lucide-react'
 import { getStoreProducts } from '@/lib/supabase/queries/store'
 import { formatRwf } from '@/lib/utils/currency'
 import { Badge } from '@/components/ui/badge'
-import { AddToCartButton } from '@/components/store/AddToCartButton'
+import { QuickAddButton } from '@/components/store/quick-add-button'
 
 export const metadata = {
   title: 'IsokoClick | Premium Wholesale & Dropshipping',
@@ -111,7 +111,17 @@ export default async function StoreHomePage() {
                         <span className="text-xs text-neutral-500 block mt-0.5">/{product.unit_label_en}</span>
                       </div>
                       
-                      <AddToCartButton product={product} />
+                      <QuickAddButton
+                        id={product.id}
+                        slug={product.slug}
+                        name={product.name_en}
+                        price={product.sale_price ?? product.base_price}
+                        minQty={product.min_order_qty}
+                        unitType={product.unit_type}
+                        imageUrl={null}
+                        source={product.source}
+                        className="relative z-10 h-10 w-10 opacity-100"
+                      />
                     </div>
                   </div>
                 </div>

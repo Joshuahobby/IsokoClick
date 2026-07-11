@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { formatRwf } from '@/lib/utils/currency'
-import { QuickAddButton } from './quick-add-button'
+import { QuickAddButton } from '@/components/store/quick-add-button'
 import type { ProductWithImages } from '@/lib/supabase/queries/products'
 
 type Props = {

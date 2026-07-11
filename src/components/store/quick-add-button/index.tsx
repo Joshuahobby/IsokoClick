@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ShoppingCart, Check } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { useCartStore } from '@/hooks/use-cart'
 import type { InventorySource, UnitType } from '@/types/database'
 
@@ -14,9 +15,20 @@ type Props = {
   unitType: UnitType
   imageUrl: string | null
   source: InventorySource
+  className?: string
 }
 
-export function QuickAddButton({ id, slug, name, price, minQty, unitType, imageUrl, source }: Props) {
+export function QuickAddButton({
+  id,
+  slug,
+  name,
+  price,
+  minQty,
+  unitType,
+  imageUrl,
+  source,
+  className,
+}: Props) {
   const [added, setAdded] = useState(false)
   const addItem = useCartStore((s) => s.addItem)
 
@@ -32,7 +44,10 @@ export function QuickAddButton({ id, slug, name, price, minQty, unitType, imageU
     <button
       type="button"
       onClick={handleClick}
-      className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-primary text-white opacity-0 transition-all group-hover:opacity-100 hover:bg-amber-600"
+      className={cn(
+        'flex h-8 w-8 items-center justify-center rounded-full bg-brand-primary text-white opacity-0 transition-all group-hover:opacity-100 hover:bg-amber-600',
+        className
+      )}
       aria-label={`Add ${name} to cart`}
     >
       {added ? <Check size={14} /> : <ShoppingCart size={14} />}
