@@ -28,11 +28,11 @@ async function changeStatus(partnerId: string, userId: string, status: PartnerSt
 
 export default async function AdminPartnerDetailPage({ params }: Props) {
   const { id } = await params
-  const partner = await getAdminPartnerById(id) as any
-  
+  const partner = await getAdminPartnerById(id)
+
   if (!partner) notFound()
 
-  const statusCfg = PARTNER_STATUS_BADGE[partner.status as PartnerStatus] || { label: partner.status, className: 'bg-neutral-800' }
+  const statusCfg = PARTNER_STATUS_BADGE[partner.status]
 
   return (
     <div className="max-w-4xl">
@@ -123,15 +123,15 @@ export default async function AdminPartnerDetailPage({ params }: Props) {
             <dl className="space-y-3 text-sm">
               <div>
                 <dt className="text-neutral-500">Full Name</dt>
-                <dd className="font-medium text-white">{(partner.user as any).full_name}</dd>
+                <dd className="font-medium text-white">{partner.user.full_name}</dd>
               </div>
               <div>
                 <dt className="text-neutral-500">Account Email</dt>
-                <dd className="text-white">{(partner.user as any).email}</dd>
+                <dd className="text-white">{partner.user.email}</dd>
               </div>
               <div>
                 <dt className="text-neutral-500">Account Phone</dt>
-                <dd className="text-white">{(partner.user as any).phone || 'Not provided'}</dd>
+                <dd className="text-white">{partner.user.phone || 'Not provided'}</dd>
               </div>
             </dl>
           ) : (

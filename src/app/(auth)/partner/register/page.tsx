@@ -10,7 +10,7 @@ const initialState = { error: '' }
 
 export default function PartnerRegistrationPage() {
   const [state, formAction, isPending] = useActionState(
-    async (prevState: any, formData: FormData) => {
+    async (prevState: { error: string }, formData: FormData) => {
       const result = await applyForPartner(formData)
       if (result?.error) {
         return { error: result.error }

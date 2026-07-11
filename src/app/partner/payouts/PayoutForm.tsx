@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label'
 
 export function PayoutForm({ currentPhone }: { currentPhone: string | null }) {
   const [state, formAction, isPending] = useActionState(
-    async (prevState: any, formData: FormData) => {
+    async (prevState: { error: string; success: boolean }, formData: FormData) => {
       const result = await updatePayoutInfo(formData)
       if (result?.error) {
         return { error: result.error, success: false }

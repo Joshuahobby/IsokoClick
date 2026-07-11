@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useActionState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
 import { useCartStore } from '@/hooks/use-cart'
 import { formatRwf } from '@/lib/utils/currency'
 import { createOrder } from './actions'
@@ -23,7 +22,7 @@ export function CheckoutClient() {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <h2 className="text-2xl font-bold text-neutral-900 mb-2">Your cart is empty</h2>
-        <p className="text-neutral-500 mb-6">Looks like you haven't added anything to your cart yet.</p>
+        <p className="text-neutral-500 mb-6">Looks like you haven&apos;t added anything to your cart yet.</p>
         <Link href="/" className="rounded-lg bg-brand-primary px-6 py-2.5 font-semibold text-white hover:bg-brand-primary/90">
           Continue Shopping
         </Link>

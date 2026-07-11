@@ -1,24 +1,24 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import { ShoppingCart, X, Plus, Minus, Trash2 } from 'lucide-react'
 import { useCartStore } from '@/hooks/use-cart'
 import { formatRwf } from '@/lib/utils/currency'
 
+const emptySubscribe = () => () => {}
+
 export function CartDrawer() {
   const [isOpen, setIsOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
+  // Hydration gate: cart totals come from localStorage (zustand persist), so the
+  // first client render must match the server HTML before live values appear.
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false)
   
   const items = useCartStore((state) => state.items)
   const removeItem = useCartStore((state) => state.removeItem)
   const updateQty = useCartStore((state) => state.updateQty)
   const totalItems = useCartStore((state) => state.totalItems())
   const totalPrice = useCartStore((state) => state.totalPrice())
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   if (!mounted) {
     return (
