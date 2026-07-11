@@ -215,14 +215,14 @@ export default async function AdminOrderDetailPage({ params }: Props) {
           {order.order_items.map((item) => (
             <div key={item.id} className="flex items-center justify-between gap-4 text-sm">
               <div className="min-w-0 flex-1">
-                <p className="font-medium text-white">{item.product_name}</p>
+                <p className="font-medium text-white">{item.product?.name_en ?? 'Deleted product'}</p>
                 <p className="text-xs text-neutral-500">
                   {item.source === 'dropship' ? 'Dropship' : 'Internal'} ·{' '}
-                  {formatRwf(item.unit_price)} × {item.qty}
-                  {item.product_sku ? ` · SKU: ${item.product_sku}` : ''}
+                  {formatRwf(item.unit_price)} × {item.quantity}
+                  {item.product?.sku ? ` · SKU: ${item.product.sku}` : ''}
                 </p>
               </div>
-              <span className="shrink-0 font-semibold text-white">{formatRwf(item.subtotal)}</span>
+              <span className="shrink-0 font-semibold text-white">{formatRwf(item.total_price)}</span>
             </div>
           ))}
         </div>

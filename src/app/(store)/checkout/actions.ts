@@ -1,6 +1,7 @@
 'use server'
 
 import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { getUserProfileId } from '@/lib/supabase/queries/orders'
 import type { CartItem } from '@/hooks/use-cart'
 import type { OrderInsert, OrderItemInsert, PaymentInsert } from '@/types/database'
 
@@ -12,6 +13,12 @@ export async function createOrder(formData: FormData) {
 
   if (!user) {
     return { error: 'You must be logged in to place an order.' }
+  }
+
+  // orders.customer_id references public.users.id, not the auth user id
+  const customerId = await getUserProfileId(user.id)
+  if (!customerId) {
+    return { error: 'User profile not found. Please complete account setup.' }
   }
 
   try {
@@ -30,7 +37,7 @@ export async function createOrder(formData: FormData) {
     const orderNumber = `ORD-${Date.now().toString().slice(-6)}`
     const newOrder: OrderInsert = {
       order_number: orderNumber,
-      customer_id: user.id,
+      customer_id: customerId,
       shipping_address_id: null,
       status: 'pending',
       order_type: 'b2c',
@@ -58,12 +65,13 @@ export async function createOrder(formData: FormData) {
     const orderItemsToInsert: OrderItemInsert[] = cartItems.map((item) => ({
       order_id: orderId,
       product_id: item.id,
-      product_name: item.name,
-      product_sku: null,
+      variant_id: null,
       source: item.source,
+      partner_id: null,
+      quantity: item.qty,
       unit_price: item.price,
-      qty: item.qty,
-      subtotal: item.price * item.qty,
+      total_price: item.price * item.qty,
+      commission_rate: null,
     }))
 
     const { error: itemsError } = await admin.from('order_items').insert(orderItemsToInsert)
@@ -90,8 +98,10 @@ export async function createOrder(formData: FormData) {
     if (paymentError) throw new Error(`Payment init failed: ${paymentError.message}`)
 
     return { success: true, orderId }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Checkout error:', error)
-    return { error: error.message || 'An unexpected error occurred during checkout.' }
+    const message =
+      error instanceof Error ? error.message : 'An unexpected error occurred during checkout.'
+    return { error: message }
   }
 }

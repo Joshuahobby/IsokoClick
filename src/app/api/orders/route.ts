@@ -16,10 +16,11 @@ type OrderRequestBody = {
   deliveryDetails: DeliveryDetails
 }
 
+// Default to sandbox — only hit the live API when explicitly set to 'production'
 const PAWAPAY_BASE_URL =
-  process.env.PAWAPAY_SANDBOX === 'true'
-    ? 'https://api.sandbox.pawapay.io'
-    : 'https://api.pawapay.cloud'
+  process.env.PAWAPAY_ENVIRONMENT === 'production'
+    ? 'https://api.pawapay.cloud'
+    : 'https://api.sandbox.pawapay.io'
 
 const CORRESPONDENT: Record<string, string> = {
   MTN: 'MTN_MOMO_RWA',
@@ -108,12 +109,13 @@ export async function POST(request: Request) {
   const orderItems = items.map((item) => ({
     order_id: orderId,
     product_id: item.id,
-    product_name: item.name,
-    product_sku: null,
+    variant_id: null,
     source: item.source,
+    partner_id: null,
+    quantity: item.qty,
     unit_price: item.price,
-    qty: item.qty,
-    subtotal: item.price * item.qty,
+    total_price: item.price * item.qty,
+    commission_rate: null,
   }))
 
   const { error: itemsError } = await adminClient.from('order_items').insert(orderItems)

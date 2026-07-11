@@ -73,11 +73,11 @@ export default async function PartnerOrdersPage(
                         <div className="font-medium text-white">{item.order.order_number}</div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="font-medium text-white">{item.product_name}</div>
+                        <div className="font-medium text-white">{item.product?.name_en ?? '—'}</div>
                       </td>
                       <td className="px-6 py-4 text-neutral-300">
-                        {item.qty} × {formatRwf(item.unit_price)}
-                        <div className="font-medium text-brand-primary mt-0.5">{formatRwf(item.subtotal)}</div>
+                        {item.quantity} × {formatRwf(item.unit_price)}
+                        <div className="font-medium text-brand-primary mt-0.5">{formatRwf(item.total_price)}</div>
                       </td>
                       <td className="px-6 py-4">
                         <Badge className={`border-0 ${statusCfg.className}`}>

@@ -2,7 +2,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import type { OrderRow, OrderItemRow, PaymentRow, PaymentStatus, OrderStatus } from '@/types/database'
 
 export type OrderWithDetails = OrderRow & {
-  order_items: OrderItemRow[]
+  order_items: (OrderItemRow & { product: { name_en: string } | null })[]
   payments: PaymentRow[]
 }
 
@@ -10,7 +10,7 @@ export async function getOrderById(id: string, userId: string): Promise<OrderWit
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('orders')
-    .select('*, order_items(*), payments(*)')
+    .select('*, order_items(*, product:product_id(name_en)), payments(*)')
     .eq('id', id)
     .eq('customer_id', userId)
     .is('deleted_at', null)
