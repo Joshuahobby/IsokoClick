@@ -28,13 +28,15 @@ function mapStatuses(pawapayStatus: string): { payment: PaymentStatus; order: Or
 export async function POST(request: Request) {
   const rawBody = await request.text()
 
-  // Verify PawaPay webhook signature
+  // Verify PawaPay webhook signature — fail closed if the secret is not configured,
+  // otherwise a misconfigured deployment would accept forged callbacks
   const secret = process.env.PAWAPAY_WEBHOOK_SECRET
-  if (secret) {
-    const signature = request.headers.get('x-pawapay-signature') ?? ''
-    if (!verifySignature(rawBody, signature, secret)) {
-      return new Response('Invalid signature', { status: 401 })
-    }
+  if (!secret) {
+    return new Response('Webhook secret not configured', { status: 500 })
+  }
+  const signature = request.headers.get('x-pawapay-signature') ?? ''
+  if (!verifySignature(rawBody, signature, secret)) {
+    return new Response('Invalid signature', { status: 401 })
   }
 
   let payload: PawaPayWebhookPayload
