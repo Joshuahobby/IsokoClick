@@ -280,17 +280,18 @@ export async function updatePartnerStatus(
   if (partnerError) return false
 
   // 2. If approved, update user role to 'partner'
+  // Roles live in app_metadata (service-key only) — user_metadata is
+  // client-controlled and must never carry authorization.
   if (status === 'approved') {
     await admin.from('users').update({ role: 'partner' }).eq('id', userId)
-    // Update auth metadata as well so the session role is 'partner'
     await admin.auth.admin.updateUserById(userId, {
-      user_metadata: { role: 'partner' }
+      app_metadata: { role: 'partner' }
     })
   } else if (status === 'suspended' || status === 'rejected') {
     // Revert role to customer
     await admin.from('users').update({ role: 'customer' }).eq('id', userId)
     await admin.auth.admin.updateUserById(userId, {
-      user_metadata: { role: 'customer' }
+      app_metadata: { role: 'customer' }
     })
   }
 
