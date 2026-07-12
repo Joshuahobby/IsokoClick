@@ -21,7 +21,7 @@ export default function ResetPasswordPage() {
 
     const supabase = createClient()
     const { error: authError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/auth/update-password`,
+      redirectTo: `${window.location.origin}/callback?next=/update-password`,
     })
 
     if (authError) {
@@ -47,7 +47,7 @@ export default function ResetPasswordPage() {
           expires in 1 hour.
         </p>
         <Link
-          href="/auth/login"
+          href="/login"
           className="mt-6 inline-block text-sm text-brand-primary hover:text-amber-400 transition-colors"
         >
           Back to login

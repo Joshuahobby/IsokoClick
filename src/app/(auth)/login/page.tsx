@@ -60,7 +60,7 @@ function LoginForm() {
           <div className="flex items-center justify-between">
             <Label htmlFor="password" className="text-neutral-300">Password</Label>
             <Link
-              href="/auth/reset-password"
+              href="/reset-password"
               className="text-xs text-neutral-500 hover:text-brand-primary transition-colors"
             >
               Forgot password?
@@ -91,7 +91,7 @@ function LoginForm() {
 
       <p className="mt-6 text-center text-sm text-neutral-500">
         Don&apos;t have an account?{' '}
-        <Link href="/auth/signup" className="text-brand-primary hover:text-amber-400 transition-colors">
+        <Link href="/signup" className="text-brand-primary hover:text-amber-400 transition-colors">
           Create account
         </Link>
       </p>
