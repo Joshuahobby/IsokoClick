@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { ChevronRight, User, Building, MapPin, CheckCircle, XCircle, AlertTriangle } from 'lucide-react'
 import { getAdminPartnerById, updatePartnerStatus } from '@/lib/supabase/queries/admin'
+import { hasRole } from '@/lib/supabase/require-role'
 import { Badge } from '@/components/ui/badge'
 import type { PartnerStatus } from '@/types/database'
 
@@ -21,6 +22,7 @@ type Props = { params: Promise<{ id: string }> }
 
 async function changeStatus(partnerId: string, userId: string, status: PartnerStatus) {
   'use server'
+  if (!(await hasRole('admin'))) return
   await updatePartnerStatus(partnerId, status, userId)
   revalidatePath(`/admin/partners/${partnerId}`)
   revalidatePath('/admin/partners')

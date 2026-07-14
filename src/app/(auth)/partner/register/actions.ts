@@ -2,11 +2,12 @@
 
 import { redirect } from 'next/navigation'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { logError } from '@/lib/utils/log'
 import type { PartnerInsert } from '@/types/database'
 
 export async function applyForPartner(formData: FormData) {
   const supabase = await createClient()
-  
+
   // Get the current user
   const { data: { user }, error: userError } = await supabase.auth.getUser()
   if (userError || !user) {
@@ -25,17 +26,29 @@ export async function applyForPartner(formData: FormData) {
     return { error: 'Business name, email, and phone are required.' }
   }
 
+  const admin = await createAdminClient()
+
+  // One application per account
+  const { data: existing } = await admin
+    .from('partners')
+    .select('id')
+    .eq('user_id', user.id)
+    .is('deleted_at', null)
+    .maybeSingle()
+  if (existing) {
+    return { error: 'You already have a partner application on file.' }
+  }
+
   // Generate a basic slug
-  const slug = businessName
+  const baseSlug = businessName
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)+/g, '')
 
-  // Create the partner record
   const newPartner: PartnerInsert = {
     user_id: user.id,
     business_name: businessName,
-    slug,
+    slug: baseSlug,
     email,
     phone,
     tin_number: tinNumber || null,
@@ -49,16 +62,23 @@ export async function applyForPartner(formData: FormData) {
     deleted_at: null,
   }
 
-  const admin = await createAdminClient()
-  const { error } = await admin
-    .from('partners')
-    .insert(newPartner)
+  let { error } = await admin.from('partners').insert(newPartner)
 
-  if (error) {
-    // Basic unique constraint handling (e.g. if user already applied or slug taken)
-    return { error: error.message }
+  // Slug collision (unique violation): retry once with a random suffix
+  if (error?.code === '23505') {
+    const suffixed = `${baseSlug}-${crypto.randomUUID().slice(0, 4)}`
+    ;({ error } = await admin.from('partners').insert({ ...newPartner, slug: suffixed }))
   }
 
-  // On success, redirect to a success page or dashboard showing pending status
-  redirect('/partner/dashboard')
+  if (error) {
+    // Raw Postgres errors leak schema details — log server-side, keep
+    // the client message generic.
+    logError('partner:apply', error)
+    return { error: 'Failed to submit your application. Please try again.' }
+  }
+
+  // The user's role is still 'customer' until an admin approves the
+  // application, so the partner portal would bounce them — send them to
+  // a public confirmation page instead.
+  redirect('/partner/register/success')
 }

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { getPartnerByUserId } from '@/lib/supabase/queries/partners'
+import { logError } from '@/lib/utils/log'
 import type { ProductInsert } from '@/types/database'
 
 export async function createPartnerProduct(formData: FormData) {
@@ -17,6 +18,12 @@ export async function createPartnerProduct(formData: FormData) {
   const partner = await getPartnerByUserId(user.id)
   if (!partner) {
     return { error: 'Partner profile not found.' }
+  }
+
+  // Products may only go live for approved partners — pending, suspended,
+  // and rejected partners cannot publish to the store.
+  if (partner.status !== 'approved') {
+    return { error: 'Your partner account must be approved before you can add products.' }
   }
 
   const nameEn = formData.get('name_en') as string
@@ -47,7 +54,7 @@ export async function createPartnerProduct(formData: FormData) {
     base_price: basePrice,
     sale_price: salePrice,
     min_order_qty: 1,
-    is_active: true, // Auto-active for dropship by default, or maybe pending approval? Assuming auto-active for simplicity.
+    is_active: true, // Partner is verified approved above, so listings go live immediately
     is_featured: false,
     is_heavy_goods: false,
     category_id: null,
@@ -66,7 +73,10 @@ export async function createPartnerProduct(formData: FormData) {
   const { error } = await admin.from('products').insert(newProduct)
 
   if (error) {
-    return { error: 'Failed to create product. ' + error.message }
+    // Raw Postgres errors leak schema details — log server-side, keep
+    // the client message generic.
+    logError('partner:create-product', error)
+    return { error: 'Failed to create product. Please try again.' }
   }
 
   revalidatePath('/partner/catalog')

@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { ChevronRight, Package, User, Truck, CreditCard } from 'lucide-react'
 import { getAdminOrderById, updateOrderStatus } from '@/lib/supabase/queries/admin'
+import { hasRole } from '@/lib/supabase/require-role'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { formatRwf } from '@/lib/utils/currency'
@@ -46,6 +47,7 @@ type Props = { params: Promise<{ id: string }> }
 
 async function changeStatus(orderId: string, status: OrderStatus) {
   'use server'
+  if (!(await hasRole('admin'))) return
   await updateOrderStatus(orderId, status)
   revalidatePath(`/admin/orders/${orderId}`)
   revalidatePath('/admin/orders')
@@ -63,7 +65,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
   const statusCfg = ORDER_STATUS_BADGE[order.status]
   const nextStatuses = NEXT_STATUSES[order.status] ?? []
 
-  type DeliveryDetails = { fullName?: string; district?: string; notes?: string }
+  type DeliveryDetails = { fullName?: string; phone?: string; district?: string; address?: string; notes?: string }
   let delivery: DeliveryDetails = {}
   if (order.notes) {
     try {
@@ -144,7 +146,9 @@ export default async function AdminOrderDetailPage({ params }: Props) {
           {Object.keys(delivery).length > 0 ? (
             <div className="space-y-1 text-sm">
               {delivery.fullName && <p className="font-medium text-white">{delivery.fullName}</p>}
+              {delivery.address && <p className="text-neutral-400">{delivery.address}</p>}
               {delivery.district && <p className="text-neutral-400">{delivery.district}</p>}
+              {delivery.phone && <p className="text-neutral-400">{delivery.phone}</p>}
               {delivery.notes && <p className="text-neutral-500">{delivery.notes}</p>}
             </div>
           ) : (
@@ -215,14 +219,14 @@ export default async function AdminOrderDetailPage({ params }: Props) {
           {order.order_items.map((item) => (
             <div key={item.id} className="flex items-center justify-between gap-4 text-sm">
               <div className="min-w-0 flex-1">
-                <p className="font-medium text-white">{item.product_name}</p>
+                <p className="font-medium text-white">{item.product?.name_en ?? 'Product'}</p>
                 <p className="text-xs text-neutral-500">
                   {item.source === 'dropship' ? 'Dropship' : 'Internal'} ·{' '}
-                  {formatRwf(item.unit_price)} × {item.qty}
-                  {item.product_sku ? ` · SKU: ${item.product_sku}` : ''}
+                  {formatRwf(item.unit_price)} × {item.quantity}
+                  {item.product?.sku ? ` · SKU: ${item.product.sku}` : ''}
                 </p>
               </div>
-              <span className="shrink-0 font-semibold text-white">{formatRwf(item.subtotal)}</span>
+              <span className="shrink-0 font-semibold text-white">{formatRwf(item.total_price)}</span>
             </div>
           ))}
         </div>

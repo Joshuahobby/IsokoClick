@@ -72,16 +72,23 @@ type DbEntry<Row, Insert, Update> = {
 export interface Database {
   public: {
     Tables: {
-      users:       DbEntry<UserRow,      UserInsert,      UserUpdate>
-      products:    DbEntry<ProductRow,   ProductInsert,   ProductUpdate>
-      orders:      DbEntry<OrderRow,     OrderInsert,     OrderUpdate>
-      order_items: DbEntry<OrderItemRow, OrderItemInsert, OrderItemUpdate>
-      payments:    DbEntry<PaymentRow,   PaymentInsert,   PaymentUpdate>
-      partners:    DbEntry<PartnerRow,   PartnerInsert,   PartnerUpdate>
-      categories:  DbEntry<CategoryRow,  CategoryInsert,  CategoryUpdate>
+      users:          DbEntry<UserRow,         UserInsert,         UserUpdate>
+      products:       DbEntry<ProductRow,      ProductInsert,      ProductUpdate>
+      orders:         DbEntry<OrderRow,        OrderInsert,        OrderUpdate>
+      order_items:    DbEntry<OrderItemRow,    OrderItemInsert,    OrderItemUpdate>
+      payments:       DbEntry<PaymentRow,      PaymentInsert,      PaymentUpdate>
+      payment_events: DbEntry<PaymentEventRow, PaymentEventInsert, PaymentEventUpdate>
+      partners:       DbEntry<PartnerRow,      PartnerInsert,      PartnerUpdate>
+      categories:     DbEntry<CategoryRow,     CategoryInsert,     CategoryUpdate>
+      delivery_zones: DbEntry<DeliveryZoneRow, DeliveryZoneInsert, DeliveryZoneUpdate>
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      create_order_with_items: {
+        Args: { p_order: Json; p_items: Json; p_payment: Json }
+        Returns: string
+      }
+    }
     Enums: Record<string, string[]>
     CompositeTypes: Record<string, null>
   }
@@ -228,3 +235,28 @@ export interface PartnerRow {
 }
 export type PartnerInsert = Omit<PartnerRow, 'id' | 'created_at' | 'updated_at'>
 export type PartnerUpdate = Partial<PartnerInsert>
+
+export interface PaymentEventRow {
+  id: string
+  payment_id: string | null
+  event_type: string
+  raw_payload: Json
+  received_at: string
+}
+export type PaymentEventInsert = Omit<PaymentEventRow, 'id' | 'received_at'>
+export type PaymentEventUpdate = Partial<PaymentEventInsert>
+
+export interface DeliveryZoneRow {
+  id: string
+  name: string
+  districts: string[]
+  delivery_fee: number
+  min_days: number
+  max_days: number
+  supports_heavy: boolean
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+export type DeliveryZoneInsert = Omit<DeliveryZoneRow, 'id' | 'created_at' | 'updated_at'>
+export type DeliveryZoneUpdate = Partial<DeliveryZoneInsert>

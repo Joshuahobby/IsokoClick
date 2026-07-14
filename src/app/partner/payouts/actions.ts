@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getPartnerByUserId } from '@/lib/supabase/queries/partners'
+import { logError } from '@/lib/utils/log'
 
 export async function updatePayoutInfo(formData: FormData) {
   const supabase = await createClient()
@@ -34,7 +35,8 @@ export async function updatePayoutInfo(formData: FormData) {
     .eq('id', partner.id)
 
   if (error) {
-    return { error: 'Failed to update payout settings. ' + error.message }
+    logError('partner:update-payout', error)
+    return { error: 'Failed to update payout settings. Please try again.' }
   }
 
   revalidatePath('/partner/payouts')

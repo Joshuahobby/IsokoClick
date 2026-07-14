@@ -198,12 +198,11 @@ export type AdminOrderDetail = OrderRow & {
   customer: { full_name: string; email: string; phone: string | null } | null
   order_items: {
     id: string
-    product_name: string
-    product_sku: string | null
     source: 'internal' | 'dropship'
+    quantity: number
     unit_price: number
-    qty: number
-    subtotal: number
+    total_price: number
+    product: { name_en: string; sku: string | null } | null
   }[]
   payments: {
     id: string
@@ -226,7 +225,7 @@ export async function getAdminOrderById(id: string): Promise<AdminOrderDetail | 
     .select(`
       *,
       customer:customer_id(full_name, email, phone),
-      order_items(id, product_name, product_sku, source, unit_price, qty, subtotal),
+      order_items(id, source, quantity, unit_price, total_price, product:product_id(name_en, sku)),
       payments(id, status, amount, currency, phone_number, operator, initiated_at, completed_at, failure_reason, pawapay_deposit_id)
     `)
     .eq('id', id)

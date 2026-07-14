@@ -61,27 +61,27 @@ export async function getPartnerStats(partnerId: string): Promise<PartnerStats> 
     productIds.length > 0
       ? admin
           .from('order_items')
-          .select('subtotal')
+          .select('total_price')
           .in('product_id', productIds)
       : Promise.resolve({ data: [] }),
 
     productIds.length > 0
       ? admin
           .from('order_items')
-          .select('subtotal, orders!inner(created_at)')
+          .select('total_price, orders!inner(created_at)')
           .in('product_id', productIds)
           .gte('orders.created_at', monthStart)
       : Promise.resolve({ data: [] }),
   ])
 
-  const sumSubtotal = (rows: { subtotal: number }[] | null) =>
-    (rows ?? []).reduce((s, r) => s + r.subtotal, 0)
+  const sumTotalPrice = (rows: { total_price: number }[] | null) =>
+    (rows ?? []).reduce((s, r) => s + r.total_price, 0)
 
   return {
     pendingItems: pendingItems.count ?? 0,
     activeProducts: activeProducts.count ?? 0,
-    revenueTotal: sumSubtotal(revenue.data as { subtotal: number }[] | null),
-    revenueThisMonth: sumSubtotal(revenueMonth.data as { subtotal: number }[] | null),
+    revenueTotal: sumTotalPrice(revenue.data as { total_price: number }[] | null),
+    revenueThisMonth: sumTotalPrice(revenueMonth.data as { total_price: number }[] | null),
   }
 }
 
@@ -89,10 +89,10 @@ export async function getPartnerStats(partnerId: string): Promise<PartnerStats> 
 
 export type PartnerOrderItem = {
   id: string
-  product_name: string
-  qty: number
+  quantity: number
   unit_price: number
-  subtotal: number
+  total_price: number
+  product: { name_en: string } | null
   order: {
     id: string
     order_number: string
@@ -124,7 +124,8 @@ export async function getPartnerOrderItems(
   const { data, error, count } = await admin
     .from('order_items')
     .select(
-      `id, product_name, qty, unit_price, subtotal,
+      `id, quantity, unit_price, total_price,
+       product:product_id(name_en),
        order:order_id(id, order_number, status, created_at)`,
       { count: 'exact' }
     )

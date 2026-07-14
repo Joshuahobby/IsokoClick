@@ -1,5 +1,5 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
-import type { OrderRow, OrderItemRow, PaymentRow, PaymentStatus, OrderStatus } from '@/types/database'
+import type { Json, OrderRow, OrderItemRow, PaymentRow, PaymentStatus, OrderStatus } from '@/types/database'
 
 export type OrderWithDetails = OrderRow & {
   order_items: OrderItemRow[]
@@ -46,10 +46,38 @@ export async function getPaymentStatusByOrderId(
   return (payment?.status as PaymentStatus) ?? null
 }
 
+export type PaymentForWebhook = Pick<PaymentRow, 'id' | 'order_id' | 'amount' | 'currency' | 'status'>
+
+export async function getPaymentByDepositId(depositId: string): Promise<PaymentForWebhook | null> {
+  const adminClient = await createAdminClient()
+  const { data, error } = await adminClient
+    .from('payments')
+    .select('id, order_id, amount, currency, status')
+    .eq('pawapay_deposit_id', depositId)
+    .single()
+
+  if (error) return null
+  return data as PaymentForWebhook | null
+}
+
+export async function recordPaymentEvent(
+  paymentId: string,
+  eventType: string,
+  rawPayload: Json
+): Promise<void> {
+  const adminClient = await createAdminClient()
+  await adminClient.from('payment_events').insert({
+    payment_id: paymentId,
+    event_type: eventType,
+    raw_payload: rawPayload,
+  })
+}
+
 export async function updatePaymentAndOrderStatus(
   depositId: string,
   paymentStatus: PaymentStatus,
-  orderStatus: OrderStatus
+  orderStatus: OrderStatus,
+  failureReason: string | null = null
 ): Promise<boolean> {
   const adminClient = await createAdminClient()
 
@@ -58,6 +86,7 @@ export async function updatePaymentAndOrderStatus(
     .update({
       status: paymentStatus,
       completed_at: paymentStatus === 'completed' ? new Date().toISOString() : undefined,
+      failure_reason: paymentStatus === 'failed' ? failureReason : null,
     })
     .eq('pawapay_deposit_id', depositId)
     .select('order_id')

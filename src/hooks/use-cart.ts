@@ -48,7 +48,13 @@ export const useCartStore = create<CartStore>()(
 
       updateQty: (id, qty) =>
         set((state) => ({
-          items: state.items.map((i) => (i.id === id ? { ...i, qty } : i)),
+          items: state.items.map((i) =>
+            i.id === id
+              ? // Clamp to a whole number no lower than the product's
+                // minimum order quantity (NaN and negatives become the min)
+                { ...i, qty: Math.max(Math.max(1, i.minQty), Math.floor(qty) || 1) }
+              : i
+          ),
         })),
 
       clearCart: () => set({ items: [] }),

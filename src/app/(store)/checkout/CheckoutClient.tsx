@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useCartStore } from '@/hooks/use-cart'
 import { formatRwf } from '@/lib/utils/currency'
-import { createOrder } from './actions'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
@@ -33,18 +32,48 @@ export function CheckoutClient() {
   async function handleCheckout(formData: FormData) {
     setIsPending(true)
     setError('')
-    
-    // Add cart items to the form data
-    formData.append('cart_data', JSON.stringify(items))
 
-    const result = await createOrder(formData)
-    
-    if (result?.error) {
-      setError(result.error)
-      setIsPending(false)
-    } else if (result?.success) {
+    // Only ids and quantities are sent — prices, sources, and delivery
+    // fees are all re-derived server-side from the database.
+    const payload = {
+      items: items.map((item) => ({ id: item.id, qty: item.qty })),
+      deliveryDetails: {
+        fullName: `${formData.get('first_name')} ${formData.get('last_name')}`.trim(),
+        phone: String(formData.get('phone') ?? ''),
+        district: String(formData.get('district') ?? ''),
+        address: String(formData.get('address') ?? ''),
+      },
+      paymentMethod: String(formData.get('payment_method') ?? 'momo'),
+    }
+
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      if (res.status === 401) {
+        router.push('/login?redirectTo=/checkout')
+        return
+      }
+
+      const json = (await res.json()) as {
+        data: { orderId: string } | null
+        error: string | null
+      }
+
+      if (!res.ok || !json.data) {
+        setError(json.error ?? 'Something went wrong. Please try again.')
+        setIsPending(false)
+        return
+      }
+
       clearCart()
-      router.push(`/orders/${result.orderId}`) // Redirect to an order confirmation page
+      router.push(`/orders/${json.data.orderId}`)
+    } catch {
+      setError('Something went wrong. Please try again.')
+      setIsPending(false)
     }
   }
 
@@ -97,7 +126,7 @@ export function CheckoutClient() {
               required
               className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
             >
-              <option value="momo">Mobile Money (Pay on Delivery)</option>
+              <option value="momo">Mobile Money (MTN MoMo / Airtel Money)</option>
               <option value="cash">Cash on Delivery</option>
             </select>
           </div>
@@ -142,7 +171,7 @@ export function CheckoutClient() {
             </div>
             <div className="flex justify-between">
               <p>Delivery Fee</p>
-              <p className="text-green-600">Calculated later</p>
+              <p className="text-green-600">Based on your district</p>
             </div>
             <div className="flex justify-between border-t border-neutral-200 pt-3 text-lg font-bold">
               <p>Total Estimated</p>

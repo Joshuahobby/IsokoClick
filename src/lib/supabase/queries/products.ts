@@ -29,10 +29,17 @@ export async function getProducts(filters: ProductFilters = {}): Promise<{
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
 
+  // Filtering on an embedded resource only removes parent rows when the
+  // join is `!inner` — a plain embed would return every product with
+  // `categories: null` and silently ignore the category filter.
+  const categoriesEmbed = filters.category
+    ? 'categories:category_id!inner(name_en, slug)'
+    : 'categories:category_id(name_en, slug)'
+
   let query = supabase
     .from('products')
     .select(
-      `*, product_images(storage_url, alt_text, is_primary), categories:category_id(name_en, slug)`,
+      `*, product_images(storage_url, alt_text, is_primary), ${categoriesEmbed}`,
       { count: 'exact' }
     )
     .eq('is_active', true)
@@ -128,7 +135,8 @@ export async function getRelatedProducts(
 
   const { data } = await supabase
     .from('products')
-    .select(`*, product_images(storage_url, alt_text, is_primary), categories:category_id(name_en, slug)`)
+    // `!inner` so the category filter removes parent rows (see getProducts)
+    .select(`*, product_images(storage_url, alt_text, is_primary), categories:category_id!inner(name_en, slug)`)
     .eq('is_active', true)
     .is('deleted_at', null)
     .eq('categories.slug', categorySlug)
