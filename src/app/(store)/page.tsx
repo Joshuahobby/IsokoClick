@@ -1,10 +1,11 @@
 import Link from 'next/link'
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { ShoppingCart } from 'lucide-react'
 import { getStoreProducts } from '@/lib/supabase/queries/store'
 import { formatRwf } from '@/lib/utils/currency'
 import { Badge } from '@/components/ui/badge'
 import { AddToCartButton } from '@/components/store/AddToCartButton'
+import type { AppLocale } from '@/i18n/locales'
 
 export async function generateMetadata() {
   const t = await getTranslations('home')
@@ -24,8 +25,9 @@ const CATEGORY_SLUGS = [
 ] as const
 
 export default async function StoreHomePage() {
+  const locale = (await getLocale()) as AppLocale
   const [{ products }, t, tCommon] = await Promise.all([
-    getStoreProducts(1, 24),
+    getStoreProducts(locale, 1, 24),
     getTranslations('home'),
     getTranslations('common'),
   ])
@@ -107,7 +109,7 @@ export default async function StoreHomePage() {
                       <h3 className="text-base font-semibold text-neutral-900 line-clamp-2">
                         <Link href={`/product/${product.slug}`}>
                           <span aria-hidden="true" className="absolute inset-0"></span>
-                          {product.name_en}
+                          {product.name}
                         </Link>
                       </h3>
                     </div>
@@ -124,7 +126,7 @@ export default async function StoreHomePage() {
                         ) : (
                           <span className="text-lg font-bold text-neutral-900">{formatRwf(product.base_price)}</span>
                         )}
-                        <span className="text-xs text-neutral-500 block mt-0.5">/{product.unit_label_en}</span>
+                        <span className="text-xs text-neutral-500 block mt-0.5">/{product.unitLabel}</span>
                       </div>
 
                       <AddToCartButton product={product} />
