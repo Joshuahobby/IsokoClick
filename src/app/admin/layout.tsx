@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -10,14 +11,6 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 
-const NAV = [
-  { href: '/admin/dashboard', label: 'Dashboard',  icon: LayoutDashboard },
-  { href: '/admin/orders',    label: 'Orders',      icon: ShoppingBag },
-  { href: '/admin/products',  label: 'Products',    icon: Package },
-  { href: '/admin/partners',  label: 'Partners',    icon: Users },
-  { href: '/admin/analytics', label: 'Analytics',   icon: BarChart2 },
-]
-
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const {
@@ -25,6 +18,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   } = await supabase.auth.getUser()
 
   if (!user || user.app_metadata?.role !== 'admin') redirect('/')
+
+  const t = await getTranslations('admin.nav')
+
+  const nav = [
+    { href: '/admin/dashboard', label: t('dashboard'), icon: LayoutDashboard },
+    { href: '/admin/orders',    label: t('orders'),    icon: ShoppingBag },
+    { href: '/admin/products',  label: t('products'),  icon: Package },
+    { href: '/admin/partners',  label: t('partners'),  icon: Users },
+    { href: '/admin/analytics', label: t('analytics'), icon: BarChart2 },
+  ]
 
   return (
     <div className="flex min-h-screen bg-neutral-950">
@@ -35,12 +38,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary text-xs font-black text-white">
             IC
           </span>
-          <span className="text-sm font-bold text-white">Admin</span>
+          <span className="text-sm font-bold text-white">{t('portalName')}</span>
         </div>
 
         {/* Nav */}
         <nav className="flex-1 space-y-0.5 p-3">
-          {NAV.map(({ href, label, icon: Icon }) => (
+          {nav.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
               href={href}
@@ -60,7 +63,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-neutral-500 transition-colors hover:bg-neutral-800 hover:text-white"
             >
               <LogOut size={15} />
-              Sign out
+              {t('signOut')}
             </button>
           </form>
         </div>

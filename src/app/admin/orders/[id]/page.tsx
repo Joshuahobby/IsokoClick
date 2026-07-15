@@ -1,7 +1,7 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { ChevronRight, Package, User, Truck, CreditCard } from 'lucide-react'
 import { getAdminOrderById, updateOrderStatus } from '@/lib/supabase/queries/admin'
 import { hasRole } from '@/lib/supabase/require-role'
@@ -11,26 +11,30 @@ import { formatRwf } from '@/lib/utils/currency'
 import type { OrderStatus, PaymentStatus } from '@/types/database'
 
 export const dynamic = 'force-dynamic'
-export const metadata: Metadata = { title: 'Order Detail — Admin' }
 
-const ORDER_STATUS_BADGE: Record<OrderStatus, { label: string; className: string }> = {
-  pending:             { label: 'Pending',        className: 'bg-neutral-800 text-neutral-300' },
-  confirmed:           { label: 'Confirmed',      className: 'bg-blue-500/20 text-blue-400' },
-  processing:          { label: 'Processing',     className: 'bg-amber-500/20 text-amber-400' },
-  partially_fulfilled: { label: 'Part Fulfilled', className: 'bg-amber-500/20 text-amber-400' },
-  fulfilled:           { label: 'Fulfilled',      className: 'bg-green-500/20 text-green-400' },
-  shipped:             { label: 'Shipped',        className: 'bg-blue-500/20 text-blue-400' },
-  delivered:           { label: 'Delivered',      className: 'bg-green-500/20 text-green-400' },
-  cancelled:           { label: 'Cancelled',      className: 'bg-red-500/20 text-red-400' },
-  refunded:            { label: 'Refunded',       className: 'bg-neutral-700 text-neutral-400' },
+export async function generateMetadata() {
+  const t = await getTranslations('admin.orderDetail')
+  return { title: t('metaTitle') }
 }
 
-const PAYMENT_STATUS_BADGE: Record<PaymentStatus, { label: string; className: string }> = {
-  pending:   { label: 'Unpaid',   className: 'bg-neutral-800 text-neutral-400' },
-  initiated: { label: 'Pending',  className: 'bg-amber-500/20 text-amber-400' },
-  completed: { label: 'Paid',     className: 'bg-green-500/20 text-green-400' },
-  failed:    { label: 'Failed',   className: 'bg-red-500/20 text-red-400' },
-  refunded:  { label: 'Refunded', className: 'bg-neutral-700 text-neutral-400' },
+const ORDER_STATUS_CLASS: Record<OrderStatus, string> = {
+  pending:             'bg-neutral-800 text-neutral-300',
+  confirmed:           'bg-blue-500/20 text-blue-400',
+  processing:          'bg-amber-500/20 text-amber-400',
+  partially_fulfilled: 'bg-amber-500/20 text-amber-400',
+  fulfilled:           'bg-green-500/20 text-green-400',
+  shipped:             'bg-blue-500/20 text-blue-400',
+  delivered:           'bg-green-500/20 text-green-400',
+  cancelled:           'bg-red-500/20 text-red-400',
+  refunded:            'bg-neutral-700 text-neutral-400',
+}
+
+const PAYMENT_STATUS_CLASS: Record<PaymentStatus, string> = {
+  pending:   'bg-neutral-800 text-neutral-400',
+  initiated: 'bg-amber-500/20 text-amber-400',
+  completed: 'bg-green-500/20 text-green-400',
+  failed:    'bg-red-500/20 text-red-400',
+  refunded:  'bg-neutral-700 text-neutral-400',
 }
 
 const NEXT_STATUSES: Partial<Record<OrderStatus, OrderStatus[]>> = {
@@ -56,13 +60,18 @@ async function changeStatus(orderId: string, status: OrderStatus) {
 
 export default async function AdminOrderDetailPage({ params }: Props) {
   const { id } = await params
-  const order = await getAdminOrderById(id)
+  const [order, t, tOrder, tPayment, tCommon] = await Promise.all([
+    getAdminOrderById(id),
+    getTranslations('admin.orderDetail'),
+    getTranslations('statuses.order'),
+    getTranslations('statuses.payment'),
+    getTranslations('common'),
+  ])
   if (!order) notFound()
 
   const customer = order.customer as { full_name: string; email: string; phone: string | null } | null
   const payment = order.payments[0] ?? null
   const paymentStatus = (payment?.status ?? 'pending') as PaymentStatus
-  const statusCfg = ORDER_STATUS_BADGE[order.status]
   const nextStatuses = NEXT_STATUSES[order.status] ?? []
 
   type DeliveryDetails = { fullName?: string; phone?: string; district?: string; address?: string; notes?: string }
@@ -78,7 +87,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
     <div className="max-w-4xl">
       {/* Breadcrumb */}
       <nav className="mb-6 flex items-center gap-1.5 text-sm text-neutral-500">
-        <Link href="/admin/orders" className="hover:text-white">Orders</Link>
+        <Link href="/admin/orders" className="hover:text-white">{t('breadcrumb')}</Link>
         <ChevronRight size={14} />
         <span className="text-neutral-300">{order.order_number}</span>
       </nav>
@@ -88,18 +97,19 @@ export default async function AdminOrderDetailPage({ params }: Props) {
         <div>
           <h1 className="text-2xl font-bold text-white">{order.order_number}</h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Placed{' '}
-            {new Date(order.created_at).toLocaleDateString('en-RW', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
+            {t('placedOn', {
+              date: new Date(order.created_at).toLocaleDateString('en-RW', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              }),
             })}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Badge className={`border-0 ${statusCfg.className}`}>{statusCfg.label}</Badge>
-          <Badge className={`border-0 ${PAYMENT_STATUS_BADGE[paymentStatus].className}`}>
-            {PAYMENT_STATUS_BADGE[paymentStatus].label}
+          <Badge className={`border-0 ${ORDER_STATUS_CLASS[order.status]}`}>{tOrder(order.status)}</Badge>
+          <Badge className={`border-0 ${PAYMENT_STATUS_CLASS[paymentStatus]}`}>
+            {tPayment(paymentStatus)}
           </Badge>
         </div>
       </div>
@@ -107,9 +117,8 @@ export default async function AdminOrderDetailPage({ params }: Props) {
       {/* Status actions */}
       {nextStatuses.length > 0 && (
         <div className="mb-6 flex flex-wrap gap-2 rounded-xl border border-neutral-800 bg-neutral-900 p-4">
-          <span className="flex items-center text-sm text-neutral-500">Update status:</span>
+          <span className="flex items-center text-sm text-neutral-500">{t('updateStatus')}</span>
           {nextStatuses.map((s) => {
-            const cfg = ORDER_STATUS_BADGE[s]
             const action = changeStatus.bind(null, order.id, s)
             return (
               <form key={s} action={action}>
@@ -117,7 +126,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                   type="submit"
                   className="rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-300 transition-colors hover:border-brand-primary hover:bg-brand-primary/10 hover:text-white"
                 >
-                  {cfg.label}
+                  {tOrder(s)}
                 </button>
               </form>
             )
@@ -129,7 +138,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
         {/* Customer */}
         <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-5">
           <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
-            <User size={14} className="text-brand-primary" /> Customer
+            <User size={14} className="text-brand-primary" /> {t('customer')}
           </h2>
           <div className="space-y-1 text-sm">
             <p className="font-medium text-white">{customer?.full_name ?? '—'}</p>
@@ -141,7 +150,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
         {/* Delivery */}
         <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-5">
           <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
-            <Truck size={14} className="text-brand-primary" /> Delivery
+            <Truck size={14} className="text-brand-primary" /> {t('delivery')}
           </h2>
           {Object.keys(delivery).length > 0 ? (
             <div className="space-y-1 text-sm">
@@ -152,38 +161,38 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               {delivery.notes && <p className="text-neutral-500">{delivery.notes}</p>}
             </div>
           ) : (
-            <p className="text-sm text-neutral-500">No delivery details recorded.</p>
+            <p className="text-sm text-neutral-500">{t('noDelivery')}</p>
           )}
         </div>
 
         {/* Payment */}
         <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-5 sm:col-span-2">
           <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
-            <CreditCard size={14} className="text-brand-primary" /> Payment
+            <CreditCard size={14} className="text-brand-primary" /> {t('payment')}
           </h2>
           {payment ? (
             <dl className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm sm:grid-cols-4">
               <div>
-                <dt className="text-neutral-500">Phone</dt>
+                <dt className="text-neutral-500">{t('phone')}</dt>
                 <dd className="text-white">{payment.phone_number}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">Operator</dt>
+                <dt className="text-neutral-500">{t('operator')}</dt>
                 <dd className="text-white">{payment.operator ?? '—'}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">Amount</dt>
+                <dt className="text-neutral-500">{t('amount')}</dt>
                 <dd className="text-white">{formatRwf(payment.amount)}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">Deposit ID</dt>
+                <dt className="text-neutral-500">{t('depositId')}</dt>
                 <dd className="truncate font-mono text-xs text-neutral-400">
                   {payment.pawapay_deposit_id ?? '—'}
                 </dd>
               </div>
               {payment.initiated_at && (
                 <div>
-                  <dt className="text-neutral-500">Initiated</dt>
+                  <dt className="text-neutral-500">{t('initiated')}</dt>
                   <dd className="text-white">
                     {new Date(payment.initiated_at).toLocaleString('en-RW')}
                   </dd>
@@ -191,7 +200,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               )}
               {payment.completed_at && (
                 <div>
-                  <dt className="text-neutral-500">Completed</dt>
+                  <dt className="text-neutral-500">{t('completed')}</dt>
                   <dd className="text-white">
                     {new Date(payment.completed_at).toLocaleString('en-RW')}
                   </dd>
@@ -199,13 +208,13 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               )}
               {payment.failure_reason && (
                 <div className="sm:col-span-4">
-                  <dt className="text-neutral-500">Failure reason</dt>
+                  <dt className="text-neutral-500">{t('failureReason')}</dt>
                   <dd className="text-red-400">{payment.failure_reason}</dd>
                 </div>
               )}
             </dl>
           ) : (
-            <p className="text-sm text-neutral-500">No payment record.</p>
+            <p className="text-sm text-neutral-500">{t('noPayment')}</p>
           )}
         </div>
       </div>
@@ -213,17 +222,17 @@ export default async function AdminOrderDetailPage({ params }: Props) {
       {/* Items */}
       <div className="mt-4 rounded-xl border border-neutral-800 bg-neutral-900 p-6">
         <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
-          <Package size={14} className="text-brand-primary" /> Items
+          <Package size={14} className="text-brand-primary" /> {t('items')}
         </h2>
         <div className="space-y-3">
           {order.order_items.map((item) => (
             <div key={item.id} className="flex items-center justify-between gap-4 text-sm">
               <div className="min-w-0 flex-1">
-                <p className="font-medium text-white">{item.product?.name_en ?? 'Product'}</p>
+                <p className="font-medium text-white">{item.product?.name_en ?? tCommon('product')}</p>
                 <p className="text-xs text-neutral-500">
-                  {item.source === 'dropship' ? 'Dropship' : 'Internal'} ·{' '}
+                  {item.source === 'dropship' ? t('dropship') : t('internal')} ·{' '}
                   {formatRwf(item.unit_price)} × {item.quantity}
-                  {item.product?.sku ? ` · SKU: ${item.product.sku}` : ''}
+                  {item.product?.sku ? ` · ${t('sku', { sku: item.product.sku })}` : ''}
                 </p>
               </div>
               <span className="shrink-0 font-semibold text-white">{formatRwf(item.total_price)}</span>
@@ -235,24 +244,24 @@ export default async function AdminOrderDetailPage({ params }: Props) {
 
         <div className="space-y-1.5 text-sm">
           <div className="flex justify-between">
-            <span className="text-neutral-400">Subtotal</span>
+            <span className="text-neutral-400">{t('subtotal')}</span>
             <span className="text-white">{formatRwf(order.subtotal)}</span>
           </div>
           {order.discount_amount > 0 && (
             <div className="flex justify-between">
-              <span className="text-neutral-400">Discount</span>
+              <span className="text-neutral-400">{t('discount')}</span>
               <span className="text-green-400">-{formatRwf(order.discount_amount)}</span>
             </div>
           )}
           <div className="flex justify-between">
-            <span className="text-neutral-400">Delivery</span>
+            <span className="text-neutral-400">{t('deliveryFee')}</span>
             <span className="text-neutral-500 italic">
-              {order.delivery_fee > 0 ? formatRwf(order.delivery_fee) : 'TBD'}
+              {order.delivery_fee > 0 ? formatRwf(order.delivery_fee) : t('tbd')}
             </span>
           </div>
           <Separator className="my-2 bg-neutral-800" />
           <div className="flex justify-between font-semibold">
-            <span className="text-white">Total</span>
+            <span className="text-white">{t('total')}</span>
             <span className="text-white">{formatRwf(order.total_amount)}</span>
           </div>
         </div>

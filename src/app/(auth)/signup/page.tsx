@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { CheckCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -9,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 export default function SignupPage() {
+  const t = useTranslations('auth')
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -47,17 +49,18 @@ export default function SignupPage() {
         <div className="mb-4 flex justify-center">
           <CheckCircle size={40} className="text-brand-primary" />
         </div>
-        <h1 className="mb-2 text-xl font-bold text-white">Check your email</h1>
+        <h1 className="mb-2 text-xl font-bold text-white">{t('checkEmail')}</h1>
         <p className="text-sm text-neutral-400">
-          We sent a confirmation link to{' '}
-          <span className="font-medium text-white">{email}</span>. Click it to
-          activate your account.
+          {t.rich('confirmLinkSent', {
+            email,
+            strong: (chunks) => <span className="font-medium text-white">{chunks}</span>,
+          })}
         </p>
         <Link
           href="/login"
           className="mt-6 inline-block text-sm text-brand-primary hover:text-amber-400 transition-colors"
         >
-          Back to login
+          {t('backToLogin')}
         </Link>
       </div>
     )
@@ -65,18 +68,18 @@ export default function SignupPage() {
 
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-8">
-      <h1 className="mb-1 text-2xl font-bold text-white">Create account</h1>
+      <h1 className="mb-1 text-2xl font-bold text-white">{t('signup')}</h1>
       <p className="mb-6 text-sm text-neutral-400">
-        Join IsokoClick to start ordering construction materials
+        {t('signupSubtitle')}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="fullName" className="text-neutral-300">Full name</Label>
+          <Label htmlFor="fullName" className="text-neutral-300">{t('fullName')}</Label>
           <Input
             id="fullName"
             type="text"
-            placeholder="Jean Claude Niyonzima"
+            placeholder={t('fullNamePlaceholder')}
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             required
@@ -86,11 +89,11 @@ export default function SignupPage() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="email" className="text-neutral-300">Email address</Label>
+          <Label htmlFor="email" className="text-neutral-300">{t('email')}</Label>
           <Input
             id="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder={t('emailPlaceholder')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -100,11 +103,11 @@ export default function SignupPage() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="password" className="text-neutral-300">Password</Label>
+          <Label htmlFor="password" className="text-neutral-300">{t('password')}</Label>
           <Input
             id="password"
             type="password"
-            placeholder="Min. 8 characters"
+            placeholder={t('passwordMinPlaceholder')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -121,18 +124,18 @@ export default function SignupPage() {
           disabled={loading}
           className="w-full bg-brand-primary font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
         >
-          {loading ? 'Creating account…' : 'Create account'}
+          {loading ? t('creatingAccount') : t('signup')}
         </Button>
       </form>
 
       <p className="mt-4 text-center text-xs text-neutral-600">
-        By signing up, you agree to our Terms of Service and Privacy Policy.
+        {t('terms')}
       </p>
 
       <p className="mt-4 text-center text-sm text-neutral-500">
-        Already have an account?{' '}
+        {t('hasAccount')}{' '}
         <Link href="/login" className="text-brand-primary hover:text-amber-400 transition-colors">
-          Log in
+          {t('login')}
         </Link>
       </p>
     </div>

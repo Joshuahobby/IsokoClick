@@ -1,25 +1,30 @@
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { Header } from '@/components/store/Header'
 
 export default async function StoreLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  
+  const [tNav, tFooter] = await Promise.all([
+    getTranslations('nav'),
+    getTranslations('footer'),
+  ])
+
   let portalLink = '/login'
-  let portalLabel = 'Dashboard'
+  let portalLabel = tNav('dashboard')
 
   if (user) {
     const role = user.app_metadata?.role
     if (role === 'admin') {
       portalLink = '/admin/dashboard'
-      portalLabel = 'Admin Dashboard'
+      portalLabel = tNav('adminDashboard')
     } else if (role === 'partner') {
       portalLink = '/partner/dashboard'
-      portalLabel = 'Partner Dashboard'
+      portalLabel = tNav('partnerDashboard')
     } else {
       portalLink = '/orders' // Customer orders
-      portalLabel = 'My Orders'
+      portalLabel = tNav('myOrders')
     }
   }
 
@@ -42,44 +47,44 @@ export default async function StoreLayout({ children }: { children: React.ReactN
                 <span className="text-xl font-bold text-neutral-900">IsokoClick</span>
               </Link>
               <p className="text-sm leading-relaxed text-neutral-500">
-                Rwanda&apos;s leading B2B and wholesale marketplace. Bridging the gap between verified partners and smart businesses.
+                {tFooter('description')}
               </p>
             </div>
-            
+
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-900 mb-6">Shop</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-900 mb-6">{tFooter('shop')}</h3>
               <ul className="space-y-4 text-sm text-neutral-500">
-                <li><Link href="/" className="hover:text-brand-primary transition-colors">All Products</Link></li>
-                <li><Link href="/category/agriculture" className="hover:text-brand-primary transition-colors">Agriculture</Link></li>
-                <li><Link href="/category/construction" className="hover:text-brand-primary transition-colors">Construction</Link></li>
+                <li><Link href="/" className="hover:text-brand-primary transition-colors">{tFooter('allProducts')}</Link></li>
+                <li><Link href="/category/agriculture" className="hover:text-brand-primary transition-colors">{tFooter('agriculture')}</Link></li>
+                <li><Link href="/category/construction" className="hover:text-brand-primary transition-colors">{tFooter('construction')}</Link></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-900 mb-6">Support</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-900 mb-6">{tFooter('support')}</h3>
               <ul className="space-y-4 text-sm text-neutral-500">
-                <li><Link href="/partner/register" className="hover:text-brand-primary transition-colors">Sell on IsokoClick</Link></li>
-                <li><Link href="/contact" className="hover:text-brand-primary transition-colors">Contact Support</Link></li>
-                <li><Link href="/faq" className="hover:text-brand-primary transition-colors">Help Center</Link></li>
+                <li><Link href="/partner/register" className="hover:text-brand-primary transition-colors">{tFooter('sellOnIsokoClick')}</Link></li>
+                <li><Link href="/contact" className="hover:text-brand-primary transition-colors">{tFooter('contactSupport')}</Link></li>
+                <li><Link href="/faq" className="hover:text-brand-primary transition-colors">{tFooter('helpCenter')}</Link></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-900 mb-6">Platform</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-900 mb-6">{tFooter('platform')}</h3>
               <ul className="space-y-4 text-sm text-neutral-500">
-                <li><Link href="/login" className="hover:text-brand-primary transition-colors">Sign In</Link></li>
-                <li><Link href="/partner/register" className="hover:text-brand-primary transition-colors">Partner Registration</Link></li>
+                <li><Link href="/login" className="hover:text-brand-primary transition-colors">{tFooter('signIn')}</Link></li>
+                <li><Link href="/partner/register" className="hover:text-brand-primary transition-colors">{tFooter('partnerRegistration')}</Link></li>
               </ul>
             </div>
           </div>
-          
+
           <div className="mt-16 border-t border-neutral-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-xs text-neutral-400">
-              &copy; {new Date().getFullYear()} IsokoClick. All rights reserved.
+              {tFooter('copyright', { year: new Date().getFullYear() })}
             </p>
             <div className="flex gap-6">
-              <Link href="/privacy" className="text-xs text-neutral-400 hover:text-neutral-600">Privacy Policy</Link>
-              <Link href="/terms" className="text-xs text-neutral-400 hover:text-neutral-600">Terms of Service</Link>
+              <Link href="/privacy" className="text-xs text-neutral-400 hover:text-neutral-600">{tFooter('privacyPolicy')}</Link>
+              <Link href="/terms" className="text-xs text-neutral-400 hover:text-neutral-600">{tFooter('termsOfService')}</Link>
             </div>
           </div>
         </div>

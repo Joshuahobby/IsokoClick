@@ -2,28 +2,30 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { getPartnerByUserId } from '@/lib/supabase/queries/partners'
 import { logError } from '@/lib/utils/log'
 import type { ProductInsert } from '@/types/database'
 
 export async function createPartnerProduct(formData: FormData) {
+  const t = await getTranslations('errors')
   const supabase = await createClient()
   const { data: { user }, error: userError } = await supabase.auth.getUser()
 
   if (userError || !user) {
-    return { error: 'Not authenticated.' }
+    return { error: t('notAuthenticated') }
   }
 
   const partner = await getPartnerByUserId(user.id)
   if (!partner) {
-    return { error: 'Partner profile not found.' }
+    return { error: t('partnerNotFound') }
   }
 
   // Products may only go live for approved partners — pending, suspended,
   // and rejected partners cannot publish to the store.
   if (partner.status !== 'approved') {
-    return { error: 'Your partner account must be approved before you can add products.' }
+    return { error: t('partnerNotApproved') }
   }
 
   const nameEn = formData.get('name_en') as string
@@ -35,7 +37,7 @@ export async function createPartnerProduct(formData: FormData) {
   const descriptionEn = formData.get('description_en') as string
 
   if (!nameEn || !basePrice || !unitType || !unitLabelEn) {
-    return { error: 'Missing required fields.' }
+    return { error: t('productFieldsMissing') }
   }
 
   const slug = nameEn
@@ -76,7 +78,7 @@ export async function createPartnerProduct(formData: FormData) {
     // Raw Postgres errors leak schema details — log server-side, keep
     // the client message generic.
     logError('partner:create-product', error)
-    return { error: 'Failed to create product. Please try again.' }
+    return { error: t('productCreateFailed') }
   }
 
   revalidatePath('/partner/catalog')
