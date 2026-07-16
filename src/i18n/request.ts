@@ -1,17 +1,11 @@
 import { getRequestConfig } from 'next-intl/server'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
-
-export const SUPPORTED_LOCALES = ['en', 'rw'] as const
-export type AppLocale = (typeof SUPPORTED_LOCALES)[number]
-
-function isSupportedLocale(value: unknown): value is AppLocale {
-  return value === 'en' || value === 'rw'
-}
+import { isSupportedLocale, type AppLocale } from '@/i18n/locales'
 
 // Non-routed i18n: no /en or /rw URL prefix. The locale comes from the
 // signed-in user's users.preferred_lang column, then a NEXT_LOCALE
-// cookie for guests (set by a future language switcher); build-time
+// cookie for guests (set by the language switcher); build-time
 // prerendering falls back to English.
 export default getRequestConfig(async () => {
   let locale: AppLocale = 'en'

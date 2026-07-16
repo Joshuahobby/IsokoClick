@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { User, Search, Menu, LogOut, LayoutDashboard } from 'lucide-react'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { CartDrawer } from '@/components/store/CartDrawer'
+import { LocaleSwitcher } from '@/components/shared/locale-switcher'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -98,8 +99,10 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
             </Link>
           )}
           
+          <LocaleSwitcher className="hidden sm:flex" />
+
           <div className="h-6 w-px bg-neutral-200 hidden sm:block"></div>
-          
+
           <CartDrawer />
         </div>
 

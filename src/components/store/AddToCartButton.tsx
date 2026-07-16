@@ -15,7 +15,7 @@ export function AddToCartButton({ product }: { product: StoreProduct }) {
         addItem({
           id: product.id,
           slug: product.slug,
-          name: product.name_en,
+          name: product.name,
           price: product.sale_price ?? product.base_price,
           minQty: 1,
           unitType: 'piece', // Hardcoding for simplified example, in real use map properly
