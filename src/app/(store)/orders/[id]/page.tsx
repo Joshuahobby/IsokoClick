@@ -1,44 +1,68 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { CheckCircle2, Package, MapPin, CreditCard } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { formatRwf } from '@/lib/utils/currency'
+import type { OrderRow, OrderItemRow, PaymentRow, ProductRow } from '@/types/database'
 
 export const metadata = { title: 'Order Confirmation | IsokoClick' }
 
 type Props = { params: Promise<{ id: string }> }
+
+type OrderDetail = OrderRow & {
+  order_items: (OrderItemRow & { product: Pick<ProductRow, 'name_en'> | null })[]
+  payments: PaymentRow[]
+}
 
 export default async function OrderSuccessPage({ params }: Props) {
   const { id } = await params
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    // If not logged in, we might want to redirect, but let's just attempt to fetch
-  }
+  if (!user) redirect(`/login?redirectTo=/orders/${id}`)
 
-  // Fetch order details
+  // Resolve the public.users profile id — RLS only exposes the own row
+  const { data: profile } = await supabase
+    .from('users')
+    .select('id')
+    .eq('auth_id', user.id)
+    .single()
+  if (!profile) notFound()
+
+  // Ownership is enforced in the query itself (and again by RLS): the
+  // order must belong to the signed-in customer or it does not exist.
   const { data: order, error } = await supabase
     .from('orders')
     .select(`
       *,
-      order_items(*),
+      order_items(*, product:product_id(name_en)),
       payments(*)
     `)
     .eq('id', id)
+    .eq('customer_id', (profile as { id: string }).id)
+    .is('deleted_at', null)
     .single()
 
   if (error || !order) {
     notFound()
   }
 
-  // If this order belongs to someone else, reject (basic security check)
-  const o = order as any
-  if (o.customer_id && user && o.customer_id !== user.id) {
-    notFound()
-  }
+  // The hand-written Database type carries no relationship metadata, so
+  // supabase-js cannot infer the embedded order_items/payments joins.
+  const o = order as unknown as OrderDetail
 
   const payment = o.payments?.[0]
+
+  // Delivery details are stored as JSON in notes by /api/orders
+  type DeliveryDetails = { fullName?: string; phone?: string; district?: string; address?: string }
+  let delivery: DeliveryDetails = {}
+  if (o.notes) {
+    try {
+      delivery = (JSON.parse(o.notes) as { deliveryDetails?: DeliveryDetails }).deliveryDetails ?? {}
+    } catch {
+      // Legacy orders stored free-text notes — shown as-is below
+    }
+  }
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
@@ -68,13 +92,13 @@ export default async function OrderSuccessPage({ params }: Props) {
           </h2>
           <div className="flow-root">
             <ul className="-my-4 divide-y divide-neutral-100">
-              {o.order_items.map((item: any) => (
+              {o.order_items.map((item) => (
                 <li key={item.id} className="flex py-4 justify-between">
                   <div>
-                    <p className="text-sm font-medium text-neutral-900">{item.product_name}</p>
-                    <p className="text-sm text-neutral-500">Qty: {item.qty}</p>
+                    <p className="text-sm font-medium text-neutral-900">{item.product?.name_en ?? 'Product'}</p>
+                    <p className="text-sm text-neutral-500">Qty: {item.quantity}</p>
                   </div>
-                  <p className="text-sm font-medium text-neutral-900">{formatRwf(item.subtotal)}</p>
+                  <p className="text-sm font-medium text-neutral-900">{formatRwf(item.total_price)}</p>
                 </li>
               ))}
             </ul>
@@ -102,7 +126,16 @@ export default async function OrderSuccessPage({ params }: Props) {
               <MapPin size={20} className="text-neutral-400" /> Delivery Details
             </h2>
             <div className="text-sm text-neutral-600 space-y-1">
-              <p className="whitespace-pre-wrap">{o.notes}</p>
+              {Object.keys(delivery).length > 0 ? (
+                <>
+                  {delivery.fullName && <p className="font-medium text-neutral-900">{delivery.fullName}</p>}
+                  {delivery.address && <p>{delivery.address}</p>}
+                  {delivery.district && <p>{delivery.district}</p>}
+                  {delivery.phone && <p>{delivery.phone}</p>}
+                </>
+              ) : (
+                <p className="whitespace-pre-wrap">{o.notes}</p>
+              )}
             </div>
           </div>
 

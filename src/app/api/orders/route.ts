@@ -1,19 +1,25 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { apiResponse, apiError } from '@/lib/utils/api'
 import { getUserProfileId } from '@/lib/supabase/queries/orders'
+import { logError } from '@/lib/utils/log'
+import { normalizePhone, detectOperator } from '@/lib/utils/phone'
 import { MIN_ORDER_VALUE } from '@/constants/app'
-import type { CartItem } from '@/hooks/use-cart'
+import type { DeliveryZoneRow, InventorySource, Json } from '@/types/database'
+
+type CartLine = { id: string; qty: number }
 
 type DeliveryDetails = {
   fullName: string
   phone: string
   district: string
-  notes: string
+  address: string
+  notes?: string
 }
 
 type OrderRequestBody = {
-  items: CartItem[]
+  items: CartLine[]
   deliveryDetails: DeliveryDetails
+  paymentMethod: 'momo' | 'cash'
 }
 
 const PAWAPAY_BASE_URL =
@@ -26,15 +32,23 @@ const CORRESPONDENT: Record<string, string> = {
   AIRTEL: 'AIRTEL_OAPI_RWA',
 }
 
-function detectOperator(phone: string): 'MTN' | 'AIRTEL' | null {
-  const sub = phone.slice(3, 5) // after '250'
-  if (sub === '78' || sub === '79') return 'MTN'
-  if (sub === '72' || sub === '73') return 'AIRTEL'
-  return null
-}
+const MAX_LINE_QTY = 10_000
 
 function generateOrderNumber(): string {
-  return `IC-${Date.now().toString(36).toUpperCase()}`
+  const rand = crypto.randomUUID().slice(0, 4).toUpperCase()
+  return `IC-${Date.now().toString(36).toUpperCase()}-${rand}`
+}
+
+type PricedProduct = {
+  id: string
+  name_en: string
+  source: InventorySource
+  base_price: number
+  sale_price: number | null
+  min_order_qty: number
+  is_heavy_goods: boolean
+  partner_id: string | null
+  partner: { commission_rate: number } | null
 }
 
 export async function POST(request: Request) {
@@ -57,77 +71,152 @@ export async function POST(request: Request) {
     return apiError('Invalid request body')
   }
 
-  const { items, deliveryDetails } = body
+  const { items, deliveryDetails, paymentMethod } = body
 
   if (!items?.length) return apiError('Cart is empty')
   if (!deliveryDetails?.phone) return apiError('Delivery phone number is required')
   if (!deliveryDetails?.fullName) return apiError('Full name is required')
   if (!deliveryDetails?.district) return apiError('District is required')
+  if (paymentMethod !== 'momo' && paymentMethod !== 'cash') {
+    return apiError('Invalid payment method')
+  }
 
-  // Compute totals server-side (never trust client total)
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0)
+  const phone = normalizePhone(deliveryDetails.phone)
+  if (!phone) return apiError('Enter a valid Rwandan mobile number (07XX XXX XXX)')
+
+  const operator = detectOperator(phone)
+  if (paymentMethod === 'momo' && !operator) {
+    return apiError('Mobile Money requires an MTN or Airtel Rwanda number')
+  }
+
+  // Validate quantities before touching the DB
+  const lines = new Map<string, number>()
+  for (const line of items) {
+    if (typeof line.id !== 'string' || !Number.isInteger(line.qty) || line.qty < 1 || line.qty > MAX_LINE_QTY) {
+      return apiError('Invalid cart item quantity')
+    }
+    lines.set(line.id, (lines.get(line.id) ?? 0) + line.qty)
+  }
+
+  // Re-price every line from the database — the client cart is never
+  // trusted for prices, sources, or availability. The RLS-scoped client
+  // only returns active, non-deleted products, and the embedded partner
+  // join only resolves for approved partners.
+  const { data: productRows, error: productsError } = await supabase
+    .from('products')
+    .select(
+      'id, name_en, source, base_price, sale_price, min_order_qty, is_heavy_goods, partner_id, partner:partner_id(commission_rate)'
+    )
+    .in('id', [...lines.keys()])
+    .eq('is_active', true)
+    .is('deleted_at', null)
+
+  if (productsError) {
+    logError('orders:load-products', productsError)
+    return apiError('Failed to load products. Please try again.', 500)
+  }
+
+  // The hand-written Database type carries no relationship metadata, so
+  // supabase-js cannot infer the embedded partner join.
+  const products = (productRows ?? []) as unknown as PricedProduct[]
+  const productById = new Map(products.map((p) => [p.id, p]))
+
+  const orderItems: Json[] = []
+  let subtotal = 0
+  let hasHeavyGoods = false
+
+  for (const [productId, qty] of lines) {
+    const product = productById.get(productId)
+    if (!product) return apiError('An item in your cart is no longer available')
+    if (product.source === 'dropship' && (!product.partner_id || !product.partner)) {
+      return apiError(`${product.name_en} is currently unavailable`)
+    }
+    if (qty < product.min_order_qty) {
+      return apiError(`${product.name_en} has a minimum order of ${product.min_order_qty}`)
+    }
+
+    const unitPrice = product.sale_price ?? product.base_price
+    const totalPrice = unitPrice * qty
+    subtotal += totalPrice
+    if (product.is_heavy_goods) hasHeavyGoods = true
+
+    orderItems.push({
+      product_id: product.id,
+      variant_id: null,
+      source: product.source,
+      partner_id: product.partner_id,
+      quantity: qty,
+      unit_price: unitPrice,
+      total_price: totalPrice,
+      commission_rate: product.source === 'dropship' ? (product.partner?.commission_rate ?? null) : null,
+    })
+  }
+
   if (subtotal < MIN_ORDER_VALUE) {
     return apiError(`Minimum order value is RWF ${MIN_ORDER_VALUE.toLocaleString()}`)
   }
 
-  const operator = detectOperator(deliveryDetails.phone)
-  if (!operator) return apiError('Phone number must be MTN or Airtel Rwanda')
+  // Delivery fee comes from the zone covering the district
+  const { data: zoneRow } = await supabase
+    .from('delivery_zones')
+    .select('delivery_fee, supports_heavy')
+    .contains('districts', [deliveryDetails.district])
+    .eq('is_active', true)
+    .limit(1)
+    .maybeSingle()
+
+  const zone = zoneRow as Pick<DeliveryZoneRow, 'delivery_fee' | 'supports_heavy'> | null
+  if (!zone) return apiError('Delivery is not yet available in that district')
+  if (hasHeavyGoods && !zone.supports_heavy) {
+    return apiError('Heavy goods require scheduled delivery, which is not yet available in that district')
+  }
+
+  const deliveryFee = zone.delivery_fee
+  const totalAmount = subtotal + deliveryFee
 
   const adminClient = await createAdminClient()
   const orderNumber = generateOrderNumber()
   const depositId = crypto.randomUUID()
 
-  // Create order
-  const { data: order, error: orderError } = await adminClient
-    .from('orders')
-    .insert({
+  // Order + items + payment are created atomically in one transaction
+  const { data: orderId, error: orderError } = await adminClient.rpc('create_order_with_items', {
+    p_order: {
       order_number: orderNumber,
       customer_id: customerId,
-      shipping_address_id: null,
-      status: 'pending' as const,
-      order_type: 'b2c' as const,
+      status: 'pending',
+      order_type: 'b2c',
       subtotal,
       discount_amount: 0,
-      delivery_fee: 0,
-      total_amount: subtotal,
-      promo_code: null,
+      delivery_fee: deliveryFee,
+      total_amount: totalAmount,
+      notes: JSON.stringify({ deliveryDetails: { ...deliveryDetails, phone }, paymentMethod }),
       is_approved: true,
-      notes: JSON.stringify({ deliveryDetails }),
-      deleted_at: null,
-    })
-    .select('id')
-    .single()
+    },
+    p_items: orderItems,
+    p_payment: {
+      pawapay_deposit_id: paymentMethod === 'momo' ? depositId : null,
+      amount: totalAmount,
+      currency: 'RWF',
+      phone_number: phone,
+      operator,
+      status: 'pending',
+      initiated_at: null,
+    },
+  })
 
-  if (orderError || !order) {
+  if (orderError || !orderId) {
+    logError('orders:create', orderError)
     return apiError('Failed to create order. Please try again.', 500)
   }
 
-  const orderId = (order as { id: string }).id
-
-  // Create order items
-  const orderItems = items.map((item) => ({
-    order_id: orderId,
-    product_id: item.id,
-    variant_id: null,
-    source: item.source,
-    partner_id: null,
-    quantity: item.qty,
-    unit_price: item.price,
-    total_price: item.price * item.qty,
-    commission_rate: null,
-  }))
-
-  const { error: itemsError } = await adminClient.from('order_items').insert(orderItems)
-
-  if (itemsError) {
-    // Roll back order (soft — set deleted_at)
-    await adminClient.from('orders').update({ deleted_at: new Date().toISOString() }).eq('id', orderId)
-    return apiError('Failed to create order items. Please try again.', 500)
+  // Cash on delivery: no PawaPay push — the payment stays pending
+  if (paymentMethod === 'cash') {
+    return apiResponse({ orderId, orderNumber, depositId: null, paymentInitiated: false })
   }
 
-  // Call PawaPay Deposits API
+  // Call PawaPay Deposits API (USSD push to the customer's phone)
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://isokoclick.rw'
-  let pawapayStatus: string | null = null
+  let paymentInitiated = false
 
   try {
     const pawapayRes = await fetch(`${PAWAPAY_BASE_URL}/deposits`, {
@@ -139,12 +228,12 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         depositId,
         returnUrl: `${appUrl}/orders/${orderId}`,
-        amount: String(subtotal),
+        amount: String(totalAmount),
         currency: 'RWF',
-        correspondent: CORRESPONDENT[operator],
+        correspondent: CORRESPONDENT[operator as string],
         payer: {
           type: 'MSISDN',
-          address: { value: deliveryDetails.phone },
+          address: { value: phone },
         },
         customerTimestamp: new Date().toISOString(),
         statementDescription: `IsokoClick ${orderNumber}`,
@@ -153,26 +242,22 @@ export async function POST(request: Request) {
 
     if (pawapayRes.ok) {
       const pawapayData = (await pawapayRes.json()) as { status?: string }
-      pawapayStatus = pawapayData.status ?? null
+      paymentInitiated = pawapayData.status === 'ACCEPTED' || pawapayData.status === 'SUBMITTED'
+    } else {
+      logError('orders:pawapay', new Error(`PawaPay deposit failed with HTTP ${pawapayRes.status}`))
     }
-  } catch {
-    // PawaPay call failed — still record the order but mark payment as pending
+  } catch (error) {
+    // PawaPay call failed — the order and pending payment are already
+    // recorded, so the customer can retry payment from the order page.
+    logError('orders:pawapay', error)
   }
 
-  // Create payment record
-  await adminClient.from('payments').insert({
-    order_id: orderId,
-    pawapay_deposit_id: depositId,
-    amount: subtotal,
-    currency: 'RWF',
-    phone_number: deliveryDetails.phone,
-    operator: operator as 'MTN' | 'AIRTEL',
-    status:
-      pawapayStatus === 'ACCEPTED' || pawapayStatus === 'SUBMITTED' ? 'initiated' : 'pending',
-    failure_reason: null,
-    initiated_at: new Date().toISOString(),
-    completed_at: null,
-  })
+  if (paymentInitiated) {
+    await adminClient
+      .from('payments')
+      .update({ status: 'initiated', initiated_at: new Date().toISOString() })
+      .eq('pawapay_deposit_id', depositId)
+  }
 
-  return apiResponse({ orderId, orderNumber, depositId })
+  return apiResponse({ orderId, orderNumber, depositId, paymentInitiated })
 }

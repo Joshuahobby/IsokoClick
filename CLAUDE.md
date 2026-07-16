@@ -53,7 +53,7 @@ Three separate portals under `src/app/` using Next.js route groups:
 - `(auth)/` — shared login/signup/reset-password pages
 
 ### Middleware
-Route protection lives in [src/proxy.ts](src/proxy.ts) (not the Next.js default `middleware.ts`). It reads the user's role from `user.user_metadata.role` and redirects unauthorized access. Public routes: `/`, `/shop`, `/product`, `/auth`. Role → route guards: `admin→/admin`, `partner→/partner`, `warehouse_staff→/warehouse`, `delivery_agent→/delivery`.
+Route protection lives in [src/proxy.ts](src/proxy.ts) (not the Next.js default `middleware.ts`). It reads the user's role from `user.app_metadata.role` (never `user_metadata` — that's client-controlled) and redirects unauthorized access. Routes are public by default; only listed protected prefixes (`/admin`, `/partner`, `/warehouse`, `/delivery`, `/checkout`, `/orders`, `/account`) require auth — unknown paths 404 instead of redirecting to login. New authenticated areas must be added to `PROTECTED_ROUTES`. Role → route guards: `admin→/admin`, `partner→/partner`, `warehouse_staff→/warehouse`, `delivery_agent→/delivery`.
 
 ### Supabase Client Pattern
 - **Browser/Client Components:** `createClient()` from `lib/supabase/client.ts`

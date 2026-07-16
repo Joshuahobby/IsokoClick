@@ -2,8 +2,9 @@
 
 import { ShoppingCart } from 'lucide-react'
 import { useCartStore } from '@/hooks/use-cart'
+import type { StoreProduct } from '@/lib/supabase/queries/store'
 
-export function AddToCartButton({ product }: { product: any }) {
+export function AddToCartButton({ product }: { product: StoreProduct }) {
   const addItem = useCartStore((state) => state.addItem)
 
   return (

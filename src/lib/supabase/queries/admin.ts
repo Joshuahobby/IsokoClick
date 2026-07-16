@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
-import type { OrderRow, OrderStatus, PaymentStatus, PartnerStatus } from '@/types/database'
+import type { OrderRow, OrderStatus, PartnerRow, PaymentStatus, PartnerStatus, UserRow } from '@/types/database'
 
 // ─── Dashboard stats ──────────────────────────────────────────────────────────
 
@@ -198,12 +198,11 @@ export type AdminOrderDetail = OrderRow & {
   customer: { full_name: string; email: string; phone: string | null } | null
   order_items: {
     id: string
-    product_name: string
-    product_sku: string | null
     source: 'internal' | 'dropship'
+    quantity: number
     unit_price: number
-    qty: number
-    subtotal: number
+    total_price: number
+    product: { name_en: string; sku: string | null } | null
   }[]
   payments: {
     id: string
@@ -226,7 +225,7 @@ export async function getAdminOrderById(id: string): Promise<AdminOrderDetail | 
     .select(`
       *,
       customer:customer_id(full_name, email, phone),
-      order_items(id, product_name, product_sku, source, unit_price, qty, subtotal),
+      order_items(id, source, quantity, unit_price, total_price, product:product_id(name_en, sku)),
       payments(id, status, amount, currency, phone_number, operator, initiated_at, completed_at, failure_reason, pawapay_deposit_id)
     `)
     .eq('id', id)
@@ -248,7 +247,11 @@ export async function updateOrderStatus(
 
 // ─── Admin partner detail & actions ──────────────────────────────────────────
 
-export async function getAdminPartnerById(id: string) {
+export type AdminPartnerDetail = PartnerRow & {
+  user: Pick<UserRow, 'full_name' | 'email' | 'phone'> | null
+}
+
+export async function getAdminPartnerById(id: string): Promise<AdminPartnerDetail | null> {
   const admin = await createAdminClient()
   const { data, error } = await admin
     .from('partners')
@@ -258,7 +261,9 @@ export async function getAdminPartnerById(id: string) {
     .single()
 
   if (error) return null
-  return data
+  // The hand-written Database type carries no relationship metadata, so
+  // supabase-js cannot infer the embedded user join.
+  return data as unknown as AdminPartnerDetail
 }
 
 export async function updatePartnerStatus(

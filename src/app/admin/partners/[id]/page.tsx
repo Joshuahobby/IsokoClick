@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { ChevronRight, User, Building, MapPin, CheckCircle, XCircle, AlertTriangle } from 'lucide-react'
 import { getAdminPartnerById, updatePartnerStatus } from '@/lib/supabase/queries/admin'
+import { hasRole } from '@/lib/supabase/require-role'
 import { Badge } from '@/components/ui/badge'
 import type { PartnerStatus } from '@/types/database'
 
@@ -21,6 +22,7 @@ type Props = { params: Promise<{ id: string }> }
 
 async function changeStatus(partnerId: string, userId: string, status: PartnerStatus) {
   'use server'
+  if (!(await hasRole('admin'))) return
   await updatePartnerStatus(partnerId, status, userId)
   revalidatePath(`/admin/partners/${partnerId}`)
   revalidatePath('/admin/partners')
@@ -28,11 +30,11 @@ async function changeStatus(partnerId: string, userId: string, status: PartnerSt
 
 export default async function AdminPartnerDetailPage({ params }: Props) {
   const { id } = await params
-  const partner = await getAdminPartnerById(id) as any
-  
+  const partner = await getAdminPartnerById(id)
+
   if (!partner) notFound()
 
-  const statusCfg = PARTNER_STATUS_BADGE[partner.status as PartnerStatus] || { label: partner.status, className: 'bg-neutral-800' }
+  const statusCfg = PARTNER_STATUS_BADGE[partner.status] ?? { label: partner.status, className: 'bg-neutral-800' }
 
   return (
     <div className="max-w-4xl">
@@ -123,15 +125,15 @@ export default async function AdminPartnerDetailPage({ params }: Props) {
             <dl className="space-y-3 text-sm">
               <div>
                 <dt className="text-neutral-500">Full Name</dt>
-                <dd className="font-medium text-white">{(partner.user as any).full_name}</dd>
+                <dd className="font-medium text-white">{partner.user.full_name}</dd>
               </div>
               <div>
                 <dt className="text-neutral-500">Account Email</dt>
-                <dd className="text-white">{(partner.user as any).email}</dd>
+                <dd className="text-white">{partner.user.email}</dd>
               </div>
               <div>
                 <dt className="text-neutral-500">Account Phone</dt>
-                <dd className="text-white">{(partner.user as any).phone || 'Not provided'}</dd>
+                <dd className="text-white">{partner.user.phone || 'Not provided'}</dd>
               </div>
             </dl>
           ) : (

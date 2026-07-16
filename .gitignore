@@ -25,7 +25,7 @@
 *.pem
 
 # Claude Code machine-local state
-.claude/settings.local.json
+.claude/
 
 # debug
 npm-debug.log*
