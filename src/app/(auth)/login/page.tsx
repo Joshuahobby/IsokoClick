@@ -3,12 +3,14 @@
 import { useState, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 function LoginForm() {
+  const t = useTranslations('auth')
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirectTo') ?? '/'
@@ -38,16 +40,16 @@ function LoginForm() {
 
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-8">
-      <h1 className="mb-1 text-2xl font-bold text-white">Welcome back</h1>
-      <p className="mb-6 text-sm text-neutral-400">Sign in to your IsokoClick account</p>
+      <h1 className="mb-1 text-2xl font-bold text-white">{t('welcomeBack')}</h1>
+      <p className="mb-6 text-sm text-neutral-400">{t('signInSubtitle')}</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="email" className="text-neutral-300">Email address</Label>
+          <Label htmlFor="email" className="text-neutral-300">{t('email')}</Label>
           <Input
             id="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder={t('emailPlaceholder')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -58,18 +60,18 @@ function LoginForm() {
 
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <Label htmlFor="password" className="text-neutral-300">Password</Label>
+            <Label htmlFor="password" className="text-neutral-300">{t('password')}</Label>
             <Link
               href="/reset-password"
               className="text-xs text-neutral-500 hover:text-brand-primary transition-colors"
             >
-              Forgot password?
+              {t('forgotPassword')}
             </Link>
           </div>
           <Input
             id="password"
             type="password"
-            placeholder="••••••••"
+            placeholder={t('passwordPlaceholder')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -85,14 +87,14 @@ function LoginForm() {
           disabled={loading}
           className="w-full bg-brand-primary font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
         >
-          {loading ? 'Signing in…' : 'Log in'}
+          {loading ? t('signingIn') : t('login')}
         </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-neutral-500">
-        Don&apos;t have an account?{' '}
+        {t('noAccount')}{' '}
         <Link href="/signup" className="text-brand-primary hover:text-amber-400 transition-colors">
-          Create account
+          {t('signup')}
         </Link>
       </p>
     </div>
@@ -100,8 +102,10 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+  const t = useTranslations('common')
+
   return (
-    <Suspense fallback={<div className="p-8 text-white">Loading...</div>}>
+    <Suspense fallback={<div className="p-8 text-white">{t('loading')}</div>}>
       <LoginForm />
     </Suspense>
   )

@@ -2,6 +2,7 @@
 
 import { useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { ShoppingCart, X, Plus, Minus, Trash2 } from 'lucide-react'
 import { useCartStore } from '@/hooks/use-cart'
 import { formatRwf } from '@/lib/utils/currency'
@@ -9,6 +10,8 @@ import { formatRwf } from '@/lib/utils/currency'
 const emptySubscribe = () => () => {}
 
 export function CartDrawer() {
+  const t = useTranslations('cart')
+  const tCommon = useTranslations('common')
   const [isOpen, setIsOpen] = useState(false)
   // False during SSR and the hydration render, true after — the cart is
   // rehydrated from localStorage on the client, so the first client render
@@ -55,8 +58,8 @@ export function CartDrawer() {
           <div className="relative w-full max-w-md bg-white shadow-2xl transition-transform flex flex-col h-full animate-in slide-in-from-right">
             <div className="flex items-center justify-between border-b border-neutral-200 px-6 py-4">
               <h2 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
-                <ShoppingCart size={20} className="text-brand-primary" /> 
-                Your Cart
+                <ShoppingCart size={20} className="text-brand-primary" />
+                {t('title')}
               </h2>
               <button 
                 onClick={() => setIsOpen(false)}
@@ -70,12 +73,12 @@ export function CartDrawer() {
               {items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   <ShoppingCart size={48} className="text-neutral-200 mb-4" />
-                  <p className="text-neutral-500">Your cart is currently empty.</p>
-                  <button 
+                  <p className="text-neutral-500">{t('emptyDrawer')}</p>
+                  <button
                     onClick={() => setIsOpen(false)}
                     className="mt-6 font-medium text-brand-primary hover:underline"
                   >
-                    Continue Shopping
+                    {t('continueShopping')}
                   </button>
                 </div>
               ) : (
@@ -83,7 +86,7 @@ export function CartDrawer() {
                   {items.map((item) => (
                     <div key={item.id} className="flex gap-4">
                       <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border border-neutral-200 bg-neutral-50 flex items-center justify-center">
-                        <span className="text-xs text-neutral-400">No Image</span>
+                        <span className="text-xs text-neutral-400">{tCommon('noImage')}</span>
                       </div>
 
                       <div className="flex flex-1 flex-col">
@@ -129,28 +132,28 @@ export function CartDrawer() {
             {items.length > 0 && (
               <div className="border-t border-neutral-200 px-6 py-6 bg-neutral-50">
                 <div className="flex justify-between text-base font-medium text-neutral-900 mb-4">
-                  <p>Subtotal</p>
+                  <p>{t('subtotal')}</p>
                   <p>{formatRwf(totalPrice)}</p>
                 </div>
                 <p className="mt-0.5 text-sm text-neutral-500 mb-6">
-                  Delivery and taxes calculated at checkout.
+                  {t('deliveryNote')}
                 </p>
                 <Link
                   href="/checkout"
                   onClick={() => setIsOpen(false)}
                   className="flex w-full items-center justify-center rounded-md border border-transparent bg-brand-primary px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-brand-primary/90"
                 >
-                  Checkout
+                  {t('checkout')}
                 </Link>
                 <div className="mt-4 flex justify-center text-center text-sm text-neutral-500">
                   <p>
-                    or{' '}
+                    {t('or')}{' '}
                     <button
                       type="button"
                       className="font-medium text-brand-primary hover:text-brand-primary/80"
                       onClick={() => setIsOpen(false)}
                     >
-                      Continue Shopping
+                      {t('continueShopping')}
                       <span aria-hidden="true"> &rarr;</span>
                     </button>
                   </p>

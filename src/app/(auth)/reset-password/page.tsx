@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { CheckCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -9,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 export default function ResetPasswordPage() {
+  const t = useTranslations('auth')
   const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -40,17 +42,18 @@ export default function ResetPasswordPage() {
         <div className="mb-4 flex justify-center">
           <CheckCircle size={40} className="text-brand-primary" />
         </div>
-        <h1 className="mb-2 text-xl font-bold text-white">Check your email</h1>
+        <h1 className="mb-2 text-xl font-bold text-white">{t('checkEmail')}</h1>
         <p className="text-sm text-neutral-400">
-          We sent a password reset link to{' '}
-          <span className="font-medium text-white">{email}</span>. The link
-          expires in 1 hour.
+          {t.rich('resetLinkSent', {
+            email,
+            strong: (chunks) => <span className="font-medium text-white">{chunks}</span>,
+          })}
         </p>
         <Link
           href="/login"
           className="mt-6 inline-block text-sm text-brand-primary hover:text-amber-400 transition-colors"
         >
-          Back to login
+          {t('backToLogin')}
         </Link>
       </div>
     )
@@ -58,18 +61,18 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-8">
-      <h1 className="mb-1 text-2xl font-bold text-white">Reset password</h1>
+      <h1 className="mb-1 text-2xl font-bold text-white">{t('resetTitle')}</h1>
       <p className="mb-6 text-sm text-neutral-400">
-        Enter your email and we&apos;ll send you a reset link.
+        {t('resetSubtitle')}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="email" className="text-neutral-300">Email address</Label>
+          <Label htmlFor="email" className="text-neutral-300">{t('email')}</Label>
           <Input
             id="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder={t('emailPlaceholder')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -85,13 +88,13 @@ export default function ResetPasswordPage() {
           disabled={loading}
           className="w-full bg-brand-primary font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
         >
-          {loading ? 'Sending…' : 'Send reset link'}
+          {loading ? t('sending') : t('sendResetLink')}
         </Button>
       </form>
 
       <div className="mt-8 text-center">
         <Link href="/login" className="text-sm text-neutral-500 hover:text-brand-primary transition-colors">
-          Back to login
+          {t('backToLogin')}
         </Link>
       </div>
     </div>

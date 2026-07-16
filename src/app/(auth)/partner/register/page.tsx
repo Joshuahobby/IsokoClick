@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { applyForPartner } from './actions'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -9,6 +10,7 @@ import { Label } from '@/components/ui/label'
 const initialState = { error: '' }
 
 export default function PartnerRegistrationPage() {
+  const t = useTranslations('partnerRegister')
   const [state, formAction, isPending] = useActionState(
     async (prevState: { error: string }, formData: FormData) => {
       const result = await applyForPartner(formData)
@@ -25,10 +27,10 @@ export default function PartnerRegistrationPage() {
       <div className="w-full max-w-md space-y-8 rounded-2xl border border-neutral-800 bg-neutral-900 p-8 shadow-xl">
         <div>
           <h2 className="text-center text-3xl font-bold tracking-tight text-white">
-            Become a Partner
+            {t('title')}
           </h2>
           <p className="mt-2 text-center text-sm text-neutral-400">
-            Join IsokoClick and start dropshipping your products to thousands of customers.
+            {t('subtitle')}
           </p>
         </div>
 
@@ -42,7 +44,7 @@ export default function PartnerRegistrationPage() {
           <div className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="business_name" className="text-neutral-300">
-                Business Name <span className="text-red-500">*</span>
+                {t('businessName')} <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="business_name"
@@ -50,14 +52,14 @@ export default function PartnerRegistrationPage() {
                 type="text"
                 required
                 className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary"
-                placeholder="e.g. Kigali Wholesale"
+                placeholder={t('businessNamePlaceholder')}
               />
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="email" className="text-neutral-300">
-                  Business Email <span className="text-red-500">*</span>
+                  {t('businessEmail')} <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="email"
@@ -65,13 +67,13 @@ export default function PartnerRegistrationPage() {
                   type="email"
                   required
                   className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary"
-                  placeholder="contact@company.rw"
+                  placeholder={t('businessEmailPlaceholder')}
                 />
               </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="phone" className="text-neutral-300">
-                  Phone Number <span className="text-red-500">*</span>
+                  {t('phone')} <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="phone"
@@ -79,7 +81,7 @@ export default function PartnerRegistrationPage() {
                   type="tel"
                   required
                   className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary"
-                  placeholder="078..."
+                  placeholder={t('phonePlaceholder')}
                 />
               </div>
             </div>
@@ -87,54 +89,54 @@ export default function PartnerRegistrationPage() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="tin_number" className="text-neutral-300">
-                  TIN Number
+                  {t('tinNumber')}
                 </Label>
                 <Input
                   id="tin_number"
                   name="tin_number"
                   type="text"
                   className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary"
-                  placeholder="9-digit TIN"
+                  placeholder={t('tinPlaceholder')}
                 />
               </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="district" className="text-neutral-300">
-                  District
+                  {t('district')}
                 </Label>
                 <Input
                   id="district"
                   name="district"
                   type="text"
                   className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary"
-                  placeholder="e.g. Gasabo"
+                  placeholder={t('districtPlaceholder')}
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="address" className="text-neutral-300">
-                Physical Address
+                {t('address')}
               </Label>
               <Input
                 id="address"
                 name="address"
                 type="text"
                 className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary"
-                placeholder="Street name, building, etc."
+                placeholder={t('addressPlaceholder')}
               />
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="description" className="text-neutral-300">
-                Business Description
+                {t('description')}
               </Label>
               <textarea
                 id="description"
                 name="description"
                 rows={3}
                 className="w-full rounded-md border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2 focus:ring-offset-neutral-900"
-                placeholder="What kinds of products do you sell?"
+                placeholder={t('descriptionPlaceholder')}
               />
             </div>
           </div>
@@ -144,14 +146,14 @@ export default function PartnerRegistrationPage() {
             disabled={isPending}
             className="flex w-full justify-center rounded-lg bg-brand-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary disabled:opacity-50"
           >
-            {isPending ? 'Submitting Application...' : 'Apply Now'}
+            {isPending ? t('submitting') : t('apply')}
           </button>
         </form>
 
         <p className="text-center text-sm text-neutral-500">
-          Already a partner?{' '}
+          {t('alreadyPartner')}{' '}
           <Link href="/login" className="font-semibold text-brand-primary hover:text-brand-primary/80">
-            Sign in
+            {t('signIn')}
           </Link>
         </p>
       </div>

@@ -2,12 +2,14 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 export default function UpdatePasswordPage() {
+  const t = useTranslations('auth')
   const router = useRouter()
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -19,7 +21,7 @@ export default function UpdatePasswordPage() {
     setError(null)
 
     if (password !== confirm) {
-      setError('Passwords do not match.')
+      setError(t('passwordsDontMatch'))
       return
     }
 
@@ -39,16 +41,16 @@ export default function UpdatePasswordPage() {
 
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-8">
-      <h1 className="mb-1 text-2xl font-bold text-white">Set new password</h1>
-      <p className="mb-6 text-sm text-neutral-400">Choose a strong password for your account.</p>
+      <h1 className="mb-1 text-2xl font-bold text-white">{t('newPasswordTitle')}</h1>
+      <p className="mb-6 text-sm text-neutral-400">{t('newPasswordSubtitle')}</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="password" className="text-neutral-300">New password</Label>
+          <Label htmlFor="password" className="text-neutral-300">{t('newPassword')}</Label>
           <Input
             id="password"
             type="password"
-            placeholder="Min. 8 characters"
+            placeholder={t('passwordMinPlaceholder')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -59,11 +61,11 @@ export default function UpdatePasswordPage() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="confirm" className="text-neutral-300">Confirm password</Label>
+          <Label htmlFor="confirm" className="text-neutral-300">{t('confirmPassword')}</Label>
           <Input
             id="confirm"
             type="password"
-            placeholder="••••••••"
+            placeholder={t('passwordPlaceholder')}
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             required
@@ -80,7 +82,7 @@ export default function UpdatePasswordPage() {
           disabled={loading}
           className="w-full bg-brand-primary font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
         >
-          {loading ? 'Updating…' : 'Update password'}
+          {loading ? t('updating') : t('updatePassword')}
         </Button>
       </form>
     </div>

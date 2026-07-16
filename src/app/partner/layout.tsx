@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -9,13 +10,6 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 
-const NAV = [
-  { href: '/partner/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/partner/catalog',   label: 'Catalog',   icon: Package },
-  { href: '/partner/orders',    label: 'Orders',    icon: ShoppingBag },
-  { href: '/partner/payouts',   label: 'Payouts',   icon: Wallet },
-]
-
 export default async function PartnerLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const {
@@ -23,6 +17,15 @@ export default async function PartnerLayout({ children }: { children: React.Reac
   } = await supabase.auth.getUser()
 
   if (!user || user.app_metadata?.role !== 'partner') redirect('/')
+
+  const t = await getTranslations('partner.nav')
+
+  const nav = [
+    { href: '/partner/dashboard', label: t('dashboard'), icon: LayoutDashboard },
+    { href: '/partner/catalog',   label: t('catalog'),   icon: Package },
+    { href: '/partner/orders',    label: t('orders'),    icon: ShoppingBag },
+    { href: '/partner/payouts',   label: t('payouts'),   icon: Wallet },
+  ]
 
   return (
     <div className="flex min-h-screen bg-neutral-950">
@@ -33,12 +36,12 @@ export default async function PartnerLayout({ children }: { children: React.Reac
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-xs font-black text-black">
             P
           </span>
-          <span className="text-sm font-bold text-white">Partner Portal</span>
+          <span className="text-sm font-bold text-white">{t('portalName')}</span>
         </div>
 
         {/* Nav */}
         <nav className="flex-1 space-y-0.5 p-3">
-          {NAV.map(({ href, label, icon: Icon }) => (
+          {nav.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
               href={href}
@@ -58,7 +61,7 @@ export default async function PartnerLayout({ children }: { children: React.Reac
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-neutral-500 transition-colors hover:bg-neutral-800 hover:text-white"
             >
               <LogOut size={15} />
-              Sign out
+              {t('signOut')}
             </button>
           </form>
         </div>

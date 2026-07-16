@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { apiResponse, apiError } from '@/lib/utils/api'
 import { getUserProfileId } from '@/lib/supabase/queries/orders'
@@ -52,48 +53,50 @@ type PricedProduct = {
 }
 
 export async function POST(request: Request) {
+  const t = await getTranslations('errors')
+
   // Auth check
   const supabase = await createClient()
   const {
     data: { user: authUser },
   } = await supabase.auth.getUser()
-  if (!authUser) return apiError('Unauthorized', 401)
+  if (!authUser) return apiError(t('unauthorized'), 401)
 
   // Get public users.id (different from auth.uid())
   const customerId = await getUserProfileId(authUser.id)
-  if (!customerId) return apiError('User profile not found. Please complete account setup.', 404)
+  if (!customerId) return apiError(t('profileNotFound'), 404)
 
   // Parse body
   let body: OrderRequestBody
   try {
     body = (await request.json()) as OrderRequestBody
   } catch {
-    return apiError('Invalid request body')
+    return apiError(t('invalidBody'))
   }
 
   const { items, deliveryDetails, paymentMethod } = body
 
-  if (!items?.length) return apiError('Cart is empty')
-  if (!deliveryDetails?.phone) return apiError('Delivery phone number is required')
-  if (!deliveryDetails?.fullName) return apiError('Full name is required')
-  if (!deliveryDetails?.district) return apiError('District is required')
+  if (!items?.length) return apiError(t('cartEmpty'))
+  if (!deliveryDetails?.phone) return apiError(t('phoneRequired'))
+  if (!deliveryDetails?.fullName) return apiError(t('nameRequired'))
+  if (!deliveryDetails?.district) return apiError(t('districtRequired'))
   if (paymentMethod !== 'momo' && paymentMethod !== 'cash') {
-    return apiError('Invalid payment method')
+    return apiError(t('invalidPaymentMethod'))
   }
 
   const phone = normalizePhone(deliveryDetails.phone)
-  if (!phone) return apiError('Enter a valid Rwandan mobile number (07XX XXX XXX)')
+  if (!phone) return apiError(t('invalidPhone'))
 
   const operator = detectOperator(phone)
   if (paymentMethod === 'momo' && !operator) {
-    return apiError('Mobile Money requires an MTN or Airtel Rwanda number')
+    return apiError(t('momoOperator'))
   }
 
   // Validate quantities before touching the DB
   const lines = new Map<string, number>()
   for (const line of items) {
     if (typeof line.id !== 'string' || !Number.isInteger(line.qty) || line.qty < 1 || line.qty > MAX_LINE_QTY) {
-      return apiError('Invalid cart item quantity')
+      return apiError(t('invalidQuantity'))
     }
     lines.set(line.id, (lines.get(line.id) ?? 0) + line.qty)
   }
@@ -113,7 +116,7 @@ export async function POST(request: Request) {
 
   if (productsError) {
     logError('orders:load-products', productsError)
-    return apiError('Failed to load products. Please try again.', 500)
+    return apiError(t('productsLoadFailed'), 500)
   }
 
   // The hand-written Database type carries no relationship metadata, so
@@ -127,12 +130,12 @@ export async function POST(request: Request) {
 
   for (const [productId, qty] of lines) {
     const product = productById.get(productId)
-    if (!product) return apiError('An item in your cart is no longer available')
+    if (!product) return apiError(t('itemUnavailable'))
     if (product.source === 'dropship' && (!product.partner_id || !product.partner)) {
-      return apiError(`${product.name_en} is currently unavailable`)
+      return apiError(t('productUnavailable', { name: product.name_en }))
     }
     if (qty < product.min_order_qty) {
-      return apiError(`${product.name_en} has a minimum order of ${product.min_order_qty}`)
+      return apiError(t('minQty', { name: product.name_en, qty: product.min_order_qty }))
     }
 
     const unitPrice = product.sale_price ?? product.base_price
@@ -153,7 +156,7 @@ export async function POST(request: Request) {
   }
 
   if (subtotal < MIN_ORDER_VALUE) {
-    return apiError(`Minimum order value is RWF ${MIN_ORDER_VALUE.toLocaleString()}`)
+    return apiError(t('minOrderValue', { amount: MIN_ORDER_VALUE.toLocaleString() }))
   }
 
   // Delivery fee comes from the zone covering the district
@@ -166,9 +169,9 @@ export async function POST(request: Request) {
     .maybeSingle()
 
   const zone = zoneRow as Pick<DeliveryZoneRow, 'delivery_fee' | 'supports_heavy'> | null
-  if (!zone) return apiError('Delivery is not yet available in that district')
+  if (!zone) return apiError(t('deliveryUnavailable'))
   if (hasHeavyGoods && !zone.supports_heavy) {
-    return apiError('Heavy goods require scheduled delivery, which is not yet available in that district')
+    return apiError(t('heavyGoodsUnavailable'))
   }
 
   const deliveryFee = zone.delivery_fee
@@ -206,7 +209,7 @@ export async function POST(request: Request) {
 
   if (orderError || !orderId) {
     logError('orders:create', orderError)
-    return apiError('Failed to create order. Please try again.', 500)
+    return apiError(t('orderCreateFailed'), 500)
   }
 
   // Cash on delivery: no PawaPay push — the payment stays pending

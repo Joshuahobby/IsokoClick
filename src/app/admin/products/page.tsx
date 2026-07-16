@@ -1,11 +1,14 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { Plus } from 'lucide-react'
 import { getAdminProducts } from '@/lib/supabase/queries/admin'
 import { Badge } from '@/components/ui/badge'
 import { formatRwf } from '@/lib/utils/currency'
 
-export const metadata: Metadata = { title: 'Products — Admin' }
+export async function generateMetadata() {
+  const t = await getTranslations('admin.products')
+  return { title: t('metaTitle') }
+}
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>
 
@@ -14,21 +17,25 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
   const search = typeof sp.search === 'string' ? sp.search : undefined
   const page = Number(sp.page ?? 1)
 
-  const { products, total } = await getAdminProducts(page, 25, search)
+  const [{ products, total }, t, tCommon] = await Promise.all([
+    getAdminProducts(page, 25, search),
+    getTranslations('admin.products'),
+    getTranslations('common'),
+  ])
   const totalPages = Math.ceil(total / 25)
 
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Products</h1>
+        <h1 className="text-2xl font-bold text-white">{t('title')}</h1>
         <div className="flex items-center gap-3">
-          <span className="text-sm text-neutral-500">{total.toLocaleString()} total</span>
+          <span className="text-sm text-neutral-500">{tCommon('countTotal', { count: total.toLocaleString() })}</span>
           <Link
             href="/admin/products/new"
             className="flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-amber-600"
           >
             <Plus size={14} />
-            Add product
+            {t('addProduct')}
           </Link>
         </div>
       </div>
@@ -38,30 +45,30 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
         <input
           name="search"
           defaultValue={search}
-          placeholder="Search products…"
+          placeholder={t('searchPlaceholder')}
           className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-brand-primary"
         />
         <button
           type="submit"
           className="rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-amber-600"
         >
-          Search
+          {t('search')}
         </button>
       </form>
 
       <div className="rounded-xl border border-neutral-800 bg-neutral-900">
         {products.length === 0 ? (
-          <div className="px-6 py-16 text-center text-sm text-neutral-500">No products found.</div>
+          <div className="px-6 py-16 text-center text-sm text-neutral-500">{t('noProducts')}</div>
         ) : (
           <>
             <div className="divide-y divide-neutral-800">
               {/* Header */}
               <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-4 px-6 py-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
-                <span>Product</span>
-                <span>Category</span>
-                <span>Source</span>
-                <span>Price</span>
-                <span>Status</span>
+                <span>{t('colProduct')}</span>
+                <span>{t('colCategory')}</span>
+                <span>{t('colSource')}</span>
+                <span>{t('colPrice')}</span>
+                <span>{t('colStatus')}</span>
                 <span></span>
               </div>
 
@@ -85,7 +92,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                           : 'bg-purple-500/20 text-purple-400'
                       }`}
                     >
-                      {product.source}
+                      {product.source === 'internal' ? tCommon('isokoClickStock') : tCommon('partnerStock')}
                     </Badge>
                     <div className="text-right">
                       <p className="text-sm text-white">{formatRwf(product.sale_price ?? product.base_price)}</p>
@@ -101,11 +108,11 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                             : 'bg-red-500/20 text-red-400'
                         }`}
                       >
-                        {product.is_active ? 'Active' : 'Inactive'}
+                        {product.is_active ? tCommon('active') : tCommon('inactive')}
                       </Badge>
                       {product.is_featured && (
                         <Badge className="border-0 bg-amber-500/20 text-xs text-amber-400">
-                          Featured
+                          {tCommon('featured')}
                         </Badge>
                       )}
                     </div>
@@ -113,7 +120,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                       href={`/admin/products/${product.id}`}
                       className="text-xs text-brand-primary hover:underline"
                     >
-                      Edit
+                      {t('edit')}
                     </Link>
                   </div>
                 )
@@ -124,7 +131,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
             {totalPages > 1 && (
               <div className="flex items-center justify-between border-t border-neutral-800 px-6 py-4">
                 <span className="text-xs text-neutral-500">
-                  Page {page} of {totalPages}
+                  {tCommon('pageOf', { page, total: totalPages })}
                 </span>
                 <div className="flex gap-2">
                   {page > 1 && (
@@ -132,7 +139,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                       href={`?page=${page - 1}${search ? `&search=${search}` : ''}`}
                       className="rounded-lg border border-neutral-700 px-3 py-1.5 text-xs text-white hover:bg-neutral-800"
                     >
-                      Previous
+                      {tCommon('previous')}
                     </Link>
                   )}
                   {page < totalPages && (
@@ -140,7 +147,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                       href={`?page=${page + 1}${search ? `&search=${search}` : ''}`}
                       className="rounded-lg border border-neutral-700 px-3 py-1.5 text-xs text-white hover:bg-neutral-800"
                     >
-                      Next
+                      {tCommon('next')}
                     </Link>
                   )}
                 </div>

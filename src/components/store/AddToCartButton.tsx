@@ -1,10 +1,12 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { ShoppingCart } from 'lucide-react'
 import { useCartStore } from '@/hooks/use-cart'
 import type { StoreProduct } from '@/lib/supabase/queries/store'
 
 export function AddToCartButton({ product }: { product: StoreProduct }) {
+  const t = useTranslations('common')
   const addItem = useCartStore((state) => state.addItem)
 
   return (
@@ -24,7 +26,7 @@ export function AddToCartButton({ product }: { product: StoreProduct }) {
       className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-neutral-100 text-neutral-600 transition-colors hover:bg-brand-primary hover:text-white"
     >
       <ShoppingCart size={18} />
-      <span className="sr-only">Add to cart</span>
+      <span className="sr-only">{t('addToCart')}</span>
     </button>
   )
 }

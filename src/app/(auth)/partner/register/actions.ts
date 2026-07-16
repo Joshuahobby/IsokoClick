@@ -1,17 +1,19 @@
 'use server'
 
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { logError } from '@/lib/utils/log'
 import type { PartnerInsert } from '@/types/database'
 
 export async function applyForPartner(formData: FormData) {
+  const t = await getTranslations('errors')
   const supabase = await createClient()
 
   // Get the current user
   const { data: { user }, error: userError } = await supabase.auth.getUser()
   if (userError || !user) {
-    return { error: 'You must be logged in to apply.' }
+    return { error: t('loginRequiredApply') }
   }
 
   const businessName = formData.get('business_name') as string
@@ -23,7 +25,7 @@ export async function applyForPartner(formData: FormData) {
   const description = formData.get('description') as string
 
   if (!businessName || !email || !phone) {
-    return { error: 'Business name, email, and phone are required.' }
+    return { error: t('partnerFieldsRequired') }
   }
 
   const admin = await createAdminClient()
@@ -36,7 +38,7 @@ export async function applyForPartner(formData: FormData) {
     .is('deleted_at', null)
     .maybeSingle()
   if (existing) {
-    return { error: 'You already have a partner application on file.' }
+    return { error: t('alreadyApplied') }
   }
 
   // Generate a basic slug
@@ -74,7 +76,7 @@ export async function applyForPartner(formData: FormData) {
     // Raw Postgres errors leak schema details — log server-side, keep
     // the client message generic.
     logError('partner:apply', error)
-    return { error: 'Failed to submit your application. Please try again.' }
+    return { error: t('applicationFailed') }
   }
 
   // The user's role is still 'customer' until an admin approves the

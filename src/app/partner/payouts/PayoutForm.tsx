@@ -1,11 +1,13 @@
 'use client'
 
 import { useActionState } from 'react'
+import { useTranslations } from 'next-intl'
 import { updatePayoutInfo } from './actions'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 export function PayoutForm({ currentPhone }: { currentPhone: string | null }) {
+  const t = useTranslations('partner.payouts')
   const [state, formAction, isPending] = useActionState(
     async (prevState: { error: string; success: boolean }, formData: FormData) => {
       const result = await updatePayoutInfo(formData)
@@ -26,20 +28,20 @@ export function PayoutForm({ currentPhone }: { currentPhone: string | null }) {
       )}
       {state.success && (
         <div className="rounded-lg bg-green-500/10 p-3 text-sm text-green-400">
-          Payout settings updated successfully!
+          {t('updateSuccess')}
         </div>
       )}
 
       <div className="space-y-1.5">
         <Label htmlFor="payout_phone" className="text-neutral-300">
-          Mobile Money Phone Number
+          {t('momoPhone')}
         </Label>
         <Input
           id="payout_phone"
           name="payout_phone"
           type="tel"
           defaultValue={currentPhone || ''}
-          placeholder="078..."
+          placeholder={t('phonePlaceholder')}
           className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary"
         />
       </div>
@@ -49,7 +51,7 @@ export function PayoutForm({ currentPhone }: { currentPhone: string | null }) {
         disabled={isPending}
         className="w-full rounded-lg bg-neutral-800 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-neutral-700 disabled:opacity-50"
       >
-        {isPending ? 'Updating...' : 'Update Payout Info'}
+        {isPending ? t('updating') : t('update')}
       </button>
     </form>
   )
