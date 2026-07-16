@@ -7,7 +7,9 @@ import { updateSession } from '@/lib/supabase/middleware'
 // Exemptions for public paths that live under a protected prefix, checked
 // before PROTECTED_ROUTES. /api routes enforce their own auth (401 JSON
 // envelopes) and include server-to-server callbacks like the PawaPay
-// webhook — an HTML login redirect would break both.
+// webhook — an HTML login redirect would break both. The matcher below now
+// keeps /api out of the middleware entirely; this entry stays as a guard in
+// case that regex is ever loosened.
 const PUBLIC_EXEMPTIONS = [
   '/partner/register',
   '/api',
@@ -74,8 +76,10 @@ export async function proxy(request: NextRequest) {
   return supabaseResponse
 }
 
+// `api(?:$|/)` rather than a bare `api` so a future top-level route that merely
+// starts with those letters (/apidocs) still runs through the middleware.
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!api(?:$|/)|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
