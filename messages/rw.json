@@ -52,7 +52,9 @@
     "deals": "Ibigabanyijwe",
     "sellOnIsokoClick": "Gurisha kuri IsokoClick",
     "menu": "Ibikubiyemo",
-    "closeMenu": "Funga"
+    "closeMenu": "Funga",
+    "search": "Shakisha ibicuruzwa",
+    "skipToContent": "Simbukira ku bikubiyemo"
   },
   "footer": {
     "description": "Isoko ry'ibikoresho by'ubwubatsi mu Rwanda. Ububiko bwacu n'abafatanyabikorwa bemejwe, bigezwa aho wubaka.",
@@ -141,6 +143,12 @@
     "total": "Igiteranyo gikomeye",
     "checkout": "Komeza kwishyura",
     "remove": "Siba",
+    "removeAria": "Kura {name} mu gitebo",
+    "open": "Fungura igitebo",
+    "openAria": "{count, plural, =0 {Fungura igitebo} one {Fungura igitebo, ikintu #} other {Fungura igitebo, ibintu #}}",
+    "close": "Funga igitebo",
+    "decreaseQty": "Gabanya umubare",
+    "increaseQty": "Ongera umubare",
     "deliveryNote": "Amafaranga yo gutumiza n'imisoro bibarwa mu kwishyura.",
     "or": "cyangwa"
   },

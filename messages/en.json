@@ -52,7 +52,9 @@
     "deals": "Deals",
     "sellOnIsokoClick": "Sell on IsokoClick",
     "menu": "Menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "search": "Search products",
+    "skipToContent": "Skip to main content"
   },
   "footer": {
     "description": "Rwanda's construction materials marketplace. Warehouse stock and verified partners, delivered to your site.",
@@ -141,6 +143,12 @@
     "total": "Total",
     "checkout": "Checkout",
     "remove": "Remove",
+    "removeAria": "Remove {name} from cart",
+    "open": "Open cart",
+    "openAria": "{count, plural, =0 {Open cart} one {Open cart, # item} other {Open cart, # items}}",
+    "close": "Close cart",
+    "decreaseQty": "Decrease quantity",
+    "increaseQty": "Increase quantity",
     "deliveryNote": "Delivery and taxes calculated at checkout.",
     "or": "or"
   },

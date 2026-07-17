@@ -27,9 +27,15 @@ export default async function StoreLayout({ children }: { children: React.ReactN
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[200] focus:rounded-lg focus:bg-brand-primary focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-neutral-950"
+      >
+        {tNav('skipToContent')}
+      </a>
       <Header user={user} portalLink={portalLink} portalLabel={portalLabel} />
 
-      <main className="flex-1">
+      <main id="main" className="flex-1">
         {children}
       </main>
 

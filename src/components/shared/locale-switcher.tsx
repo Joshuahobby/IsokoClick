@@ -12,8 +12,8 @@ const LABELS: Record<AppLocale, string> = { en: 'EN', rw: 'RW' }
 type Variant = 'light' | 'dark'
 
 const VARIANT_CLASSES: Record<Variant, { divider: string; inactive: string }> = {
-  light: { divider: 'text-neutral-300', inactive: 'text-neutral-500 hover:text-neutral-900' },
-  dark: { divider: 'text-neutral-700', inactive: 'text-neutral-500 hover:text-white' },
+  light: { divider: 'text-neutral-300', inactive: 'text-neutral-600 hover:text-neutral-900' },
+  dark: { divider: 'text-neutral-700', inactive: 'text-neutral-400 hover:text-white' },
 }
 
 export function LocaleSwitcher({

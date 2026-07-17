@@ -50,7 +50,7 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
         <div className="flex items-center gap-6">
           <button
             type="button"
-            className="text-neutral-300 transition-colors hover:text-white lg:hidden"
+            className="-m-2.5 p-2.5 text-neutral-300 transition-colors hover:text-white lg:hidden"
             onClick={() => setMobileOpen((open) => !open)}
             aria-expanded={mobileOpen}
             aria-label={mobileOpen ? t('closeMenu') : t('menu')}
@@ -86,7 +86,8 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t('searchPlaceholder')}
-              className="w-full rounded-full border border-neutral-800 bg-neutral-900 py-2 pl-10 pr-4 text-sm text-white placeholder:text-neutral-500 transition-all focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+              aria-label={t('search')}
+              className="w-full rounded-full border border-neutral-800 bg-neutral-900 py-2 pl-10 pr-4 text-sm text-white placeholder:text-neutral-400 transition-all focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
             />
             <Search className="absolute left-3 top-2.5 text-neutral-500" size={18} aria-hidden="true" />
           </div>
@@ -158,7 +159,8 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t('searchPlaceholder')}
-                className="w-full rounded-full border border-neutral-800 bg-neutral-900 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-neutral-500 focus:border-brand-primary focus:outline-none"
+                aria-label={t('search')}
+                className="w-full rounded-full border border-neutral-800 bg-neutral-900 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-neutral-400 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
               />
               <Search className="absolute left-3 top-3 text-neutral-500" size={18} aria-hidden="true" />
             </div>
