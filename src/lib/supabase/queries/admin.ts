@@ -1,5 +1,16 @@
 import { createAdminClient } from '@/lib/supabase/server'
-import type { OrderRow, OrderStatus, PartnerRow, PaymentStatus, PartnerStatus, UserRow } from '@/types/database'
+import { logError } from '@/lib/utils/log'
+import type {
+  OrderRow,
+  OrderStatus,
+  PartnerRow,
+  PaymentStatus,
+  PartnerStatus,
+  ProductInsert,
+  ProductRow,
+  ProductUpdate,
+  UserRow,
+} from '@/types/database'
 
 // ─── Dashboard stats ──────────────────────────────────────────────────────────
 
@@ -151,6 +162,43 @@ export async function getAdminProducts(
   const { data, error, count } = await query
   if (error) return { products: [], total: 0 }
   return { products: data as unknown as AdminProductRow[], total: count ?? 0 }
+}
+
+// ─── Admin product detail & mutations ────────────────────────────────────────
+
+export async function getAdminProductById(id: string): Promise<ProductRow | null> {
+  const admin = await createAdminClient()
+  const { data, error } = await admin
+    .from('products')
+    .select('*')
+    .eq('id', id)
+    .is('deleted_at', null)
+    .single()
+
+  if (error) return null
+  return data
+}
+
+export async function createProduct(input: ProductInsert): Promise<{ id: string } | null> {
+  const admin = await createAdminClient()
+  const { data, error } = await admin.from('products').insert(input).select('id').single()
+
+  if (error) {
+    logError('admin:create-product', error)
+    return null
+  }
+  return data
+}
+
+export async function updateProduct(id: string, patch: ProductUpdate): Promise<boolean> {
+  const admin = await createAdminClient()
+  const { error } = await admin.from('products').update(patch).eq('id', id)
+
+  if (error) {
+    logError('admin:update-product', error)
+    return false
+  }
+  return true
 }
 
 // ─── Admin partners list ──────────────────────────────────────────────────────
