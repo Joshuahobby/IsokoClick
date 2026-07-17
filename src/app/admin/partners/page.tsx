@@ -49,7 +49,7 @@ export default async function AdminPartnersPage({ searchParams }: { searchParams
             href={value ? `?status=${value}` : '?'}
             className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
               (status ?? '') === value
-                ? 'bg-brand-primary text-white'
+                ? 'bg-brand-primary text-neutral-950'
                 : 'border border-neutral-700 text-neutral-400 hover:text-white'
             }`}
           >

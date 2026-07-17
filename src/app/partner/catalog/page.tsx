@@ -43,7 +43,7 @@ export default async function PartnerCatalogPage(
         </div>
         <Link
           href="/partner/catalog/new"
-          className="flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-primary/90"
+          className="flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-neutral-950 transition-colors hover:bg-brand-primary/90"
         >
           <Plus size={16} />
           {t('addProduct')}

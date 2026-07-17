@@ -24,7 +24,7 @@ export function CheckoutClient() {
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <h2 className="text-2xl font-bold text-white mb-2">{t('emptyTitle')}</h2>
         <p className="text-neutral-400 mb-6">{t('emptySubtext')}</p>
-        <Link href="/" className="rounded-full bg-brand-primary px-6 py-2.5 font-semibold text-white transition-colors hover:bg-amber-600">
+        <Link href="/" className="rounded-full bg-brand-primary px-6 py-2.5 font-semibold text-neutral-950 transition-colors hover:bg-amber-600">
           {t('continueShopping')}
         </Link>
       </div>
@@ -137,7 +137,7 @@ export function CheckoutClient() {
             <button
               type="submit"
               disabled={isPending}
-              className="w-full rounded-full bg-brand-primary px-6 py-3.5 text-center text-sm font-bold text-white shadow-sm transition-colors hover:bg-amber-600 disabled:opacity-50"
+              className="w-full rounded-full bg-brand-primary px-6 py-3.5 text-center text-sm font-bold text-neutral-950 shadow-sm transition-colors hover:bg-amber-600 disabled:opacity-50"
             >
               {isPending ? t('processing') : t('placeOrder')}
             </button>

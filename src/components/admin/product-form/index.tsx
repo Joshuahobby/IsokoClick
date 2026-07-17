@@ -285,7 +285,7 @@ export function ProductForm({ action, categories, product }: Props) {
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-lg bg-brand-primary px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-600 disabled:opacity-50"
+            className="rounded-lg bg-brand-primary px-6 py-2 text-sm font-semibold text-neutral-950 transition-colors hover:bg-amber-600 disabled:opacity-50"
           >
             {isPending ? t('saving') : product ? t('saveChanges') : t('create')}
           </button>

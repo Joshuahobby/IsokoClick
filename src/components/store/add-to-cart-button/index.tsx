@@ -69,10 +69,10 @@ export function AddToCartButton({ product, name, imageUrl }: Props) {
         size="lg"
         onClick={handleAddToCart}
         className={cn(
-          'flex-1 gap-2 rounded-xl font-semibold text-white transition-colors',
+          'flex-1 gap-2 rounded-xl font-semibold transition-colors',
           added
-            ? 'bg-green-600 hover:bg-green-700'
-            : 'bg-brand-primary hover:bg-amber-600'
+            ? 'bg-green-600 text-white hover:bg-green-700'
+            : 'bg-brand-primary text-neutral-950 hover:bg-amber-600'
         )}
       >
         {added ? (

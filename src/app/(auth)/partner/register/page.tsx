@@ -144,7 +144,7 @@ export default function PartnerRegistrationPage() {
           <button
             type="submit"
             disabled={isPending}
-            className="flex w-full justify-center rounded-lg bg-brand-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary disabled:opacity-50"
+            className="flex w-full justify-center rounded-lg bg-brand-primary px-4 py-2.5 text-sm font-semibold text-neutral-950 transition-colors hover:bg-brand-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary disabled:opacity-50"
           >
             {isPending ? t('submitting') : t('apply')}
           </button>

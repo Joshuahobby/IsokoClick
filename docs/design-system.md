@@ -100,7 +100,7 @@ Container max-width: `1280px` (center-aligned with `px-4 md:px-8`)
 - Eyebrow label in pill badge (e.g., "New Stock Arrived")
 - Large bold headline, 2–3 lines max
 - Sub-headline: muted gray, max 2 lines
-- CTA button: white with dark text (primary) + ghost button (secondary)
+- CTA button: orange fill with dark text (primary) + ghost button (secondary); both hero CTAs target the buyer journey (partner recruitment has its own band lower on the page)
 - Background: subtle geometric texture or construction imagery
 
 ### Product Card
@@ -110,7 +110,7 @@ Container max-width: `1280px` (center-aligned with `px-4 md:px-8`)
 - Bottom section: category tag, product name, unit price in RWF, stock badge
 - Source badge: "Warehouse" (orange) or "Partner" (purple) — top-right corner
 - Hover: subtle scale(1.02) + border highlight
-- "Add to Cart" appears on hover (desktop) / always visible (mobile)
+- Quick-add button always visible (min 44px touch target) — never hover-only; buyers can't discover hover affordances on touch devices
 
 ### Product Price Display
 ```
@@ -121,12 +121,14 @@ Per bag             ← unit label, small muted text
 
 ### Buttons
 ```
-Primary:    bg-brand-primary text-white hover:bg-amber-600    (orange fill)
-Secondary:  bg-white text-neutral-900 hover:bg-neutral-100    (white fill)
+Primary:    bg-brand-primary text-neutral-950 hover:bg-amber-600    (orange fill, dark text)
+Secondary:  bg-white text-neutral-900 hover:bg-neutral-100          (white fill)
 Ghost:      border border-neutral-600 text-white hover:border-white
 Danger:     bg-red-600 text-white
 Disabled:   bg-neutral-700 text-neutral-500 cursor-not-allowed
 ```
+Orange fills always use **dark text** (`text-neutral-950`): white on `#E07B39` is
+~3.0:1 and fails WCAG AA at button sizes; dark text is ~5.8:1 and passes.
 All buttons: `rounded-full`, `px-6 py-2.5`, `font-semibold`, `transition-all duration-200`
 
 ### Badges / Tags

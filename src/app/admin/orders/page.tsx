@@ -87,7 +87,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
         </select>
         <button
           type="submit"
-          className="rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-white hover:bg-amber-600"
+          className="rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-neutral-950 hover:bg-amber-600"
         >
           {t('filter')}
         </button>
