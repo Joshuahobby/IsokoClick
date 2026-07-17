@@ -32,7 +32,7 @@ export function QuickAddButton({ id, slug, name, price, minQty, unitType, imageU
     <button
       type="button"
       onClick={handleClick}
-      className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-primary text-white opacity-0 transition-all group-hover:opacity-100 hover:bg-amber-600"
+      className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-primary text-white transition-all hover:bg-amber-600 lg:opacity-0 lg:group-hover:opacity-100"
       aria-label={`Add ${name} to cart`}
     >
       {added ? <Check size={14} /> : <ShoppingCart size={14} />}

@@ -10,6 +10,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
+      url: `${APP_URL}/shop`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
       url: `${APP_URL}/partner/register`,
       lastModified: new Date(),
       changeFrequency: 'monthly',

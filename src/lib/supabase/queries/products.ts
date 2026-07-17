@@ -1,9 +1,10 @@
+import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import type { ProductRow, CategoryRow } from '@/types/database'
 
 export type ProductWithImages = ProductRow & {
   product_images: { storage_url: string; alt_text: string | null; is_primary: boolean }[]
-  categories: Pick<CategoryRow, 'name_en' | 'slug'> | null
+  categories: Pick<CategoryRow, 'name_en' | 'name_rw' | 'slug'> | null
 }
 
 export type ProductFilters = {
@@ -33,8 +34,8 @@ export async function getProducts(filters: ProductFilters = {}): Promise<{
   // join is `!inner` — a plain embed would return every product with
   // `categories: null` and silently ignore the category filter.
   const categoriesEmbed = filters.category
-    ? 'categories:category_id!inner(name_en, slug)'
-    : 'categories:category_id(name_en, slug)'
+    ? 'categories:category_id!inner(name_en, name_rw, slug)'
+    : 'categories:category_id(name_en, name_rw, slug)'
 
   let query = supabase
     .from('products')
@@ -86,15 +87,15 @@ export async function getProducts(filters: ProductFilters = {}): Promise<{
   }
 }
 
-export async function getProductBySlug(slug: string): Promise<
-  | (ProductRow & {
-      product_images: { storage_url: string; alt_text: string | null; sort_order: number; is_primary: boolean }[]
-      product_specs:  { key_en: string; value_en: string; sort_order: number }[]
-      product_variants: { id: string; name_en: string; price: number | null; sort_order: number; is_active: boolean }[]
-      categories: Pick<CategoryRow, 'name_en' | 'slug'> | null
-    })
-  | null
-> {
+export type ProductDetail = ProductRow & {
+  product_images: { storage_url: string; alt_text: string | null; sort_order: number; is_primary: boolean }[]
+  product_specs:  { key_en: string; value_en: string; sort_order: number }[]
+  product_variants: { id: string; name_en: string; price: number | null; sort_order: number; is_active: boolean }[]
+  categories: Pick<CategoryRow, 'name_en' | 'name_rw' | 'slug'> | null
+}
+
+// cache() dedupes the fetch between generateMetadata and the page render.
+export const getProductBySlug = cache(async (slug: string): Promise<ProductDetail | null> => {
   const supabase = await createClient()
 
   const { data, error } = await supabase
@@ -104,7 +105,7 @@ export async function getProductBySlug(slug: string): Promise<
       product_images(storage_url, alt_text, sort_order, is_primary),
       product_specs(key_en, value_en, sort_order),
       product_variants(id, name_en, price, sort_order, is_active),
-      categories:category_id(name_en, slug)
+      categories:category_id(name_en, name_rw, slug)
     `)
     .eq('slug', slug)
     .eq('is_active', true)
@@ -112,8 +113,9 @@ export async function getProductBySlug(slug: string): Promise<
     .single()
 
   if (error) return null
-  return data as ReturnType<typeof getProductBySlug> extends Promise<infer T> ? T : never
-}
+  // Hand-written Database type carries no relationship metadata (see getProducts)
+  return data as unknown as ProductDetail
+})
 
 export async function getFeaturedProducts(limit = 6): Promise<ProductWithImages[]> {
   const { products } = await getProducts({ featured: true, pageSize: limit })
@@ -136,7 +138,7 @@ export async function getRelatedProducts(
   const { data } = await supabase
     .from('products')
     // `!inner` so the category filter removes parent rows (see getProducts)
-    .select(`*, product_images(storage_url, alt_text, is_primary), categories:category_id!inner(name_en, slug)`)
+    .select(`*, product_images(storage_url, alt_text, is_primary), categories:category_id!inner(name_en, name_rw, slug)`)
     .eq('is_active', true)
     .is('deleted_at', null)
     .eq('categories.slug', categorySlug)
@@ -144,6 +146,22 @@ export async function getRelatedProducts(
     .limit(limit)
 
   return (data ?? []) as unknown as ProductWithImages[]
+}
+
+// Active-product count per category id, computed in one round-trip.
+export async function getCategoryProductCounts(): Promise<Record<string, number>> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('products')
+    .select('category_id')
+    .eq('is_active', true)
+    .is('deleted_at', null)
+
+  const counts: Record<string, number> = {}
+  for (const row of data ?? []) {
+    if (row.category_id) counts[row.category_id] = (counts[row.category_id] ?? 0) + 1
+  }
+  return counts
 }
 
 export async function getCategories(): Promise<CategoryRow[]> {

@@ -36,7 +36,7 @@ export default async function RootLayout({
   const messages = await getMessages()
 
   return (
-    <html lang={locale} className={`${inter.variable} h-full`}>
+    <html lang={locale} className={`${inter.variable} h-full`} data-scroll-behavior="smooth">
       <body className="min-h-full flex flex-col bg-background text-foreground antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}

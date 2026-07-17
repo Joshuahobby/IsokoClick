@@ -1,12 +1,32 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getLocale, getTranslations } from 'next-intl/server'
-import { ShoppingCart } from 'lucide-react'
-import { getStoreProducts } from '@/lib/supabase/queries/store'
+import {
+  ArrowRight,
+  Building2,
+  Handshake,
+  HardHat,
+  ShoppingCart,
+  Smartphone,
+  Store,
+  Tag,
+  Truck,
+  Warehouse,
+} from 'lucide-react'
+import {
+  getCategories,
+  getCategoryProductCounts,
+  getProducts,
+  type ProductWithImages,
+} from '@/lib/supabase/queries/products'
+import { ProductCard } from '@/components/store/product-card'
+import { CategoryIcon } from '@/components/store/category-icon'
 import { formatRwf } from '@/lib/utils/currency'
-import { Badge } from '@/components/ui/badge'
-import { AddToCartButton } from '@/components/store/AddToCartButton'
+import { localize } from '@/lib/utils/localize'
 import type { AppLocale } from '@/i18n/locales'
 
+// Note: rendered dynamically (not ISR) — the cookie-based locale in
+// src/i18n/request.ts falls back to English during static prerenders.
 export async function generateMetadata() {
   const t = await getTranslations('home')
   return {
@@ -15,127 +35,389 @@ export async function generateMetadata() {
   }
 }
 
-const CATEGORY_SLUGS = [
-  'agriculture',
-  'construction',
-  'electronics',
-  'groceries',
-  'hardware',
-  'textiles',
-] as const
+function SectionHeader({
+  title,
+  subtitle,
+  href,
+  linkLabel,
+}: {
+  title: string
+  subtitle?: string
+  href?: string
+  linkLabel?: string
+}) {
+  return (
+    <div className="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">{title}</h2>
+        {subtitle && <p className="mt-2 text-sm text-neutral-400">{subtitle}</p>}
+      </div>
+      {href && linkLabel && (
+        <Link
+          href={href}
+          className="group inline-flex items-center gap-1.5 text-sm font-semibold text-brand-primary transition-colors hover:text-amber-500"
+        >
+          {linkLabel}
+          <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      )}
+    </div>
+  )
+}
 
 export default async function StoreHomePage() {
   const locale = (await getLocale()) as AppLocale
-  const [{ products }, t, tCommon] = await Promise.all([
-    getStoreProducts(locale, 1, 24),
+  const [t, tCommon, categories, categoryCounts, featuredRes, newestRes, saleRes] = await Promise.all([
     getTranslations('home'),
     getTranslations('common'),
+    getCategories(),
+    getCategoryProductCounts(),
+    getProducts({ featured: true, pageSize: 8 }),
+    getProducts({ sort: 'newest', pageSize: 12 }),
+    getProducts({ onSale: true, pageSize: 4 }),
   ])
 
+  const featured = featuredRes.products
+  const featuredIds = new Set(featured.map((p) => p.id))
+  const newArrivals = newestRes.products.filter((p) => !featuredIds.has(p.id)).slice(0, 8)
+  const saleProducts = saleRes.products
+  const spotlight: ProductWithImages | undefined = featured[0] ?? newestRes.products[0]
+  const spotlightImage =
+    spotlight?.product_images?.find((img) => img.is_primary) ?? spotlight?.product_images?.[0]
+  const brands = [...new Set(
+    [...featured, ...newestRes.products].map((p) => p.brand).filter((b): b is string => Boolean(b))
+  )]
+
+  const stats = [
+    { value: String(categories.length), label: t('statCategories') },
+    { value: '30', label: t('statDistricts') },
+    { value: '100%', label: t('statPartners') },
+    { value: '18%', label: t('statVat') },
+  ]
+
+  const steps = [
+    { icon: Store, title: t('how1Title'), desc: t('how1Desc') },
+    { icon: Smartphone, title: t('how2Title'), desc: t('how2Desc') },
+    { icon: Truck, title: t('how3Title'), desc: t('how3Desc') },
+  ]
+
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-brand-primary">
-        <div className="absolute inset-0 bg-[url('/hero-pattern.svg')] opacity-10 mix-blend-overlay"></div>
-        <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
-          <div className="max-w-2xl text-white">
-            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+    <div className="flex min-h-screen flex-col">
+
+      {/* ── Hero ─────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-grid-texture opacity-[0.04]" aria-hidden="true" />
+        <div
+          className="pointer-events-none absolute -right-32 -top-32 h-[28rem] w-[28rem] rounded-full bg-brand-primary/15 blur-3xl"
+          aria-hidden="true"
+        />
+        <div className="relative mx-auto grid max-w-7xl gap-12 px-4 pb-16 pt-14 sm:px-6 lg:grid-cols-[1fr_400px] lg:items-center lg:px-8 lg:pb-24 lg:pt-20">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-brand-primary/40 bg-brand-primary/10 px-4 py-1.5 text-xs font-semibold text-brand-primary">
+              <HardHat size={14} aria-hidden="true" />
+              {t('heroEyebrow')}
+            </span>
+            <h1 className="mt-6 max-w-2xl text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
               {t('heroTitle')}
             </h1>
-            <p className="mt-6 max-w-xl text-lg text-brand-primary-foreground/90">
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-neutral-400">
               {t('heroSubtitle')}
             </p>
-            <div className="mt-10 flex gap-4">
+            <div className="mt-10 flex flex-wrap gap-4">
               <Link
-                href="#products"
-                className="rounded-full bg-white px-8 py-3.5 text-sm font-bold text-brand-primary transition-transform hover:scale-105"
+                href="/shop"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-primary px-8 py-3.5 text-sm font-bold text-white transition-colors hover:bg-amber-600"
               >
-                {t('startShopping')}
+                {t('shopMaterials')}
+                <ArrowRight size={16} aria-hidden="true" />
+              </Link>
+              <Link
+                href="/partner/register"
+                className="rounded-full border border-neutral-600 px-8 py-3.5 text-sm font-semibold text-white transition-colors hover:border-white"
+              >
+                {t('becomePartner')}
               </Link>
             </div>
+
+            <dl className="mt-14 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4">
+              {stats.map((stat) => (
+                <div key={stat.label}>
+                  <dd className="price text-2xl text-white">{stat.value}</dd>
+                  <dt className="mt-1 text-xs leading-snug text-neutral-500">{stat.label}</dt>
+                </div>
+              ))}
+            </dl>
           </div>
+
+          {/* Spotlight card (desktop) */}
+          {spotlight && (
+            <div className="hidden lg:block">
+              <div className="rounded-3xl border border-neutral-800 bg-neutral-900/80 p-6 shadow-2xl shadow-black/40 backdrop-blur">
+                <p className="text-xs font-semibold uppercase tracking-wider text-brand-primary">
+                  {t('heroSpotlight')}
+                </p>
+                <Link href={`/product/${spotlight.slug}`} className="group mt-4 block">
+                  <div className="arch-top relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-neutral-800">
+                    {spotlightImage ? (
+                      <Image
+                        src={spotlightImage.storage_url}
+                        alt={spotlightImage.alt_text ?? localize(locale, spotlight.name_en, spotlight.name_rw)}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        sizes="400px"
+                      />
+                    ) : (
+                      <CategoryIcon slug={spotlight.categories?.slug} size={56} className="text-neutral-600" />
+                    )}
+                  </div>
+                  <div className="mt-4 flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-xs text-neutral-500">
+                        {spotlight.categories
+                          ? localize(locale, spotlight.categories.name_en, spotlight.categories.name_rw)
+                          : null}
+                      </p>
+                      <h3 className="mt-0.5 font-semibold text-white group-hover:text-neutral-200">
+                        {localize(locale, spotlight.name_en, spotlight.name_rw)}
+                      </h3>
+                    </div>
+                    <div className="text-right">
+                      <p className="price text-lg text-white">
+                        {formatRwf(spotlight.sale_price ?? spotlight.base_price)}
+                      </p>
+                      <p className="text-xs text-neutral-500">
+                        {localize(locale, spotlight.unit_label_en, spotlight.unit_label_rw)}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+                <div className="mt-5 space-y-2.5 border-t border-neutral-800 pt-5 text-sm text-neutral-300">
+                  <p className="flex items-center gap-2.5">
+                    <Truck size={16} className="shrink-0 text-brand-primary" aria-hidden="true" />
+                    {t('trustDelivery')}
+                  </p>
+                  <p className="flex items-center gap-2.5">
+                    <Smartphone size={16} className="shrink-0 text-brand-primary" aria-hidden="true" />
+                    {t('trustPayment')}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Featured Categories (Static for now) */}
-      <section className="bg-white py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-end mb-8">
-            <div>
-              <h2 className="text-2xl font-bold tracking-tight text-neutral-900">{t('categoriesTitle')}</h2>
-              <p className="text-sm text-neutral-500 mt-1">{t('categoriesSubtitle')}</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {CATEGORY_SLUGS.map((slug) => (
-              <Link key={slug} href={`/category/${slug}`} className="group relative flex h-32 flex-col items-center justify-center overflow-hidden rounded-2xl bg-neutral-100 transition-colors hover:bg-brand-primary/10">
-                <span className="font-semibold text-neutral-700 transition-colors group-hover:text-brand-primary">{t(`categories.${slug}`)}</span>
+      {/* ── Categories ───────────────────────────────────────── */}
+      <section className="border-t border-neutral-800/70 bg-neutral-900/40">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+          <SectionHeader
+            title={t('categoriesTitle')}
+            subtitle={t('categoriesSubtitle')}
+            href="/shop"
+            linkLabel={t('viewAllProducts')}
+          />
+          <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {categories.map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/shop?category=${cat.slug}`}
+                className="group rounded-2xl border border-neutral-800 bg-neutral-900 p-6 transition-all hover:border-brand-primary/50 hover:bg-neutral-800/80"
+              >
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary">
+                  <CategoryIcon slug={cat.slug} size={22} />
+                </span>
+                <p className="mt-4 font-semibold text-white transition-colors group-hover:text-brand-primary">
+                  {localize(locale, cat.name_en, cat.name_rw)}
+                </p>
+                <p className="mt-1 text-xs text-neutral-500">
+                  {t('itemsCount', { count: categoryCounts[cat.id] ?? 0 })}
+                </p>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Product Grid */}
-      <section id="products" className="bg-neutral-50 py-16 flex-1">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-end mb-8">
-            <h2 className="text-3xl font-bold tracking-tight text-neutral-900">{t('latestArrivals')}</h2>
+      {/* ── Featured materials ───────────────────────────────── */}
+      {featured.length > 0 ? (
+        <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+          <SectionHeader
+            title={t('featuredTitle')}
+            subtitle={t('featuredSubtitle')}
+            href="/shop?sort=featured"
+            linkLabel={tCommon('viewAll')}
+          />
+          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {featured.map((product) => (
+              <ProductCard key={product.id} product={product} locale={locale} />
+            ))}
           </div>
+        </section>
+      ) : (
+        newArrivals.length === 0 && (
+          <section className="mx-auto w-full max-w-7xl px-4 py-24 text-center sm:px-6 lg:px-8">
+            <ShoppingCart size={48} className="mx-auto mb-4 text-neutral-700" aria-hidden="true" />
+            <h3 className="text-lg font-medium text-white">{t('noProducts')}</h3>
+            <p className="mt-1 text-sm text-neutral-500">{t('noProductsHint')}</p>
+          </section>
+        )
+      )}
 
-          {products.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 text-center">
-              <ShoppingCart size={48} className="text-neutral-300 mb-4" />
-              <h3 className="text-lg font-medium text-neutral-900">{t('noProducts')}</h3>
-              <p className="mt-1 text-sm text-neutral-500">{t('noProductsHint')}</p>
+      {/* ── Deals band ───────────────────────────────────────── */}
+      {saleProducts.length > 0 && (
+        <section className="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-primary to-amber-700">
+            <div className="absolute inset-0 bg-stripe-texture opacity-10" aria-hidden="true" />
+            <div className="relative grid gap-10 p-8 lg:grid-cols-2 lg:p-12">
+              <div className="flex flex-col justify-center">
+                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">
+                  <Tag size={12} aria-hidden="true" />
+                  {tCommon('sale')}
+                </span>
+                <h2 className="mt-5 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                  {t('dealsTitle')}
+                </h2>
+                <p className="mt-3 max-w-md text-white/85">{t('dealsSubtitle')}</p>
+                <Link
+                  href="/shop?sale=1"
+                  className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-bold text-neutral-900 transition-transform hover:scale-105"
+                >
+                  {t('shopAllDeals')}
+                  <ArrowRight size={16} aria-hidden="true" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {saleProducts.slice(0, 2).map((product) => (
+                  <ProductCard key={product.id} product={product} locale={locale} />
+                ))}
+              </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-              {products.map((product) => (
-                <div key={product.id} className="group relative flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition-shadow hover:shadow-lg">
-                  {/* Image Placeholder */}
-                  <div className="aspect-[4/3] bg-neutral-100 flex items-center justify-center relative">
-                    <span className="text-neutral-400 font-medium">{tCommon('noImage')}</span>
-                    {product.sale_price && (
-                      <div className="absolute top-3 left-3">
-                        <Badge className="bg-red-500 text-white hover:bg-red-600 border-0">{tCommon('sale')}</Badge>
-                      </div>
-                    )}
-                  </div>
+          </div>
+        </section>
+      )}
 
-                  {/* Details */}
-                  <div className="flex flex-1 flex-col p-5">
-                    <div className="flex justify-between items-start gap-4 mb-2">
-                      <h3 className="text-base font-semibold text-neutral-900 line-clamp-2">
-                        <Link href={`/product/${product.slug}`}>
-                          <span aria-hidden="true" className="absolute inset-0"></span>
-                          {product.name}
-                        </Link>
-                      </h3>
-                    </div>
-
-                    <p className="text-sm text-neutral-500 mb-4">{product.brand || product.category || t('uncategorized')}</p>
-
-                    <div className="mt-auto flex items-end justify-between">
-                      <div>
-                        {product.sale_price ? (
-                          <div className="flex flex-col">
-                            <span className="text-sm text-neutral-400 line-through">{formatRwf(product.base_price)}</span>
-                            <span className="text-lg font-bold text-neutral-900">{formatRwf(product.sale_price)}</span>
-                          </div>
-                        ) : (
-                          <span className="text-lg font-bold text-neutral-900">{formatRwf(product.base_price)}</span>
-                        )}
-                        <span className="text-xs text-neutral-500 block mt-0.5">/{product.unitLabel}</span>
-                      </div>
-
-                      <AddToCartButton product={product} />
-                    </div>
-                  </div>
-                </div>
+      {/* ── New arrivals ─────────────────────────────────────── */}
+      {newArrivals.length > 0 && (
+        <section className="border-t border-neutral-800/70 bg-neutral-900/40">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+            <SectionHeader
+              title={t('newArrivalsTitle')}
+              subtitle={t('newArrivalsSubtitle')}
+              href="/shop?sort=newest"
+              linkLabel={tCommon('viewAll')}
+            />
+            <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {newArrivals.map((product) => (
+                <ProductCard key={product.id} product={product} locale={locale} />
               ))}
             </div>
-          )}
+          </div>
+        </section>
+      )}
+
+      {/* ── Stocked two ways ─────────────────────────────────── */}
+      <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+        <SectionHeader title={t('sourceTitle')} subtitle={t('sourceSubtitle')} />
+        <div className="mt-10 grid gap-6 md:grid-cols-2">
+          <div className="flex flex-col rounded-3xl border border-neutral-800 bg-neutral-900 p-8">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary/10 text-brand-primary">
+              <Warehouse size={24} aria-hidden="true" />
+            </span>
+            <h3 className="mt-5 text-xl font-bold text-white">{t('warehouseTitle')}</h3>
+            <p className="mt-2 flex-1 text-sm leading-relaxed text-neutral-400">{t('warehouseDesc')}</p>
+            <Link
+              href="/shop?source=internal"
+              className="group mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-primary hover:text-amber-500"
+            >
+              {t('warehouseCta')}
+              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+            </Link>
+          </div>
+          <div className="flex flex-col rounded-3xl border border-neutral-800 bg-neutral-900 p-8">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-500/10 text-purple-400">
+              <Handshake size={24} aria-hidden="true" />
+            </span>
+            <h3 className="mt-5 text-xl font-bold text-white">{t('partnerSourceTitle')}</h3>
+            <p className="mt-2 flex-1 text-sm leading-relaxed text-neutral-400">{t('partnerSourceDesc')}</p>
+            <Link
+              href="/shop?source=dropship"
+              className="group mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-purple-400 hover:text-purple-300"
+            >
+              {t('partnerSourceCta')}
+              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+
+        {/* Brands strip */}
+        {brands.length >= 2 && (
+          <div className="mt-14 flex flex-wrap items-center gap-x-8 gap-y-4 border-t border-neutral-800/70 pt-8">
+            <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+              {t('brandsTitle')}
+            </p>
+            {brands.map((brand) => (
+              <span key={brand} className="text-lg font-bold uppercase tracking-wide text-neutral-600">
+                {brand}
+              </span>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* ── How it works ─────────────────────────────────────── */}
+      <section className="border-t border-neutral-800/70 bg-neutral-900/40">
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+          <SectionHeader title={t('howTitle')} subtitle={t('howSubtitle')} />
+          <ol className="mt-10 grid gap-6 md:grid-cols-3">
+            {steps.map((step, i) => (
+              <li key={step.title} className="rounded-3xl border border-neutral-800 bg-neutral-900 p-8">
+                <div className="flex items-center justify-between">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary/10 text-brand-primary">
+                    <step.icon size={24} aria-hidden="true" />
+                  </span>
+                  <span className="price text-3xl text-neutral-800" aria-hidden="true">
+                    0{i + 1}
+                  </span>
+                </div>
+                <h3 className="mt-5 text-lg font-bold text-white">{step.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-neutral-400">{step.desc}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* ── B2B & Partner CTAs ───────────────────────────────── */}
+      <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="flex flex-col rounded-3xl border border-neutral-800 bg-neutral-900 p-8 lg:p-10">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary/10 text-brand-primary">
+              <Building2 size={24} aria-hidden="true" />
+            </span>
+            <h3 className="mt-5 text-2xl font-bold text-white">{t('b2bTitle')}</h3>
+            <p className="mt-2 flex-1 text-sm leading-relaxed text-neutral-400">{t('b2bDesc')}</p>
+            <Link
+              href="/signup"
+              className="mt-8 inline-flex w-fit rounded-full border border-neutral-600 px-7 py-3 text-sm font-semibold text-white transition-colors hover:border-white"
+            >
+              {t('b2bCta')}
+            </Link>
+          </div>
+          <div className="relative flex flex-col overflow-hidden rounded-3xl border border-brand-primary/40 bg-brand-primary/10 p-8 lg:p-10">
+            <div className="absolute inset-0 bg-grid-texture opacity-[0.03]" aria-hidden="true" />
+            <span className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary text-white">
+              <Store size={24} aria-hidden="true" />
+            </span>
+            <h3 className="relative mt-5 text-2xl font-bold text-white">{t('partnerTitle')}</h3>
+            <p className="relative mt-2 flex-1 text-sm leading-relaxed text-neutral-300">{t('partnerDesc')}</p>
+            <Link
+              href="/partner/register"
+              className="relative mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-brand-primary px-7 py-3 text-sm font-bold text-white transition-colors hover:bg-amber-600"
+            >
+              {t('partnerCta')}
+              <ArrowRight size={16} aria-hidden="true" />
+            </Link>
+          </div>
         </div>
       </section>
     </div>
