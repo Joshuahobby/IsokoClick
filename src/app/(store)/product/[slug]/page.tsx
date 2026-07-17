@@ -140,7 +140,7 @@ export default async function ProductDetailPage({ params }: Props) {
               </Link>
             )}
             {product.source === 'internal' ? (
-              <span className="rounded-full bg-brand-primary/90 px-3 py-1 text-xs font-semibold text-white">
+              <span className="rounded-full bg-brand-primary/90 px-3 py-1 text-xs font-semibold text-neutral-950">
                 {tCommon('isokoClickStock')}
               </span>
             ) : (
@@ -149,7 +149,7 @@ export default async function ProductDetailPage({ params }: Props) {
               </span>
             )}
             {product.sale_price && (
-              <span className="rounded-full bg-red-500 px-3 py-1 text-xs font-bold uppercase text-white">
+              <span className="rounded-full bg-red-600 px-3 py-1 text-xs font-bold uppercase text-white">
                 {tCommon('sale')}
               </span>
             )}

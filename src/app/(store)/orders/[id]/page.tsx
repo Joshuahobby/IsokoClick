@@ -169,7 +169,7 @@ export default async function OrderSuccessPage({ params }: Props) {
       </div>
 
       <div className="mt-8 text-center">
-        <Link href="/" className="inline-flex items-center justify-center rounded-full bg-brand-primary px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-amber-600">
+        <Link href="/" className="inline-flex items-center justify-center rounded-full bg-brand-primary px-6 py-3 text-sm font-bold text-neutral-950 transition-colors hover:bg-amber-600">
           {t('continueShopping')}
         </Link>
       </div>

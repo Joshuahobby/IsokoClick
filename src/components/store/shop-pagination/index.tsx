@@ -56,7 +56,7 @@ export function ShopPagination({ currentPage, totalPages }: Props) {
             onClick={() => goToPage(p)}
             className={`h-9 min-w-9 rounded-lg px-3 text-sm font-medium transition-colors ${
               p === currentPage
-                ? 'bg-brand-primary text-white'
+                ? 'bg-brand-primary text-neutral-950'
                 : 'border border-neutral-700 text-neutral-400 hover:border-neutral-500 hover:text-white'
             }`}
           >

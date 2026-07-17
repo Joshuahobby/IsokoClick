@@ -63,7 +63,7 @@ export default async function AccountOrdersPage() {
           <p className="text-neutral-400">{t('empty')}</p>
           <Link
             href="/"
-            className="mt-6 inline-flex items-center justify-center rounded-full bg-brand-primary px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-amber-600"
+            className="mt-6 inline-flex items-center justify-center rounded-full bg-brand-primary px-6 py-3 text-sm font-bold text-neutral-950 transition-colors hover:bg-amber-600"
           >
             {t('emptyCta')}
           </Link>

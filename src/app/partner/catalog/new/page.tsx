@@ -139,7 +139,7 @@ export default function PartnerNewProductPage() {
           <button
             type="submit"
             disabled={isPending}
-            className="rounded-lg bg-brand-primary px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-primary/90 disabled:opacity-50"
+            className="rounded-lg bg-brand-primary px-6 py-2 text-sm font-semibold text-neutral-950 transition-colors hover:bg-brand-primary/90 disabled:opacity-50"
           >
             {isPending ? t('saving') : t('submit')}
           </button>

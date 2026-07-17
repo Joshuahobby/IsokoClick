@@ -86,7 +86,7 @@ export default function ResetPasswordPage() {
         <Button
           type="submit"
           disabled={loading}
-          className="w-full bg-brand-primary font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
+          className="w-full bg-brand-primary font-semibold text-neutral-950 hover:bg-amber-600 disabled:opacity-50"
         >
           {loading ? t('sending') : t('sendResetLink')}
         </Button>

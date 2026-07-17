@@ -77,10 +77,19 @@ export default async function StoreHomePage() {
     getProducts({ onSale: true, pageSize: 4 }),
   ])
 
-  const featured = featuredRes.products
+  // Trim grids to full rows (4-col desktop) so a lone card never orphans on
+  // its own row; below one full row, show whatever exists.
+  const fullRows = (products: ProductWithImages[]) =>
+    products.length <= 4 ? products : products.slice(0, Math.floor(products.length / 4) * 4)
+
+  const saleProducts = saleRes.products.slice(0, 2)
+  const saleIds = new Set(saleProducts.map((p) => p.id))
+  const featured = fullRows(featuredRes.products.filter((p) => !saleIds.has(p.id)))
   const featuredIds = new Set(featured.map((p) => p.id))
-  const newArrivals = newestRes.products.filter((p) => !featuredIds.has(p.id)).slice(0, 8)
-  const saleProducts = saleRes.products
+  const newArrivals = fullRows(
+    newestRes.products.filter((p) => !featuredIds.has(p.id) && !saleIds.has(p.id))
+  )
+  const visibleCategories = categories.filter((cat) => (categoryCounts[cat.id] ?? 0) > 0)
   const spotlight: ProductWithImages | undefined = featured[0] ?? newestRes.products[0]
   const spotlightImage =
     spotlight?.product_images?.find((img) => img.is_primary) ?? spotlight?.product_images?.[0]
@@ -89,10 +98,10 @@ export default async function StoreHomePage() {
   )]
 
   const stats = [
-    { value: String(categories.length), label: t('statCategories') },
+    { value: t('statDeliveryValue'), label: t('statDelivery') },
     { value: '30', label: t('statDistricts') },
+    { value: t('statPaymentValue'), label: t('statPayment') },
     { value: '100%', label: t('statPartners') },
-    { value: '18%', label: t('statVat') },
   ]
 
   const steps = [
@@ -126,16 +135,16 @@ export default async function StoreHomePage() {
             <div className="mt-10 flex flex-wrap gap-4">
               <Link
                 href="/shop"
-                className="inline-flex items-center gap-2 rounded-full bg-brand-primary px-8 py-3.5 text-sm font-bold text-white transition-colors hover:bg-amber-600"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-primary px-8 py-3.5 text-sm font-bold text-neutral-950 transition-colors hover:bg-amber-600"
               >
                 {t('shopMaterials')}
                 <ArrowRight size={16} aria-hidden="true" />
               </Link>
               <Link
-                href="/partner/register"
+                href="#categories"
                 className="rounded-full border border-neutral-600 px-8 py-3.5 text-sm font-semibold text-white transition-colors hover:border-white"
               >
-                {t('becomePartner')}
+                {t('browseCategories')}
               </Link>
             </div>
 
@@ -143,7 +152,7 @@ export default async function StoreHomePage() {
               {stats.map((stat) => (
                 <div key={stat.label}>
                   <dd className="price text-2xl text-white">{stat.value}</dd>
-                  <dt className="mt-1 text-xs leading-snug text-neutral-500">{stat.label}</dt>
+                  <dt className="mt-1 text-xs leading-snug text-neutral-400">{stat.label}</dt>
                 </div>
               ))}
             </dl>
@@ -172,7 +181,7 @@ export default async function StoreHomePage() {
                   </div>
                   <div className="mt-4 flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs text-neutral-500">
+                      <p className="text-xs text-neutral-400">
                         {spotlight.categories
                           ? localize(locale, spotlight.categories.name_en, spotlight.categories.name_rw)
                           : null}
@@ -185,7 +194,7 @@ export default async function StoreHomePage() {
                       <p className="price text-lg text-white">
                         {formatRwf(spotlight.sale_price ?? spotlight.base_price)}
                       </p>
-                      <p className="text-xs text-neutral-500">
+                      <p className="text-xs text-neutral-400">
                         {localize(locale, spotlight.unit_label_en, spotlight.unit_label_rw)}
                       </p>
                     </div>
@@ -208,35 +217,37 @@ export default async function StoreHomePage() {
       </section>
 
       {/* ── Categories ───────────────────────────────────────── */}
-      <section className="border-t border-neutral-800/70 bg-neutral-900/40">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-          <SectionHeader
-            title={t('categoriesTitle')}
-            subtitle={t('categoriesSubtitle')}
-            href="/shop"
-            linkLabel={t('viewAllProducts')}
-          />
-          <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {categories.map((cat) => (
-              <Link
-                key={cat.id}
-                href={`/shop?category=${cat.slug}`}
-                className="group rounded-2xl border border-neutral-800 bg-neutral-900 p-6 transition-all hover:border-brand-primary/50 hover:bg-neutral-800/80"
-              >
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary">
-                  <CategoryIcon slug={cat.slug} size={22} />
-                </span>
-                <p className="mt-4 font-semibold text-white transition-colors group-hover:text-brand-primary">
-                  {localize(locale, cat.name_en, cat.name_rw)}
-                </p>
-                <p className="mt-1 text-xs text-neutral-500">
-                  {t('itemsCount', { count: categoryCounts[cat.id] ?? 0 })}
-                </p>
-              </Link>
-            ))}
+      {visibleCategories.length > 0 && (
+        <section id="categories" className="border-t border-neutral-800/70 bg-neutral-900/60 scroll-mt-16">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+            <SectionHeader
+              title={t('categoriesTitle')}
+              subtitle={t('categoriesSubtitle')}
+              href="/shop"
+              linkLabel={t('viewAllProducts')}
+            />
+            <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {visibleCategories.map((cat) => (
+                <Link
+                  key={cat.id}
+                  href={`/shop?category=${cat.slug}`}
+                  className="group rounded-2xl border border-neutral-800 bg-neutral-900 p-6 transition-all hover:border-brand-primary/50 hover:bg-neutral-800/80"
+                >
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary">
+                    <CategoryIcon slug={cat.slug} size={22} />
+                  </span>
+                  <p className="mt-4 font-semibold text-white transition-colors group-hover:text-brand-primary">
+                    {localize(locale, cat.name_en, cat.name_rw)}
+                  </p>
+                  <p className="mt-1 text-xs text-neutral-400">
+                    {t('itemsCount', { count: categoryCounts[cat.id] ?? 0 })}
+                  </p>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ── Featured materials ───────────────────────────────── */}
       {featured.length > 0 ? (
@@ -287,7 +298,7 @@ export default async function StoreHomePage() {
                 </Link>
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {saleProducts.slice(0, 2).map((product) => (
+                {saleProducts.map((product) => (
                   <ProductCard key={product.id} product={product} locale={locale} />
                 ))}
               </div>
@@ -298,7 +309,7 @@ export default async function StoreHomePage() {
 
       {/* ── New arrivals ─────────────────────────────────────── */}
       {newArrivals.length > 0 && (
-        <section className="border-t border-neutral-800/70 bg-neutral-900/40">
+        <section className="border-t border-neutral-800/70 bg-neutral-900/60">
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
             <SectionHeader
               title={t('newArrivalsTitle')}
@@ -352,11 +363,11 @@ export default async function StoreHomePage() {
         {/* Brands strip */}
         {brands.length >= 2 && (
           <div className="mt-14 flex flex-wrap items-center gap-x-8 gap-y-4 border-t border-neutral-800/70 pt-8">
-            <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+            <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
               {t('brandsTitle')}
             </p>
             {brands.map((brand) => (
-              <span key={brand} className="text-lg font-bold uppercase tracking-wide text-neutral-600">
+              <span key={brand} className="text-lg font-bold uppercase tracking-wide text-neutral-500">
                 {brand}
               </span>
             ))}
@@ -365,7 +376,7 @@ export default async function StoreHomePage() {
       </section>
 
       {/* ── How it works ─────────────────────────────────────── */}
-      <section className="border-t border-neutral-800/70 bg-neutral-900/40">
+      <section className="border-t border-neutral-800/70 bg-neutral-900/60">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
           <SectionHeader title={t('howTitle')} subtitle={t('howSubtitle')} />
           <ol className="mt-10 grid gap-6 md:grid-cols-3">
@@ -412,7 +423,7 @@ export default async function StoreHomePage() {
             <p className="relative mt-2 flex-1 text-sm leading-relaxed text-neutral-300">{t('partnerDesc')}</p>
             <Link
               href="/partner/register"
-              className="relative mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-brand-primary px-7 py-3 text-sm font-bold text-white transition-colors hover:bg-amber-600"
+              className="relative mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-brand-primary px-7 py-3 text-sm font-bold text-neutral-950 transition-colors hover:bg-amber-600"
             >
               {t('partnerCta')}
               <ArrowRight size={16} aria-hidden="true" />

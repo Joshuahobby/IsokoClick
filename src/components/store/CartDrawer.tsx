@@ -40,7 +40,7 @@ export function CartDrawer() {
       >
         <ShoppingCart size={22} />
         {totalItems > 0 && (
-          <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-brand-primary text-[10px] font-bold text-white">
+          <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-brand-primary text-[10px] font-bold text-neutral-950">
             {totalItems}
           </span>
         )}
@@ -141,7 +141,7 @@ export function CartDrawer() {
                 <Link
                   href="/checkout"
                   onClick={() => setIsOpen(false)}
-                  className="flex w-full items-center justify-center rounded-full border border-transparent bg-brand-primary px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-amber-600"
+                  className="flex w-full items-center justify-center rounded-full border border-transparent bg-brand-primary px-6 py-3 text-base font-semibold text-neutral-950 shadow-sm transition-colors hover:bg-amber-600"
                 >
                   {t('checkout')}
                 </Link>
