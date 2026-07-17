@@ -72,21 +72,21 @@ export default async function OrderSuccessPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
-      <div className="rounded-2xl border border-neutral-200 bg-white p-8 text-center shadow-sm">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 mb-6">
-          <CheckCircle2 size={32} className="text-green-600" />
+      <div className="rounded-3xl border border-neutral-800 bg-neutral-900 p-8 text-center">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10 mb-6">
+          <CheckCircle2 size={32} className="text-green-500" />
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-neutral-900">{t('successTitle')}</h1>
-        <p className="mt-2 text-neutral-500">
+        <h1 className="text-3xl font-extrabold tracking-tight text-white">{t('successTitle')}</h1>
+        <p className="mt-2 text-neutral-400">
           {t.rich('thankYou', {
             orderNumber: o.order_number,
-            strong: (chunks) => <span className="font-bold text-neutral-900">{chunks}</span>,
+            strong: (chunks) => <span className="font-bold text-white">{chunks}</span>,
           })}
         </p>
 
         {payment?.status === 'initiated' && (
-          <div className="mt-6 rounded-lg bg-blue-50 p-4 border border-blue-100">
-            <p className="text-sm text-blue-800">
+          <div className="mt-6 rounded-lg border border-blue-500/30 bg-blue-500/10 p-4">
+            <p className="text-sm text-blue-300">
               <strong>{t('actionRequired')}</strong>{' '}
               {t.rich('momoPrompt', {
                 phone: payment.phone_number,
@@ -99,24 +99,24 @@ export default async function OrderSuccessPage({ params }: Props) {
 
       <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
         {/* Order Details */}
-        <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
-            <Package size={20} className="text-neutral-400" /> {t('itemsSummary')}
+        <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+          <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <Package size={20} className="text-neutral-500" /> {t('itemsSummary')}
           </h2>
           <div className="flow-root">
-            <ul className="-my-4 divide-y divide-neutral-100">
+            <ul className="-my-4 divide-y divide-neutral-800">
               {o.order_items.map((item) => (
                 <li key={item.id} className="flex py-4 justify-between">
                   <div>
-                    <p className="text-sm font-medium text-neutral-900">{item.product?.name_en ?? tCommon('product')}</p>
-                    <p className="text-sm text-neutral-500">{t('qty', { qty: item.quantity })}</p>
+                    <p className="text-sm font-medium text-white">{item.product?.name_en ?? tCommon('product')}</p>
+                    <p className="text-sm text-neutral-400">{t('qty', { qty: item.quantity })}</p>
                   </div>
-                  <p className="text-sm font-medium text-neutral-900">{formatRwf(item.total_price)}</p>
+                  <p className="text-sm font-medium text-white">{formatRwf(item.total_price)}</p>
                 </li>
               ))}
             </ul>
           </div>
-          <div className="border-t border-neutral-200 pt-4 mt-4 space-y-2 text-sm text-neutral-500">
+          <div className="border-t border-neutral-800 pt-4 mt-4 space-y-2 text-sm text-neutral-400">
             <div className="flex justify-between">
               <p>{t('subtotal')}</p>
               <p>{formatRwf(o.subtotal)}</p>
@@ -125,7 +125,7 @@ export default async function OrderSuccessPage({ params }: Props) {
               <p>{t('deliveryFee')}</p>
               <p>{formatRwf(o.delivery_fee)}</p>
             </div>
-            <div className="flex justify-between border-t border-neutral-100 pt-2 text-base font-bold text-neutral-900">
+            <div className="flex justify-between border-t border-neutral-800 pt-2 text-base font-bold text-white">
               <p>{t('total')}</p>
               <p>{formatRwf(o.total_amount)}</p>
             </div>
@@ -134,14 +134,14 @@ export default async function OrderSuccessPage({ params }: Props) {
 
         {/* Delivery & Payment Info */}
         <div className="space-y-6">
-          <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
-              <MapPin size={20} className="text-neutral-400" /> {t('deliveryDetails')}
+          <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+            <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+              <MapPin size={20} className="text-neutral-500" /> {t('deliveryDetails')}
             </h2>
-            <div className="text-sm text-neutral-600 space-y-1">
+            <div className="text-sm text-neutral-400 space-y-1">
               {Object.keys(delivery).length > 0 ? (
                 <>
-                  {delivery.fullName && <p className="font-medium text-neutral-900">{delivery.fullName}</p>}
+                  {delivery.fullName && <p className="font-medium text-white">{delivery.fullName}</p>}
                   {delivery.address && <p>{delivery.address}</p>}
                   {delivery.district && <p>{delivery.district}</p>}
                   {delivery.phone && <p>{delivery.phone}</p>}
@@ -152,12 +152,12 @@ export default async function OrderSuccessPage({ params }: Props) {
             </div>
           </div>
 
-          <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
-              <CreditCard size={20} className="text-neutral-400" /> {t('paymentInfo')}
+          <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+            <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+              <CreditCard size={20} className="text-neutral-500" /> {t('paymentInfo')}
             </h2>
             {payment ? (
-              <div className="text-sm text-neutral-600 space-y-1">
+              <div className="text-sm text-neutral-400 space-y-1">
                 <p>{t('status', { status: payment.status })}</p>
                 <p>{t('phone', { phone: payment.phone_number })}</p>
               </div>
@@ -169,7 +169,7 @@ export default async function OrderSuccessPage({ params }: Props) {
       </div>
 
       <div className="mt-8 text-center">
-        <Link href="/" className="inline-flex items-center justify-center rounded-lg bg-neutral-900 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-neutral-800">
+        <Link href="/" className="inline-flex items-center justify-center rounded-full bg-brand-primary px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-amber-600">
           {t('continueShopping')}
         </Link>
       </div>

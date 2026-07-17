@@ -22,9 +22,9 @@ export function CheckoutClient() {
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <h2 className="text-2xl font-bold text-neutral-900 mb-2">{t('emptyTitle')}</h2>
-        <p className="text-neutral-500 mb-6">{t('emptySubtext')}</p>
-        <Link href="/" className="rounded-lg bg-brand-primary px-6 py-2.5 font-semibold text-white hover:bg-brand-primary/90">
+        <h2 className="text-2xl font-bold text-white mb-2">{t('emptyTitle')}</h2>
+        <p className="text-neutral-400 mb-6">{t('emptySubtext')}</p>
+        <Link href="/" className="rounded-full bg-brand-primary px-6 py-2.5 font-semibold text-white transition-colors hover:bg-amber-600">
           {t('continueShopping')}
         </Link>
       </div>
@@ -84,11 +84,11 @@ export function CheckoutClient() {
       {/* Checkout Form */}
       <div className="lg:col-span-7">
         <div className="mb-6">
-          <h2 className="text-xl font-bold text-neutral-900">{t('deliveryInformation')}</h2>
+          <h2 className="text-xl font-bold text-white">{t('deliveryInformation')}</h2>
         </div>
 
         {error && (
-          <div className="mb-6 rounded-lg bg-red-50 p-4 text-sm text-red-600 border border-red-200">
+          <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
             {error}
           </div>
         )}
@@ -126,7 +126,7 @@ export function CheckoutClient() {
               id="payment_method"
               name="payment_method"
               required
-              className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
+              className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-white focus:border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-primary"
             >
               <option value="momo">{t('momo')}</option>
               <option value="cash">{t('cash')}</option>
@@ -137,7 +137,7 @@ export function CheckoutClient() {
             <button
               type="submit"
               disabled={isPending}
-              className="w-full rounded-lg bg-brand-primary px-6 py-3.5 text-center text-sm font-bold text-white shadow-sm hover:bg-brand-primary/90 disabled:opacity-50"
+              className="w-full rounded-full bg-brand-primary px-6 py-3.5 text-center text-sm font-bold text-white shadow-sm transition-colors hover:bg-amber-600 disabled:opacity-50"
             >
               {isPending ? t('processing') : t('placeOrder')}
             </button>
@@ -147,35 +147,35 @@ export function CheckoutClient() {
 
       {/* Order Summary */}
       <div className="lg:col-span-5">
-        <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-6 sticky top-24">
-          <h2 className="text-lg font-bold text-neutral-900 mb-6">{t('orderSummary')}</h2>
+        <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 sticky top-24">
+          <h2 className="text-lg font-bold text-white mb-6">{t('orderSummary')}</h2>
 
-          <div className="flow-root mb-6 border-b border-neutral-200 pb-6">
-            <ul className="-my-4 divide-y divide-neutral-200">
+          <div className="flow-root mb-6 border-b border-neutral-800 pb-6">
+            <ul className="-my-4 divide-y divide-neutral-800">
               {items.map((item) => (
                 <li key={item.id} className="flex py-4">
                   <div className="ml-4 flex flex-1 flex-col">
-                    <div className="flex justify-between text-base font-medium text-neutral-900">
+                    <div className="flex justify-between text-base font-medium text-white">
                       <h3 className="line-clamp-2 pr-4">{item.name}</h3>
-                      <p className="ml-4">{formatRwf(item.price * item.qty)}</p>
+                      <p className="ml-4 price">{formatRwf(item.price * item.qty)}</p>
                     </div>
-                    <p className="mt-1 text-sm text-neutral-500">{t('qty', { qty: item.qty })}</p>
+                    <p className="mt-1 text-sm text-neutral-400">{t('qty', { qty: item.qty })}</p>
                   </div>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="space-y-3 text-sm font-medium text-neutral-900">
+          <div className="space-y-3 text-sm font-medium text-neutral-200">
             <div className="flex justify-between">
               <p>{t('subtotal')}</p>
               <p>{formatRwf(totalPrice)}</p>
             </div>
             <div className="flex justify-between">
               <p>{t('deliveryFee')}</p>
-              <p className="text-green-600">{t('feeByDistrict')}</p>
+              <p className="text-green-500">{t('feeByDistrict')}</p>
             </div>
-            <div className="flex justify-between border-t border-neutral-200 pt-3 text-lg font-bold">
+            <div className="flex justify-between border-t border-neutral-800 pt-3 text-lg font-bold text-white">
               <p>{t('totalEstimated')}</p>
               <p>{formatRwf(totalPrice)}</p>
             </div>

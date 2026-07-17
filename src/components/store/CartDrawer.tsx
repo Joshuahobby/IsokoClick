@@ -26,7 +26,7 @@ export function CartDrawer() {
 
   if (!hydrated) {
     return (
-      <button className="relative text-neutral-600 hover:text-brand-primary">
+      <button className="relative text-neutral-300 hover:text-brand-primary">
         <ShoppingCart size={22} />
       </button>
     )
@@ -34,9 +34,9 @@ export function CartDrawer() {
 
   return (
     <>
-      <button 
+      <button
         onClick={() => setIsOpen(true)}
-        className="relative text-neutral-600 hover:text-brand-primary"
+        className="relative text-neutral-300 transition-colors hover:text-brand-primary"
       >
         <ShoppingCart size={22} />
         {totalItems > 0 && (
@@ -50,20 +50,20 @@ export function CartDrawer() {
         <div className="fixed inset-0 z-[100] flex justify-end">
           {/* Backdrop */}
           <div 
-            className="absolute inset-0 bg-neutral-900/50 backdrop-blur-sm transition-opacity"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={() => setIsOpen(false)}
           />
           
           {/* Drawer */}
-          <div className="relative w-full max-w-md bg-white shadow-2xl transition-transform flex flex-col h-full animate-in slide-in-from-right">
-            <div className="flex items-center justify-between border-b border-neutral-200 px-6 py-4">
-              <h2 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
+          <div className="relative w-full max-w-md border-l border-neutral-800 bg-neutral-900 shadow-2xl shadow-black/50 transition-transform flex flex-col h-full animate-in slide-in-from-right">
+            <div className="flex items-center justify-between border-b border-neutral-800 px-6 py-4">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
                 <ShoppingCart size={20} className="text-brand-primary" />
                 {t('title')}
               </h2>
-              <button 
+              <button
                 onClick={() => setIsOpen(false)}
-                className="text-neutral-500 hover:text-neutral-900 transition-colors"
+                className="text-neutral-400 hover:text-white transition-colors"
               >
                 <X size={24} />
               </button>
@@ -72,8 +72,8 @@ export function CartDrawer() {
             <div className="flex-1 overflow-y-auto px-6 py-4">
               {items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <ShoppingCart size={48} className="text-neutral-200 mb-4" />
-                  <p className="text-neutral-500">{t('emptyDrawer')}</p>
+                  <ShoppingCart size={48} className="text-neutral-700 mb-4" />
+                  <p className="text-neutral-400">{t('emptyDrawer')}</p>
                   <button
                     onClick={() => setIsOpen(false)}
                     className="mt-6 font-medium text-brand-primary hover:underline"
@@ -85,30 +85,30 @@ export function CartDrawer() {
                 <div className="space-y-6">
                   {items.map((item) => (
                     <div key={item.id} className="flex gap-4">
-                      <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border border-neutral-200 bg-neutral-50 flex items-center justify-center">
-                        <span className="text-xs text-neutral-400">{tCommon('noImage')}</span>
+                      <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border border-neutral-800 bg-neutral-800 flex items-center justify-center">
+                        <span className="text-xs text-neutral-500">{tCommon('noImage')}</span>
                       </div>
 
                       <div className="flex flex-1 flex-col">
-                        <div className="flex justify-between text-sm font-medium text-neutral-900">
+                        <div className="flex justify-between text-sm font-medium text-white">
                           <h3 className="line-clamp-2 pr-4">{item.name}</h3>
                           <p className="ml-4">{formatRwf(item.price * item.qty)}</p>
                         </div>
                         <p className="mt-1 text-sm text-neutral-500">{formatRwf(item.price)} /{item.unitType}</p>
                         
                         <div className="flex flex-1 items-end justify-between text-sm">
-                          <div className="flex items-center rounded-md border border-neutral-200">
-                            <button 
+                          <div className="flex items-center rounded-md border border-neutral-700">
+                            <button
                               onClick={() => item.qty > 1 && updateQty(item.id, item.qty - 1)}
-                              className="p-1 text-neutral-500 hover:text-neutral-900 disabled:opacity-50"
+                              className="p-1 text-neutral-400 hover:text-white disabled:opacity-50"
                               disabled={item.qty <= 1}
                             >
                               <Minus size={14} />
                             </button>
-                            <span className="w-8 text-center font-medium text-neutral-900">{item.qty}</span>
-                            <button 
+                            <span className="w-8 text-center font-medium text-white">{item.qty}</span>
+                            <button
                               onClick={() => updateQty(item.id, item.qty + 1)}
-                              className="p-1 text-neutral-500 hover:text-neutral-900"
+                              className="p-1 text-neutral-400 hover:text-white"
                             >
                               <Plus size={14} />
                             </button>
@@ -130,8 +130,8 @@ export function CartDrawer() {
             </div>
 
             {items.length > 0 && (
-              <div className="border-t border-neutral-200 px-6 py-6 bg-neutral-50">
-                <div className="flex justify-between text-base font-medium text-neutral-900 mb-4">
+              <div className="border-t border-neutral-800 px-6 py-6 bg-neutral-950">
+                <div className="flex justify-between text-base font-medium text-white mb-4">
                   <p>{t('subtotal')}</p>
                   <p>{formatRwf(totalPrice)}</p>
                 </div>
@@ -141,7 +141,7 @@ export function CartDrawer() {
                 <Link
                   href="/checkout"
                   onClick={() => setIsOpen(false)}
-                  className="flex w-full items-center justify-center rounded-md border border-transparent bg-brand-primary px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-brand-primary/90"
+                  className="flex w-full items-center justify-center rounded-full border border-transparent bg-brand-primary px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-amber-600"
                 >
                   {t('checkout')}
                 </Link>

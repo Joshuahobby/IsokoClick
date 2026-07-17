@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { ShoppingCart, Minus, Plus, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -8,11 +9,15 @@ import { useCartStore } from '@/hooks/use-cart'
 import type { ProductRow } from '@/types/database'
 
 type Props = {
-  product: Pick<ProductRow, 'id' | 'slug' | 'name_en' | 'source' | 'min_order_qty' | 'base_price' | 'sale_price' | 'unit_type'>
+  product: Pick<ProductRow, 'id' | 'slug' | 'source' | 'min_order_qty' | 'base_price' | 'sale_price' | 'unit_type'>
+  /** Localized display name — stored in the cart as-is. */
+  name: string
   imageUrl?: string | null
 }
 
-export function AddToCartButton({ product, imageUrl }: Props) {
+export function AddToCartButton({ product, name, imageUrl }: Props) {
+  const tCommon = useTranslations('common')
+  const tProduct = useTranslations('product')
   const [qty, setQty] = useState(product.min_order_qty)
   const [added, setAdded] = useState(false)
   const addItem = useCartStore((s) => s.addItem)
@@ -21,7 +26,7 @@ export function AddToCartButton({ product, imageUrl }: Props) {
     addItem({
       id: product.id,
       slug: product.slug,
-      name: product.name_en,
+      name,
       price: product.sale_price ?? product.base_price,
       qty,
       minQty: product.min_order_qty,
@@ -35,7 +40,11 @@ export function AddToCartButton({ product, imageUrl }: Props) {
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row">
-      <div className="flex items-center rounded-xl border border-neutral-700">
+      <div
+        className="flex items-center rounded-xl border border-neutral-700"
+        role="group"
+        aria-label={tProduct('quantity')}
+      >
         <button
           type="button"
           onClick={() => setQty((q) => Math.max(product.min_order_qty, q - 1))}
@@ -69,12 +78,12 @@ export function AddToCartButton({ product, imageUrl }: Props) {
         {added ? (
           <>
             <Check size={18} />
-            Added to Cart
+            {tCommon('addedToCart')}
           </>
         ) : (
           <>
             <ShoppingCart size={18} />
-            Add to Cart
+            {tCommon('addToCart')}
           </>
         )}
       </Button>
