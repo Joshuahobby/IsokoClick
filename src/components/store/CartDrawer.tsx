@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useSyncExternalStore } from 'react'
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { ShoppingCart, X, Plus, Minus, Trash2 } from 'lucide-react'
@@ -23,6 +23,58 @@ export function CartDrawer() {
   const updateQty = useCartStore((state) => state.updateQty)
   const totalItems = useCartStore((state) => state.totalItems())
   const totalPrice = useCartStore((state) => state.totalPrice())
+
+  const titleId = useId()
+  const panelRef = useRef<HTMLDivElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const previouslyFocused = useRef<HTMLElement | null>(null)
+
+  // Modal dialog behaviour: move focus in on open, trap Tab within the panel,
+  // close on Escape, lock body scroll, and restore focus to the trigger on close.
+  useEffect(() => {
+    if (!isOpen) return
+
+    previouslyFocused.current = document.activeElement as HTMLElement | null
+    closeButtonRef.current?.focus()
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        setIsOpen(false)
+        return
+      }
+      if (e.key !== 'Tab') return
+
+      const panel = panelRef.current
+      if (!panel) return
+      const focusable = panel.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+      )
+      if (focusable.length === 0) return
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      const active = document.activeElement
+
+      if (e.shiftKey && (active === first || !panel.contains(active))) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && (active === last || !panel.contains(active))) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = previousOverflow
+      previouslyFocused.current?.focus()
+    }
+  }, [isOpen])
 
   if (!hydrated) {
     return (
@@ -56,13 +108,20 @@ export function CartDrawer() {
           />
           
           {/* Drawer */}
-          <div className="relative w-full max-w-md border-l border-neutral-800 bg-neutral-900 shadow-2xl shadow-black/50 transition-transform flex flex-col h-full animate-in slide-in-from-right">
+          <div
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            className="relative w-full max-w-md border-l border-neutral-800 bg-neutral-900 shadow-2xl shadow-black/50 transition-transform flex flex-col h-full animate-in slide-in-from-right"
+          >
             <div className="flex items-center justify-between border-b border-neutral-800 px-6 py-4">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <ShoppingCart size={20} className="text-brand-primary" />
+              <h2 id={titleId} className="text-lg font-bold text-white flex items-center gap-2">
+                <ShoppingCart size={20} className="text-brand-primary" aria-hidden="true" />
                 {t('title')}
               </h2>
               <button
+                ref={closeButtonRef}
                 onClick={() => setIsOpen(false)}
                 aria-label={t('close')}
                 className="text-neutral-400 hover:text-white transition-colors"
@@ -74,7 +133,7 @@ export function CartDrawer() {
             <div className="flex-1 overflow-y-auto px-6 py-4">
               {items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <ShoppingCart size={48} className="text-neutral-700 mb-4" />
+                  <ShoppingCart size={48} className="text-neutral-700 mb-4" aria-hidden="true" />
                   <p className="text-neutral-400">{t('emptyDrawer')}</p>
                   <button
                     onClick={() => setIsOpen(false)}

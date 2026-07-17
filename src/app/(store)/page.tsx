@@ -281,7 +281,7 @@ export default async function StoreHomePage() {
       {/* ── Deals band ───────────────────────────────────────── */}
       {saleProducts.length > 0 && (
         <section className="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-primary to-amber-700">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-700 to-amber-900">
             <div className="absolute inset-0 bg-stripe-texture opacity-10" aria-hidden="true" />
             <div className="relative grid gap-10 p-8 lg:grid-cols-2 lg:p-12">
               <div className="flex flex-col justify-center">
@@ -292,7 +292,7 @@ export default async function StoreHomePage() {
                 <h2 className="mt-5 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
                   {t('dealsTitle')}
                 </h2>
-                <p className="mt-3 max-w-md text-white/85">{t('dealsSubtitle')}</p>
+                <p className="mt-3 max-w-md text-white">{t('dealsSubtitle')}</p>
                 <Link
                   href="/shop?sale=1"
                   className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-bold text-neutral-900 transition-transform hover:scale-105"
