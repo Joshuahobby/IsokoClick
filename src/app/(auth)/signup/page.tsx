@@ -128,13 +128,13 @@ export default function SignupPage() {
         </Button>
       </form>
 
-      <p className="mt-4 text-center text-xs text-neutral-600">
+      <p className="mt-4 text-center text-xs text-neutral-400">
         {t('terms')}
       </p>
 
-      <p className="mt-4 text-center text-sm text-neutral-500">
+      <p className="mt-4 text-center text-sm text-neutral-400">
         {t('hasAccount')}{' '}
-        <Link href="/login" className="text-brand-primary hover:text-amber-400 transition-colors">
+        <Link href="/login" className="text-brand-primary underline hover:text-amber-400 transition-colors">
           {t('login')}
         </Link>
       </p>

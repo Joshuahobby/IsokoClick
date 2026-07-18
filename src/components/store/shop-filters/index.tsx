@@ -55,7 +55,7 @@ export function ShopFilters({ categories }: Props) {
     <div className="space-y-6">
       {/* Sort */}
       <div>
-        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-neutral-500">{t('sortBy')}</h3>
+        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-neutral-400">{t('sortBy')}</h3>
         <div className="space-y-1">
           {sortOptions.map((opt) => (
             <button
@@ -76,7 +76,7 @@ export function ShopFilters({ categories }: Props) {
 
       {/* Categories */}
       <div>
-        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-neutral-500">{t('category')}</h3>
+        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-neutral-400">{t('category')}</h3>
         <div className="space-y-1">
           <button
             type="button"
@@ -108,7 +108,7 @@ export function ShopFilters({ categories }: Props) {
 
       {/* Source */}
       <div>
-        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-neutral-500">{t('stockType')}</h3>
+        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-neutral-400">{t('stockType')}</h3>
         <div className="space-y-1">
           {sourceOptions.map((opt) => (
             <button
@@ -147,7 +147,7 @@ export function ShopFilters({ categories }: Props) {
         <button
           type="button"
           onClick={() => router.push(pathname)}
-          className="w-full rounded-lg px-3 py-2 text-sm text-neutral-500 underline hover:text-white"
+          className="w-full rounded-lg px-3 py-2 text-sm text-neutral-400 underline hover:text-white"
         >
           {t('clearFilters')}
         </button>

@@ -40,11 +40,13 @@ function SectionHeader({
   subtitle,
   href,
   linkLabel,
+  linkAriaLabel,
 }: {
   title: string
   subtitle?: string
   href?: string
   linkLabel?: string
+  linkAriaLabel?: string
 }) {
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
@@ -55,10 +57,11 @@ function SectionHeader({
       {href && linkLabel && (
         <Link
           href={href}
+          aria-label={linkAriaLabel}
           className="group inline-flex items-center gap-1.5 text-sm font-semibold text-brand-primary transition-colors hover:text-amber-500"
         >
           {linkLabel}
-          <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+          <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
         </Link>
       )}
     </div>
@@ -150,9 +153,9 @@ export default async function StoreHomePage() {
 
             <dl className="mt-14 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4">
               {stats.map((stat) => (
-                <div key={stat.label}>
-                  <dd className="price text-2xl text-white">{stat.value}</dd>
+                <div key={stat.label} className="flex flex-col-reverse">
                   <dt className="mt-1 text-xs leading-snug text-neutral-400">{stat.label}</dt>
+                  <dd className="price text-2xl text-white">{stat.value}</dd>
                 </div>
               ))}
             </dl>
@@ -257,6 +260,7 @@ export default async function StoreHomePage() {
             subtitle={t('featuredSubtitle')}
             href="/shop?sort=featured"
             linkLabel={tCommon('viewAll')}
+            linkAriaLabel={`${tCommon('viewAll')} — ${t('featuredTitle')}`}
           />
           <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {featured.map((product) => (
@@ -269,7 +273,7 @@ export default async function StoreHomePage() {
           <section className="mx-auto w-full max-w-7xl px-4 py-24 text-center sm:px-6 lg:px-8">
             <ShoppingCart size={48} className="mx-auto mb-4 text-neutral-700" aria-hidden="true" />
             <h3 className="text-lg font-medium text-white">{t('noProducts')}</h3>
-            <p className="mt-1 text-sm text-neutral-500">{t('noProductsHint')}</p>
+            <p className="mt-1 text-sm text-neutral-400">{t('noProductsHint')}</p>
           </section>
         )
       )}
@@ -277,7 +281,7 @@ export default async function StoreHomePage() {
       {/* ── Deals band ───────────────────────────────────────── */}
       {saleProducts.length > 0 && (
         <section className="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-primary to-amber-700">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-700 to-amber-900">
             <div className="absolute inset-0 bg-stripe-texture opacity-10" aria-hidden="true" />
             <div className="relative grid gap-10 p-8 lg:grid-cols-2 lg:p-12">
               <div className="flex flex-col justify-center">
@@ -288,7 +292,7 @@ export default async function StoreHomePage() {
                 <h2 className="mt-5 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
                   {t('dealsTitle')}
                 </h2>
-                <p className="mt-3 max-w-md text-white/85">{t('dealsSubtitle')}</p>
+                <p className="mt-3 max-w-md text-white">{t('dealsSubtitle')}</p>
                 <Link
                   href="/shop?sale=1"
                   className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-bold text-neutral-900 transition-transform hover:scale-105"
@@ -316,6 +320,7 @@ export default async function StoreHomePage() {
               subtitle={t('newArrivalsSubtitle')}
               href="/shop?sort=newest"
               linkLabel={tCommon('viewAll')}
+              linkAriaLabel={`${tCommon('viewAll')} — ${t('newArrivalsTitle')}`}
             />
             <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {newArrivals.map((product) => (
@@ -367,7 +372,7 @@ export default async function StoreHomePage() {
               {t('brandsTitle')}
             </p>
             {brands.map((brand) => (
-              <span key={brand} className="text-lg font-bold uppercase tracking-wide text-neutral-500">
+              <span key={brand} className="text-lg font-bold uppercase tracking-wide text-neutral-400">
                 {brand}
               </span>
             ))}
@@ -386,7 +391,7 @@ export default async function StoreHomePage() {
                   <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary/10 text-brand-primary">
                     <step.icon size={24} aria-hidden="true" />
                   </span>
-                  <span className="price text-3xl text-neutral-800" aria-hidden="true">
+                  <span className="price text-3xl text-neutral-500" aria-hidden="true">
                     0{i + 1}
                   </span>
                 </div>

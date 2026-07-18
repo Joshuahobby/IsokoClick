@@ -26,7 +26,7 @@ export function ProductCard({ product, locale = 'en' }: Props) {
   return (
     // Stretched-link pattern: the title's ::after covers the card so the whole
     // card is clickable without nesting the quick-add <button> inside an <a>.
-    <div className="group relative overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 transition-all focus-within:border-neutral-600 hover:border-neutral-700 hover:shadow-lg hover:shadow-black/30">
+    <div className="group relative overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 transition-all hover:border-neutral-700 hover:shadow-lg hover:shadow-black/30 focus-within:border-brand-primary focus-within:ring-2 focus-within:ring-brand-primary/60">
 
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-neutral-800">
@@ -39,7 +39,7 @@ export function ProductCard({ product, locale = 'en' }: Props) {
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-neutral-600">
+          <div className="flex h-full flex-col items-center justify-center gap-2 text-neutral-400">
             <CategoryIcon slug={product.categories?.slug} size={36} />
             {categoryName && <span className="text-xs font-medium">{categoryName}</span>}
           </div>

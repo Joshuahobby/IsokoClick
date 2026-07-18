@@ -91,7 +91,7 @@ export default async function ShopPage({ searchParams }: Props) {
             <div className="flex flex-col items-center justify-center rounded-3xl border border-neutral-800 bg-neutral-900/50 py-24 text-center">
               <PackageSearch size={48} className="mb-4 text-neutral-700" aria-hidden="true" />
               <h2 className="text-lg font-medium text-white">{t('noResults')}</h2>
-              <p className="mt-1 text-sm text-neutral-500">{t('noResultsHint')}</p>
+              <p className="mt-1 text-sm text-neutral-400">{t('noResultsHint')}</p>
             </div>
           ) : (
             <>

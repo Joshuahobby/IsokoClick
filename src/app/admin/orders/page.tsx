@@ -72,6 +72,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
           name="search"
           defaultValue={search}
           placeholder={t('searchPlaceholder')}
+          aria-label={t('searchPlaceholder')}
           className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-brand-primary"
         />
         <select

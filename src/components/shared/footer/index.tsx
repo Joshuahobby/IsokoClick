@@ -33,15 +33,15 @@ export async function Footer() {
           {/* Brand */}
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2 text-lg font-bold text-white">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary text-xs font-black text-white">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary text-xs font-black text-neutral-950">
                 IC
               </span>
               {APP_NAME}
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-neutral-400">{t('description')}</p>
-            <p className="mt-3 text-xs text-neutral-600">{t('kigali')}</p>
+            <p className="mt-3 text-xs text-neutral-400">{t('kigali')}</p>
 
-            <p className="mt-6 text-xs font-semibold uppercase tracking-wider text-neutral-500">
+            <p className="mt-6 text-xs font-semibold uppercase tracking-wider text-neutral-400">
               {t('payWith')}
             </p>
             <div className="mt-2 flex gap-2">
@@ -98,12 +98,12 @@ export async function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-neutral-800 pt-6 sm:flex-row">
-          <p className="text-xs text-neutral-600">{t('copyright', { year: new Date().getFullYear() })}</p>
+          <p className="text-xs text-neutral-400">{t('copyright', { year: new Date().getFullYear() })}</p>
           <div className="flex items-center gap-6">
-            <Link href="/privacy" className="text-xs text-neutral-600 transition-colors hover:text-neutral-400">
+            <Link href="/privacy" className="text-xs text-neutral-400 transition-colors hover:text-white">
               {t('privacyPolicy')}
             </Link>
-            <Link href="/terms" className="text-xs text-neutral-600 transition-colors hover:text-neutral-400">
+            <Link href="/terms" className="text-xs text-neutral-400 transition-colors hover:text-white">
               {t('termsOfService')}
             </Link>
           </div>

@@ -63,7 +63,7 @@ function LoginForm() {
             <Label htmlFor="password" className="text-neutral-300">{t('password')}</Label>
             <Link
               href="/reset-password"
-              className="text-xs text-neutral-500 hover:text-brand-primary transition-colors"
+              className="text-xs text-neutral-400 hover:text-brand-primary transition-colors"
             >
               {t('forgotPassword')}
             </Link>
@@ -91,9 +91,9 @@ function LoginForm() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-neutral-500">
+      <p className="mt-6 text-center text-sm text-neutral-400">
         {t('noAccount')}{' '}
-        <Link href="/signup" className="text-brand-primary hover:text-amber-400 transition-colors">
+        <Link href="/signup" className="text-brand-primary underline hover:text-amber-400 transition-colors">
           {t('signup')}
         </Link>
       </p>
