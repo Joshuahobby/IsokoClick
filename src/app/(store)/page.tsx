@@ -391,7 +391,7 @@ export default async function StoreHomePage() {
                   <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary/10 text-brand-primary">
                     <step.icon size={24} aria-hidden="true" />
                   </span>
-                  <span className="price text-3xl text-neutral-800" aria-hidden="true">
+                  <span className="price text-3xl text-neutral-500" aria-hidden="true">
                     0{i + 1}
                   </span>
                 </div>

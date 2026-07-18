@@ -58,7 +58,7 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
           <Link href="/" className="group flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-primary font-black text-white transition-transform group-hover:scale-105">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-primary font-black text-neutral-950 transition-transform group-hover:scale-105">
               IC
             </div>
             <span className="hidden text-xl font-bold tracking-tight text-white sm:block">

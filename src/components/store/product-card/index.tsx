@@ -39,7 +39,7 @@ export function ProductCard({ product, locale = 'en' }: Props) {
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-neutral-600">
+          <div className="flex h-full flex-col items-center justify-center gap-2 text-neutral-400">
             <CategoryIcon slug={product.categories?.slug} size={36} />
             {categoryName && <span className="text-xs font-medium">{categoryName}</span>}
           </div>
