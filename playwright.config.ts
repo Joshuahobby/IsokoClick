@@ -1,38 +1,47 @@
 import { defineConfig, devices } from '@playwright/test'
 
 // Playwright is used for end-to-end and accessibility (axe-core) checks.
-// The suite runs against a local Next dev server; in CI the same webServer
-// block boots the app before tests and tears it down after.
-const PORT = Number(process.env.PORT ?? 3000)
-const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`
+//
+// The suite runs against a PRODUCTION build (`next build && next start`), not
+// `next dev`. The dev server injects Next's own dev-tools overlay into the
+// document, and axe-core traverses shadow DOM — so scanning dev means Next's
+// dev UI can fail this project's gate, while dev-only styling can hide a real
+// production regression. Production also removes the lazy per-route compile
+// that previously forced multi-minute timeouts.
+const rawPort = Number(process.env.PORT)
+const PORT = Number.isFinite(rawPort) && rawPort > 0 ? rawPort : 3000
+
+// When PLAYWRIGHT_BASE_URL is set the suite targets an already-deployed app
+// (e.g. a Vercel preview). In that case we must NOT also boot a local server:
+// Playwright would spawn a build nothing uses and leave it running for the
+// duration of the run.
+const EXTERNAL_BASE_URL = process.env.PLAYWRIGHT_BASE_URL
+const BASE_URL = EXTERNAL_BASE_URL ?? `http://localhost:${PORT}`
 
 export default defineConfig({
   testDir: './e2e',
-  fullyParallel: false,
-  // One worker: the local Next dev server compiles routes lazily on first
-  // hit, so parallel workers would trigger simultaneous cold compiles and
-  // starve each other. Serial keeps each compile within the per-test budget.
+  // One worker: the suite is small and shares a single server, so serial runs
+  // keep axe scans from competing for CPU and keep failures reproducible.
   workers: 1,
-  // Generous timeouts: the Next dev server compiles each route on first hit,
-  // which can take well over a minute cold on a loaded machine. These only
-  // bite on that first compile — a warm or production server serves instantly.
-  timeout: 180_000,
+  timeout: 60_000,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? [['github'], ['list']] : 'list',
   use: {
     baseURL: BASE_URL,
-    navigationTimeout: 150_000,
+    navigationTimeout: 30_000,
     trace: 'on-first-retry',
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
   ],
-  // Reuse a dev server if one is already running locally; otherwise start one.
-  webServer: {
-    command: 'npm run dev',
-    url: BASE_URL,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  // Only manage a server when we own it. `timeout` covers a cold `next build`.
+  webServer: EXTERNAL_BASE_URL
+    ? undefined
+    : {
+        command: 'npm run build && npm run start',
+        url: BASE_URL,
+        reuseExistingServer: !process.env.CI,
+        timeout: 300_000,
+      },
 })

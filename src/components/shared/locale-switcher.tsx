@@ -2,7 +2,7 @@
 
 import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { setLocale } from '@/lib/actions/locale'
 import { SUPPORTED_LOCALES, type AppLocale } from '@/i18n/locales'
 import { cn } from '@/lib/utils'
@@ -24,6 +24,7 @@ export function LocaleSwitcher({
   variant?: Variant
 }) {
   const locale = useLocale() as AppLocale
+  const t = useTranslations('nav')
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const { divider, inactive } = VARIANT_CLASSES[variant]
@@ -39,7 +40,7 @@ export function LocaleSwitcher({
   return (
     <div
       role="group"
-      aria-label="Language"
+      aria-label={t('language')}
       className={cn('flex items-center gap-1 text-xs font-semibold', className)}
     >
       {SUPPORTED_LOCALES.map((code, i) => (

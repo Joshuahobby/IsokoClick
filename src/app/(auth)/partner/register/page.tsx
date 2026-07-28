@@ -51,7 +51,7 @@ export default function PartnerRegistrationPage() {
                 name="business_name"
                 type="text"
                 required
-                className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary"
+                className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
                 placeholder={t('businessNamePlaceholder')}
               />
             </div>
@@ -66,7 +66,7 @@ export default function PartnerRegistrationPage() {
                   name="email"
                   type="email"
                   required
-                  className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary"
+                  className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
                   placeholder={t('businessEmailPlaceholder')}
                 />
               </div>
@@ -80,7 +80,7 @@ export default function PartnerRegistrationPage() {
                   name="phone"
                   type="tel"
                   required
-                  className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary"
+                  className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
                   placeholder={t('phonePlaceholder')}
                 />
               </div>
@@ -95,7 +95,7 @@ export default function PartnerRegistrationPage() {
                   id="tin_number"
                   name="tin_number"
                   type="text"
-                  className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary"
+                  className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
                   placeholder={t('tinPlaceholder')}
                 />
               </div>
@@ -108,7 +108,7 @@ export default function PartnerRegistrationPage() {
                   id="district"
                   name="district"
                   type="text"
-                  className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary"
+                  className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
                   placeholder={t('districtPlaceholder')}
                 />
               </div>
@@ -122,7 +122,7 @@ export default function PartnerRegistrationPage() {
                 id="address"
                 name="address"
                 type="text"
-                className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary"
+                className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
                 placeholder={t('addressPlaceholder')}
               />
             </div>
@@ -135,7 +135,7 @@ export default function PartnerRegistrationPage() {
                 id="description"
                 name="description"
                 rows={3}
-                className="w-full rounded-md border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2 focus:ring-offset-neutral-900"
+                className="w-full rounded-md border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2 focus:ring-offset-neutral-900"
                 placeholder={t('descriptionPlaceholder')}
               />
             </div>

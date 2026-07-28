@@ -28,6 +28,51 @@ export function CartDrawer() {
   const panelRef = useRef<HTMLDivElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const previouslyFocused = useRef<HTMLElement | null>(null)
+  const removeButtons = useRef(new Map<string, HTMLButtonElement>())
+  const pendingRemovalIndex = useRef<number | null>(null)
+
+  // Screen reader announcement for cart changes. Kept separate from the
+  // trigger's aria-label because assistive tech does not announce attribute
+  // changes on an element that does not have focus.
+  const [announcement, setAnnouncement] = useState('')
+  const lastAnnouncedTotal = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (!hydrated) return
+    // Seed on the first render that has a real (localStorage-rehydrated) count
+    // so page load does not announce anything.
+    if (lastAnnouncedTotal.current === null) {
+      lastAnnouncedTotal.current = totalItems
+      return
+    }
+    if (lastAnnouncedTotal.current === totalItems) return
+    lastAnnouncedTotal.current = totalItems
+    setAnnouncement(t('itemsInCart', { count: totalItems }))
+  }, [hydrated, totalItems, t])
+
+  // Removing an item unmounts the button that was just activated, which drops
+  // focus to <body> — outside the modal. Move it deliberately instead: to the
+  // row that shifted into the removed row's place, or to the close button when
+  // the cart is now empty.
+  useEffect(() => {
+    const index = pendingRemovalIndex.current
+    if (index === null) return
+    pendingRemovalIndex.current = null
+
+    if (items.length === 0) {
+      closeButtonRef.current?.focus()
+      return
+    }
+
+    const nextItem = items[Math.min(index, items.length - 1)]
+    const nextButton = nextItem ? removeButtons.current.get(nextItem.id) : undefined
+    ;(nextButton ?? closeButtonRef.current)?.focus()
+  }, [items])
+
+  function handleRemove(itemId: string) {
+    pendingRemovalIndex.current = items.findIndex((item) => item.id === itemId)
+    removeItem(itemId)
+  }
 
   // Modal dialog behaviour: move focus in on open, trap Tab within the panel,
   // close on Escape, lock body scroll, and restore focus to the trigger on close.
@@ -76,11 +121,22 @@ export function CartDrawer() {
     }
   }, [isOpen])
 
+  // Rendered in the same position in both branches so the hydration flip does
+  // not insert a fresh live region (which some screen readers announce).
+  const liveRegion = (
+    <span role="status" aria-live="polite" className="sr-only">
+      {announcement}
+    </span>
+  )
+
   if (!hydrated) {
     return (
-      <button aria-label={t('open')} className="relative text-neutral-300 hover:text-brand-primary">
-        <ShoppingCart size={22} />
-      </button>
+      <>
+        <button aria-label={t('open')} className="relative text-neutral-300 hover:text-brand-primary">
+          <ShoppingCart size={22} aria-hidden="true" />
+        </button>
+        {liveRegion}
+      </>
     )
   }
 
@@ -98,6 +154,7 @@ export function CartDrawer() {
           </span>
         )}
       </button>
+      {liveRegion}
 
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex justify-end">
@@ -162,8 +219,11 @@ export function CartDrawer() {
                             <button
                               onClick={() => item.qty > 1 && updateQty(item.id, item.qty - 1)}
                               aria-label={t('decreaseQty')}
-                              className="p-1 text-neutral-400 hover:text-white disabled:opacity-50"
-                              disabled={item.qty <= 1}
+                              // aria-disabled rather than disabled: a disabled
+                              // button is blurred by the browser, so stepping
+                              // 2 -> 1 would drop focus out of the dialog.
+                              aria-disabled={item.qty <= 1}
+                              className="p-1 text-neutral-400 hover:text-white aria-disabled:opacity-50 aria-disabled:hover:text-neutral-400"
                             >
                               <Minus size={14} aria-hidden="true" />
                             </button>
@@ -179,7 +239,11 @@ export function CartDrawer() {
 
                           <button
                             type="button"
-                            onClick={() => removeItem(item.id)}
+                            ref={(el) => {
+                              if (el) removeButtons.current.set(item.id, el)
+                              else removeButtons.current.delete(item.id)
+                            }}
+                            onClick={() => handleRemove(item.id)}
                             aria-label={t('removeAria', { name: item.name })}
                             className="font-medium text-red-500 hover:text-red-400 transition-colors"
                           >

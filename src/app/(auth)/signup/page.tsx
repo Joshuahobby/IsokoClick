@@ -84,7 +84,7 @@ export default function SignupPage() {
             onChange={(e) => setFullName(e.target.value)}
             required
             autoComplete="name"
-            className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-600 focus-visible:ring-brand-primary"
+            className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
           />
         </div>
 
@@ -98,7 +98,7 @@ export default function SignupPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
-            className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-600 focus-visible:ring-brand-primary"
+            className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
           />
         </div>
 
@@ -113,7 +113,7 @@ export default function SignupPage() {
             required
             minLength={8}
             autoComplete="new-password"
-            className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-600 focus-visible:ring-brand-primary"
+            className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
           />
         </div>
 

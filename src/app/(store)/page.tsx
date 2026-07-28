@@ -35,19 +35,24 @@ export async function generateMetadata() {
   }
 }
 
-function SectionHeader({
+// Several sections link out with the same visible label ("View all"), which
+// would leave a screen reader user with a list of identical link names. The
+// accessible name is composed here, from the title this component already
+// receives, so every section is disambiguated by construction — a call site
+// cannot forget to pass it.
+async function SectionHeader({
   title,
   subtitle,
   href,
   linkLabel,
-  linkAriaLabel,
 }: {
   title: string
   subtitle?: string
   href?: string
   linkLabel?: string
-  linkAriaLabel?: string
 }) {
+  const tCommon = await getTranslations('common')
+
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div>
@@ -57,7 +62,7 @@ function SectionHeader({
       {href && linkLabel && (
         <Link
           href={href}
-          aria-label={linkAriaLabel}
+          aria-label={tCommon('sectionLinkAria', { action: linkLabel, section: title })}
           className="group inline-flex items-center gap-1.5 text-sm font-semibold text-brand-primary transition-colors hover:text-amber-500"
         >
           {linkLabel}
@@ -260,7 +265,6 @@ export default async function StoreHomePage() {
             subtitle={t('featuredSubtitle')}
             href="/shop?sort=featured"
             linkLabel={tCommon('viewAll')}
-            linkAriaLabel={`${tCommon('viewAll')} — ${t('featuredTitle')}`}
           />
           <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {featured.map((product) => (
@@ -320,7 +324,6 @@ export default async function StoreHomePage() {
               subtitle={t('newArrivalsSubtitle')}
               href="/shop?sort=newest"
               linkLabel={tCommon('viewAll')}
-              linkAriaLabel={`${tCommon('viewAll')} — ${t('newArrivalsTitle')}`}
             />
             <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {newArrivals.map((product) => (
