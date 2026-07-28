@@ -95,10 +95,17 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
         <div className="flex items-center gap-3 sm:gap-4">
           {user ? (
             <DropdownMenu>
+              {/* Icon-only trigger, so it needs an explicit accessible name.
+                  This branch only renders for a signed-in user, which is why
+                  the signed-out axe suite in e2e/a11y.spec.ts never reaches it. */}
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:bg-neutral-800">
+                <Button
+                  variant="ghost"
+                  aria-label={t('myAccount')}
+                  className="relative h-10 w-10 rounded-full p-0 hover:bg-neutral-800"
+                >
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-800 text-neutral-300">
-                    <User size={20} />
+                    <User size={20} aria-hidden="true" />
                   </div>
                 </Button>
               </DropdownMenuTrigger>
