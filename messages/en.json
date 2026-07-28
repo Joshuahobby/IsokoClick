@@ -565,6 +565,16 @@
       "updateSuccess": "Payout settings updated successfully!",
       "recentPayouts": "Recent Payouts",
       "noPayouts": "No payouts have been processed yet."
+    },
+    "catalogDetail": {
+      "metaTitle": "Product",
+      "backToCatalog": "Back to catalog",
+      "subtitle": "Manage the photos shoppers see for this listing.",
+      "price": "Price",
+      "unit": "Unit",
+      "status": "Status",
+      "slug": "Slug",
+      "notApproved": "Your partner account must be approved before you can manage product images."
     }
   },
   "errors": {
@@ -601,7 +611,17 @@
     "productUpdateFailed": "Failed to update product. Please try again.",
     "payoutPhoneRequired": "Payout phone number is required.",
     "payoutPhoneInvalid": "Please enter a valid 10-digit phone number starting with 07.",
-    "payoutUpdateFailed": "Failed to update payout settings. Please try again."
+    "payoutUpdateFailed": "Failed to update payout settings. Please try again.",
+    "imageNoneSelected": "No image selected.",
+    "imageTooMany": "A product can have at most {max} images.",
+    "imageTooLarge": "That image is too large. Please use a smaller file.",
+    "imageBadFormat": "Only JPEG, PNG and WebP images are accepted.",
+    "imageUploadFailed": "Failed to upload the image. Please try again.",
+    "imageNotFound": "Image not found.",
+    "imageDeleteFailed": "Failed to remove the image. Please try again.",
+    "imageUpdateFailed": "Failed to update the image. Please try again.",
+    "imageAltRequired": "Image description is required.",
+    "imageAltTooLong": "Image description must be 200 characters or fewer."
   },
   "shop": {
     "metaTitle": "Shop Construction Materials",
@@ -649,5 +669,23 @@
     "termsTitle": "Terms of Service",
     "placeholder": "This document is being finalized and will be published before public launch.",
     "backHome": "Back to home"
+  },
+  "productImages": {
+    "title": "Product images",
+    "subtitle": "The first image is the one shoppers see in search and on cards.",
+    "count": "{used} of {max}",
+    "primary": "Main",
+    "altLabel": "Image description",
+    "altPlaceholder": "Describe what the photo shows",
+    "setPrimaryAt": "Make image {position} the main image",
+    "moveUpAt": "Move image {position} earlier",
+    "moveDownAt": "Move image {position} later",
+    "removeAt": "Remove image {position}",
+    "confirmRemove": "Confirm",
+    "addLabel": "Add images",
+    "addHint": "JPEG, PNG or WebP. Photos are resized on your device before upload.",
+    "atCapacity": "You have reached the limit of {max} images. Remove one to add another.",
+    "processing": "Preparing images…",
+    "uploading": "Uploading…"
   }
 }

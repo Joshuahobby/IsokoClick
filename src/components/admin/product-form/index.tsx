@@ -28,7 +28,7 @@ export function ProductForm({ action, categories, product }: Props) {
 
   return (
     <div className="max-w-3xl">
-      <nav className="mb-6 flex items-center gap-1.5 text-sm text-neutral-500">
+      <nav className="mb-6 flex items-center gap-1.5 text-sm text-neutral-400">
         <Link href="/admin/products" className="flex items-center gap-1 hover:text-white">
           <ChevronLeft size={16} /> {t('backToProducts')}
         </Link>
@@ -132,7 +132,7 @@ export function ProductForm({ action, categories, product }: Props) {
                 defaultValue={product?.sale_price ?? ''}
                 className={INPUT_CLASS}
               />
-              <p className="text-xs text-neutral-500">{t('salePriceHint')}</p>
+              <p className="text-xs text-neutral-400">{t('salePriceHint')}</p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="min_order_qty" className="text-neutral-300">{t('minOrderQty')}</Label>
@@ -218,7 +218,7 @@ export function ProductForm({ action, categories, product }: Props) {
             />
             <span>
               {t('isHeavyGoods')}
-              <span className="block text-xs text-neutral-500">{t('isHeavyGoodsHint')}</span>
+              <span className="block text-xs text-neutral-400">{t('isHeavyGoodsHint')}</span>
             </span>
           </label>
         </fieldset>

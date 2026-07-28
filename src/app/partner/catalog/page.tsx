@@ -73,8 +73,13 @@ export default async function PartnerCatalogPage(
                 products.map((p) => (
                   <tr key={p.id} className="transition-colors hover:bg-neutral-800/50">
                     <td className="px-6 py-4">
-                      <div className="font-medium text-white">{p.name_en}</div>
-                      <div className="text-xs text-neutral-500 mt-0.5">{p.slug}</div>
+                      <Link
+                        href={`/partner/catalog/${p.id}`}
+                        className="font-medium text-white underline-offset-4 hover:text-brand-primary hover:underline"
+                      >
+                        {p.name_en}
+                      </Link>
+                      <div className="text-xs text-neutral-400 mt-0.5">{p.slug}</div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="font-medium text-white">{formatRwf(p.base_price)}</div>

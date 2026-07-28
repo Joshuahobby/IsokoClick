@@ -565,6 +565,16 @@
       "updateSuccess": "Amakuru yo kwishyurwa yahinduwe neza!",
       "recentPayouts": "Kwishyurwa guheruka",
       "noPayouts": "Nta kwishyurwa kwakozwe kugeza ubu."
+    },
+    "catalogDetail": {
+      "metaTitle": "Igicuruzwa",
+      "backToCatalog": "Subira ku bicuruzwa",
+      "subtitle": "Genzura amafoto abaguzi babona kuri iki gicuruzwa.",
+      "price": "Igiciro",
+      "unit": "Igipimo",
+      "status": "Uko bihagaze",
+      "slug": "Slug",
+      "notApproved": "Konti yawe y’umufatanyabikorwa igomba kwemezwa mbere yo kugenzura amafoto y’ibicuruzwa."
     }
   },
   "errors": {
@@ -601,7 +611,17 @@
     "productUpdateFailed": "Guhindura igicuruzwa byanze. Ongera ugerageze.",
     "payoutPhoneRequired": "Nomero ya telefone yo kwishyurwa irasabwa.",
     "payoutPhoneInvalid": "Andika nomero ya telefone y'imibare 10 itangirwa na 07.",
-    "payoutUpdateFailed": "Guhindura amakuru yo kwishyurwa byanze. Ongera ugerageze."
+    "payoutUpdateFailed": "Guhindura amakuru yo kwishyurwa byanze. Ongera ugerageze.",
+    "imageNoneSelected": "Nta foto watoranyije.",
+    "imageTooMany": "Igicuruzwa gishobora kugira amafoto {max} gusa.",
+    "imageTooLarge": "Iyi foto ni nini cyane. Koresha indi ntoya.",
+    "imageBadFormat": "Amafoto ya JPEG, PNG na WebP gusa ni yo yemewe.",
+    "imageUploadFailed": "Kohereza ifoto byanze. Ongera ugerageze.",
+    "imageNotFound": "Ifoto ntiyabonetse.",
+    "imageDeleteFailed": "Gukuraho ifoto byanze. Ongera ugerageze.",
+    "imageUpdateFailed": "Guhindura ifoto byanze. Ongera ugerageze.",
+    "imageAltRequired": "Ibisobanuro by’ifoto birasabwa.",
+    "imageAltTooLong": "Ibisobanuro by’ifoto ntibigomba kurenga inyuguti 200."
   },
   "shop": {
     "metaTitle": "Gura Ibikoresho by'Ubwubatsi",
@@ -649,5 +669,23 @@
     "termsTitle": "Amategeko n'amabwiriza",
     "placeholder": "Iyi nyandiko iri gusozwa kandi izatangazwa mbere y'itangizwa ku mugaragaro.",
     "backHome": "Subira ahabanza"
+  },
+  "productImages": {
+    "title": "Amafoto y’igicuruzwa",
+    "subtitle": "Ifoto ya mbere ni yo abaguzi babona mu bushakashatsi no ku makarita.",
+    "count": "{used} kuri {max}",
+    "primary": "Iy’ibanze",
+    "altLabel": "Ibisobanuro by’ifoto",
+    "altPlaceholder": "Sobanura icyo ifoto yerekana",
+    "setPrimaryAt": "Shyira ifoto ya {position} ku mwanya w’ibanze",
+    "moveUpAt": "Imura ifoto ya {position} imbere",
+    "moveDownAt": "Imura ifoto ya {position} inyuma",
+    "removeAt": "Kuraho ifoto ya {position}",
+    "confirmRemove": "Emeza",
+    "addLabel": "Ongeraho amafoto",
+    "addHint": "JPEG, PNG cyangwa WebP. Amafoto agabanywa ku gikoresho cyawe mbere yo kohererezwa.",
+    "atCapacity": "Wageze ku mubare ntarengwa w’amafoto {max}. Kuraho rimwe kugira ngo wongereho irindi.",
+    "processing": "Gutegura amafoto…",
+    "uploading": "Kohereza…"
   }
 }
