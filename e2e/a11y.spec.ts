@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test'
-import AxeBuilder from '@axe-core/playwright'
+import { expectNoBlockingViolations } from './support/axe'
 
 // Accessibility regression gate. Scans public storefront pages with axe-core
 // against the WCAG 2.0/2.1 A and AA rulesets and fails on any serious- or
@@ -7,16 +7,12 @@ import AxeBuilder from '@axe-core/playwright'
 // storefront audit — colour contrast, missing accessible names, form labels —
 // before they ship.
 //
-// Only serious/critical impacts are enforced so the gate stays actionable;
-// moderate/minor best-practice findings are surfaced in the report but do not
-// fail the build. Authenticated areas (admin, partner) need signed-in fixtures
-// and are intentionally out of scope for this public-pages suite.
+// Signed-in areas (admin, partner) are covered by e2e/a11y-authenticated.spec.ts,
+// which needs credentials this suite deliberately does not. Keep public pages
+// here so the gate still runs everywhere without secrets.
 //
 // Known blind spot: axe does not evaluate `::placeholder` colour, so form
 // placeholder contrast is NOT covered here and must be reviewed by hand.
-
-const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
-const BLOCKING_IMPACTS = new Set(['serious', 'critical'])
 
 // A cart item shaped like CartItem in src/hooks/use-cart.ts, written straight
 // into the zustand persist key so cart states are deterministic and do not
@@ -40,24 +36,6 @@ function seedCart(page: Page, count: number, qty = 1) {
   )
 }
 
-async function expectNoBlockingViolations(page: Page, context: string) {
-  const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze()
-
-  const blocking = results.violations.filter(
-    (v) => v.impact != null && BLOCKING_IMPACTS.has(v.impact)
-  )
-
-  // Compact, readable failure output: rule id, impact, and the nodes hit.
-  const summary = blocking.map((v) => ({
-    id: v.id,
-    impact: v.impact,
-    help: v.help,
-    nodes: v.nodes.map((n) => n.target.join(' ')),
-  }))
-
-  expect(summary, `Serious/critical a11y violations: ${context}`).toEqual([])
-}
-
 // ── Static page scans ────────────────────────────────────────────────────
 
 const PUBLIC_PAGES = [
@@ -65,6 +43,8 @@ const PUBLIC_PAGES = [
   { name: 'shop', path: '/shop' },
   { name: 'login', path: '/login' },
   { name: 'signup', path: '/signup' },
+  { name: 'reset password', path: '/reset-password' },
+  { name: 'partner register', path: '/partner/register' },
 ]
 
 for (const { name, path } of PUBLIC_PAGES) {
@@ -73,6 +53,21 @@ for (const { name, path } of PUBLIC_PAGES) {
     await expectNoBlockingViolations(page, path)
   })
 }
+
+// A product detail page reached the way a shopper reaches one, rather than by
+// a hardcoded slug, so the scan does not break when seed data changes. This
+// covers the PDP gallery and its no-image fallback, neither of which any
+// static path above renders.
+test('storefront a11y: product detail (reached from shop)', async ({ page }) => {
+  await page.goto('/shop', { waitUntil: 'load' })
+
+  const firstProduct = page.locator('a[href^="/product/"]').first()
+  await firstProduct.waitFor({ state: 'attached' })
+  await firstProduct.click()
+  await page.waitForURL(/\/product\//)
+
+  await expectNoBlockingViolations(page, 'product detail')
+})
 
 // ── Skip link ────────────────────────────────────────────────────────────
 //

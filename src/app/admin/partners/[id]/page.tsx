@@ -49,7 +49,7 @@ export default async function AdminPartnerDetailPage({ params }: Props) {
   return (
     <div className="max-w-4xl">
       {/* Breadcrumb */}
-      <nav className="mb-6 flex items-center gap-1.5 text-sm text-neutral-500">
+      <nav className="mb-6 flex items-center gap-1.5 text-sm text-neutral-400">
         <Link href="/admin/partners" className="hover:text-white">{t('breadcrumb')}</Link>
         <ChevronRight size={14} />
         <span className="text-neutral-300">{partner.business_name}</span>
@@ -59,7 +59,7 @@ export default async function AdminPartnerDetailPage({ params }: Props) {
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">{partner.business_name}</h1>
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm text-neutral-400">
             {t('appliedOn', {
               date: new Date(partner.created_at).toLocaleDateString('en-RW', {
                 day: 'numeric',
@@ -74,7 +74,7 @@ export default async function AdminPartnerDetailPage({ params }: Props) {
 
       {/* Action Bar */}
       <div className="mb-6 flex flex-wrap gap-3 rounded-xl border border-neutral-800 bg-neutral-900 p-4">
-        <span className="flex items-center text-sm text-neutral-500">{t('actions')}</span>
+        <span className="flex items-center text-sm text-neutral-400">{t('actions')}</span>
 
         {partner.status !== 'approved' && (
           <form action={changeStatus.bind(null, partner.id, partner.user_id, 'approved')}>
@@ -109,19 +109,19 @@ export default async function AdminPartnerDetailPage({ params }: Props) {
           </h2>
           <dl className="space-y-3 text-sm">
             <div>
-              <dt className="text-neutral-500">{t('businessName')}</dt>
+              <dt className="text-neutral-400">{t('businessName')}</dt>
               <dd className="font-medium text-white">{partner.business_name}</dd>
             </div>
             <div>
-              <dt className="text-neutral-500">{t('tinNumber')}</dt>
+              <dt className="text-neutral-400">{t('tinNumber')}</dt>
               <dd className="text-white">{partner.tin_number || tCommon('notProvided')}</dd>
             </div>
             <div>
-              <dt className="text-neutral-500">{t('businessEmail')}</dt>
+              <dt className="text-neutral-400">{t('businessEmail')}</dt>
               <dd className="text-white">{partner.email || tCommon('notProvided')}</dd>
             </div>
             <div>
-              <dt className="text-neutral-500">{t('businessPhone')}</dt>
+              <dt className="text-neutral-400">{t('businessPhone')}</dt>
               <dd className="text-white">{partner.phone || tCommon('notProvided')}</dd>
             </div>
           </dl>
@@ -135,20 +135,20 @@ export default async function AdminPartnerDetailPage({ params }: Props) {
           {partner.user ? (
             <dl className="space-y-3 text-sm">
               <div>
-                <dt className="text-neutral-500">{t('fullName')}</dt>
+                <dt className="text-neutral-400">{t('fullName')}</dt>
                 <dd className="font-medium text-white">{partner.user.full_name}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">{t('accountEmail')}</dt>
+                <dt className="text-neutral-400">{t('accountEmail')}</dt>
                 <dd className="text-white">{partner.user.email}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">{t('accountPhone')}</dt>
+                <dt className="text-neutral-400">{t('accountPhone')}</dt>
                 <dd className="text-white">{partner.user.phone || tCommon('notProvided')}</dd>
               </div>
             </dl>
           ) : (
-            <p className="text-sm text-neutral-500">{t('userMissing')}</p>
+            <p className="text-sm text-neutral-400">{t('userMissing')}</p>
           )}
         </div>
 
@@ -159,15 +159,15 @@ export default async function AdminPartnerDetailPage({ params }: Props) {
           </h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 text-sm">
             <div>
-              <p className="text-neutral-500 mb-1">{t('district')}</p>
+              <p className="text-neutral-400 mb-1">{t('district')}</p>
               <p className="text-white">{partner.district || tCommon('notProvided')}</p>
             </div>
             <div>
-              <p className="text-neutral-500 mb-1">{t('address')}</p>
+              <p className="text-neutral-400 mb-1">{t('address')}</p>
               <p className="text-white">{partner.address || tCommon('notProvided')}</p>
             </div>
             <div className="sm:col-span-2">
-              <p className="text-neutral-500 mb-1">{t('description')}</p>
+              <p className="text-neutral-400 mb-1">{t('description')}</p>
               <p className="text-white whitespace-pre-wrap">{partner.description || t('noDescription')}</p>
             </div>
           </div>

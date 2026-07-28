@@ -162,7 +162,7 @@ export default async function OrderSuccessPage({ params }: Props) {
                 <p>{t('phone', { phone: payment.phone_number })}</p>
               </div>
             ) : (
-              <p className="text-sm text-neutral-500">{t('noPayment')}</p>
+              <p className="text-sm text-neutral-400">{t('noPayment')}</p>
             )}
           </div>
         </div>

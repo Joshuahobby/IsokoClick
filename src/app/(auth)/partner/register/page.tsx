@@ -150,7 +150,7 @@ export default function PartnerRegistrationPage() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-neutral-500">
+        <p className="text-center text-sm text-neutral-400">
           {t('alreadyPartner')}{' '}
           <Link href="/login" className="font-semibold text-brand-primary hover:text-brand-primary/80">
             {t('signIn')}

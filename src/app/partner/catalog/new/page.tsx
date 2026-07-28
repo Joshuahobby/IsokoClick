@@ -27,9 +27,9 @@ export default function PartnerNewProductPage() {
 
   return (
     <div className="max-w-3xl">
-      <nav className="mb-6 flex items-center gap-1.5 text-sm text-neutral-500">
+      <nav className="mb-6 flex items-center gap-1.5 text-sm text-neutral-400">
         <Link href="/partner/catalog" className="flex items-center gap-1 hover:text-white">
-          <ChevronLeft size={16} /> {t('backToCatalog')}
+          <ChevronLeft size={16} aria-hidden="true" /> {t('backToCatalog')}
         </Link>
       </nav>
 

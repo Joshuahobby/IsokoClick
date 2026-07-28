@@ -30,7 +30,7 @@ export function ProductForm({ action, categories, product }: Props) {
     <div className="max-w-3xl">
       <nav className="mb-6 flex items-center gap-1.5 text-sm text-neutral-400">
         <Link href="/admin/products" className="flex items-center gap-1 hover:text-white">
-          <ChevronLeft size={16} /> {t('backToProducts')}
+          <ChevronLeft size={16} aria-hidden="true" /> {t('backToProducts')}
         </Link>
       </nav>
 

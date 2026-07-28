@@ -63,7 +63,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white">{t('title')}</h1>
-        <span className="text-sm text-neutral-500">{tCommon('countTotal', { count: total.toLocaleString() })}</span>
+        <span className="text-sm text-neutral-400">{tCommon('countTotal', { count: total.toLocaleString() })}</span>
       </div>
 
       {/* Filters */}
@@ -78,6 +78,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
         <select
           name="status"
           defaultValue={status ?? ''}
+          aria-label={t('filterByStatus')}
           className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-primary"
         >
           {STATUS_FILTER_VALUES.map((value) => (
@@ -97,12 +98,12 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
       {/* Table */}
       <div className="rounded-xl border border-neutral-800 bg-neutral-900">
         {orders.length === 0 ? (
-          <div className="px-6 py-16 text-center text-sm text-neutral-500">{t('noOrders')}</div>
+          <div className="px-6 py-16 text-center text-sm text-neutral-400">{t('noOrders')}</div>
         ) : (
           <>
             <div className="divide-y divide-neutral-800">
               {/* Header */}
-              <div className="grid grid-cols-[1fr_1fr_auto_auto_auto_auto] gap-4 px-6 py-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
+              <div className="grid grid-cols-[1fr_1fr_auto_auto_auto_auto] gap-4 px-6 py-3 text-xs font-medium uppercase tracking-wide text-neutral-400">
                 <span>{t('colOrder')}</span>
                 <span>{t('colCustomer')}</span>
                 <span>{t('colStatus')}</span>
@@ -122,7 +123,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                   >
                     <div>
                       <p className="text-sm font-medium text-white">{order.order_number}</p>
-                      <p className="text-xs text-neutral-500">
+                      <p className="text-xs text-neutral-400">
                         {new Date(order.created_at).toLocaleDateString('en-RW', {
                           day: 'numeric',
                           month: 'short',
@@ -132,7 +133,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-sm text-white">{customer?.full_name ?? '—'}</p>
-                      <p className="truncate text-xs text-neutral-500">{customer?.email ?? ''}</p>
+                      <p className="truncate text-xs text-neutral-400">{customer?.email ?? ''}</p>
                     </div>
                     <Badge className={`border-0 text-xs ${ORDER_STATUS_CLASS[order.status]}`}>
                       {tOrder(order.status)}
@@ -143,11 +144,14 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
                     <span className="text-sm font-semibold text-white">
                       {formatRwf(order.total_amount)}
                     </span>
+                    {/* Icon-only, and one per row — the order number keeps the
+                        names distinct so a link list is navigable. */}
                     <Link
                       href={`/admin/orders/${order.id}`}
-                      className="flex items-center text-neutral-500 hover:text-white"
+                      aria-label={t('viewOrder', { order: order.order_number })}
+                      className="flex items-center text-neutral-400 hover:text-white"
                     >
-                      <ChevronRight size={16} />
+                      <ChevronRight size={16} aria-hidden="true" />
                     </Link>
                   </div>
                 )
@@ -157,7 +161,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between border-t border-neutral-800 px-6 py-4">
-                <span className="text-xs text-neutral-500">
+                <span className="text-xs text-neutral-400">
                   {tCommon('pageOf', { page, total: totalPages })}
                 </span>
                 <div className="flex gap-2">

@@ -20,6 +20,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+// Lets the sign-out control live inside the menu while its <form> stays a
+// sibling — see the DropdownMenuItem below.
+const SIGN_OUT_FORM_ID = 'header-signout'
+
 interface HeaderProps {
   user: SupabaseUser | null
   portalLink: string
@@ -110,6 +114,7 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
 
         <div className="flex items-center gap-3 sm:gap-4">
           {user ? (
+            <>
             <DropdownMenu>
               {/* Icon-only trigger, so it needs an explicit accessible name.
                   This branch only renders for a signed-in user, which is why
@@ -129,7 +134,7 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{user.user_metadata?.full_name || t('myAccount')}</p>
-                    <p className="text-xs leading-none text-neutral-500">{user.email}</p>
+                    <p className="text-xs leading-none text-neutral-400">{user.email}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -143,16 +148,25 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
                   <Link href="/account/orders" className="cursor-pointer">{t('myOrders')}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <form action="/auth/signout" method="POST">
-                  <button type="submit" className="w-full">
-                    <DropdownMenuItem className="cursor-pointer text-red-500 focus:text-red-500">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>{t('logOut')}</span>
-                    </DropdownMenuItem>
+                {/* The button *is* the menu item, and submits the sibling form
+                    by id. Wrapping a <button> around the item — or putting the
+                    <form> inside the menu — places elements in the menu that
+                    role="menu" does not allow, which axe reports as
+                    aria-required-children, aria-required-parent and
+                    nested-interactive, all on the signed-in storefront. */}
+                <DropdownMenuItem
+                  asChild
+                  className="cursor-pointer text-red-500 focus:text-red-500"
+                >
+                  <button type="submit" form={SIGN_OUT_FORM_ID} className="w-full">
+                    <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+                    <span>{t('logOut')}</span>
                   </button>
-                </form>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <form id={SIGN_OUT_FORM_ID} action="/auth/signout" method="POST" className="hidden" />
+            </>
           ) : (
             <Link
               href="/login"

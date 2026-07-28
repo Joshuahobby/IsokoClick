@@ -68,7 +68,7 @@ export default async function ProductDetailPage({ params }: Props) {
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
 
       {/* Breadcrumb */}
-      <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-sm text-neutral-500">
+      <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-sm text-neutral-400">
         <Link href="/" className="transition-colors hover:text-white">{t('home')}</Link>
         <ChevronRight size={14} aria-hidden="true" />
         <Link href="/shop" className="transition-colors hover:text-white">{t('shop')}</Link>
@@ -102,7 +102,7 @@ export default async function ProductDetailPage({ params }: Props) {
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
             ) : (
-              <div className="flex flex-col items-center gap-3 text-neutral-600">
+              <div className="flex flex-col items-center gap-3 text-neutral-400">
                 <CategoryIcon slug={product.categories?.slug} size={64} />
                 {categoryName && <span className="text-sm font-medium">{categoryName}</span>}
               </div>
@@ -158,7 +158,7 @@ export default async function ProductDetailPage({ params }: Props) {
           <h1 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">{name}</h1>
 
           {(product.brand || product.sku) && (
-            <p className="mt-2 text-sm text-neutral-500">
+            <p className="mt-2 text-sm text-neutral-400">
               {product.brand && <span>{t('brand')}: {product.brand}</span>}
               {product.brand && product.sku && <span className="mx-2">·</span>}
               {product.sku && <span>{t('sku')}: {product.sku}</span>}
@@ -169,11 +169,11 @@ export default async function ProductDetailPage({ params }: Props) {
             <div className="flex flex-wrap items-baseline gap-3">
               <span className="price text-3xl text-white sm:text-4xl">{formatRwf(displayPrice)}</span>
               {product.sale_price && (
-                <span className="text-lg text-neutral-500 line-through">{formatRwf(product.base_price)}</span>
+                <span className="text-lg text-neutral-400 line-through">{formatRwf(product.base_price)}</span>
               )}
             </div>
             <p className="mt-1 text-sm text-neutral-400">{unitLabel}</p>
-            <p className="mt-1 text-xs text-neutral-500">{t('vatIncluded')}</p>
+            <p className="mt-1 text-xs text-neutral-400">{t('vatIncluded')}</p>
             {product.min_order_qty > 1 && (
               <p className="mt-3 text-sm font-medium text-amber-500">
                 {t('minOrder', { qty: product.min_order_qty })}
@@ -210,7 +210,7 @@ export default async function ProductDetailPage({ params }: Props) {
           {/* Description */}
           {description && (
             <div className="mt-8">
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-neutral-500">
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-neutral-400">
                 {t('description')}
               </h2>
               <p className="mt-3 leading-relaxed text-neutral-300">{description}</p>
@@ -220,13 +220,13 @@ export default async function ProductDetailPage({ params }: Props) {
           {/* Specifications */}
           {specs.length > 0 && (
             <div className="mt-8">
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-neutral-500">
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-neutral-400">
                 {t('specifications')}
               </h2>
               <dl className="mt-3 divide-y divide-neutral-800 rounded-2xl border border-neutral-800">
                 {specs.map((spec) => (
                   <div key={spec.key_en} className="grid grid-cols-2 gap-4 px-5 py-3 text-sm">
-                    <dt className="text-neutral-500">{spec.key_en}</dt>
+                    <dt className="text-neutral-400">{spec.key_en}</dt>
                     <dd className="text-neutral-200">{spec.value_en}</dd>
                   </div>
                 ))}

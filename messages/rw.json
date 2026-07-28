@@ -335,7 +335,9 @@
       "colCustomer": "Umuguzi",
       "colStatus": "Imiterere",
       "colPayment": "Kwishyura",
-      "colTotal": "Igiteranyo"
+      "colTotal": "Igiteranyo",
+      "filterByStatus": "Shungura ukurikije uko bihagaze",
+      "viewOrder": "Reba itumiza {order}"
     },
     "orderDetail": {
       "metaTitle": "Itumiza — Ubuyobozi",
@@ -435,7 +437,8 @@
       "colPartner": "Umufatanyabikorwa",
       "colDistrict": "Akarere",
       "colCommission": "Komisiyo",
-      "colStatus": "Imiterere"
+      "colStatus": "Imiterere",
+      "viewPartner": "Reba umufatanyabikorwa {partner}"
     },
     "partnerDetail": {
       "metaTitle": "Umufatanyabikorwa — Ubuyobozi",

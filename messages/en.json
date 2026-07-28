@@ -335,7 +335,9 @@
       "colCustomer": "Customer",
       "colStatus": "Status",
       "colPayment": "Payment",
-      "colTotal": "Total"
+      "colTotal": "Total",
+      "filterByStatus": "Filter by status",
+      "viewOrder": "View order {order}"
     },
     "orderDetail": {
       "metaTitle": "Order Detail — Admin",
@@ -435,7 +437,8 @@
       "colPartner": "Partner",
       "colDistrict": "District",
       "colCommission": "Commission",
-      "colStatus": "Status"
+      "colStatus": "Status",
+      "viewPartner": "View partner {partner}"
     },
     "partnerDetail": {
       "metaTitle": "Partner Detail — Admin",

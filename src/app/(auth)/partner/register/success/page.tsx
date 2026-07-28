@@ -18,7 +18,7 @@ export default async function PartnerRegisterSuccessPage() {
       <h1 className="text-3xl font-extrabold tracking-tight text-neutral-900">
         {t('successTitle')}
       </h1>
-      <p className="mt-3 text-neutral-500">
+      <p className="mt-3 text-neutral-400">
         {t('successBody')}
       </p>
       <div className="mt-8">
