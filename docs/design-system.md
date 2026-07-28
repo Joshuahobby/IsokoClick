@@ -12,7 +12,7 @@ adapted for a construction context — functional over decorative, confident ove
 
 ### Primary Colors
 ```
---color-brand-primary:     #E07B39   /* Amber Orange — action, CTA, accents */
+--color-brand-primary:     #F7941C   /* Brand Orange — action, CTA, accents (matches the logo) */
 --color-brand-secondary:   #1A1A1A   /* Near Black — primary backgrounds */
 --color-brand-surface:     #242424   /* Dark Surface — cards, panels */
 --color-brand-border:      #2E2E2E   /* Subtle borders */
@@ -41,7 +41,7 @@ adapted for a construction context — functional over decorative, confident ove
 
 ### Partner / Source Badges
 ```
---color-internal:  #E07B39   /* IsokoClick warehouse — orange */
+--color-internal:  #F7941C   /* IsokoClick warehouse — orange */
 --color-dropship:  #8B5CF6   /* Partner dropship — purple */
 ```
 
@@ -127,8 +127,11 @@ Ghost:      border border-neutral-600 text-white hover:border-white
 Danger:     bg-red-600 text-white
 Disabled:   bg-neutral-700 text-neutral-500 cursor-not-allowed
 ```
-Orange fills always use **dark text** (`text-neutral-950`): white on `#E07B39` is
-~3.0:1 and fails WCAG AA at button sizes; dark text is ~5.8:1 and passes.
+Orange fills always use **dark text** (`text-neutral-950`): white on `#F7941C` is
+2.1:1 and fails WCAG AA; dark text is 8.7:1 and passes AAA. This is also why
+`--primary-foreground`, `--accent-foreground` and `--sidebar-primary-foreground`
+are `#0A0A0A` rather than white — shadcn's `bg-primary text-primary-foreground`
+and the dropdown's `focus:bg-accent` pairings resolve through those tokens.
 All buttons: `rounded-full`, `px-6 py-2.5`, `font-semibold`, `transition-all duration-200`
 
 ### Badges / Tags

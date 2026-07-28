@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { User, Search, Menu, X, LogOut, LayoutDashboard } from 'lucide-react'
@@ -9,6 +10,7 @@ import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { CartDrawer } from '@/components/store/CartDrawer'
 import { LocaleSwitcher } from '@/components/shared/locale-switcher'
 import { Button } from '@/components/ui/button'
+import { APP_NAME } from '@/constants/app'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,13 +59,26 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
-          <Link href="/" className="group flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-primary font-black text-neutral-950 transition-transform group-hover:scale-105">
-              IC
-            </div>
-            <span className="hidden text-xl font-bold tracking-tight text-white sm:block">
-              IsokoClick
-            </span>
+          {/* The lockup already contains the wordmark, so both images carry an
+              empty alt and the link is named once, on the <Link>. That keeps a
+              single accessible name whichever breakpoint is showing. */}
+          <Link href="/" aria-label={APP_NAME} className="group flex shrink-0 items-center">
+            <Image
+              src="/logo-mark.png"
+              alt=""
+              width={512}
+              height={512}
+              priority
+              className="h-9 w-9 transition-transform group-hover:scale-105 sm:hidden"
+            />
+            <Image
+              src="/logo-on-dark.png"
+              alt=""
+              width={632}
+              height={96}
+              priority
+              className="hidden h-7 w-auto transition-transform group-hover:scale-105 sm:block"
+            />
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex" aria-label={t('menu')}>

@@ -25,6 +25,12 @@ import { formatRwf } from '@/lib/utils/currency'
 import { localize } from '@/lib/utils/localize'
 import type { AppLocale } from '@/i18n/locales'
 
+// Categories with a background photo in public/category/. The asset library is
+// entirely bathroom, kitchen and tile photography, so the other six slugs have
+// nothing honest to show and keep the icon-only card. Kept in sync by hand with
+// CATEGORY_TILES in scripts/build-site-imagery.mjs.
+const CATEGORY_PHOTOS = new Set(['plumbing', 'finishes'])
+
 // Note: rendered dynamically (not ISR) — the cookie-based locale in
 // src/i18n/request.ts falls back to English during static prerenders.
 export async function generateMetadata() {
@@ -239,15 +245,33 @@ export default async function StoreHomePage() {
                 <Link
                   key={cat.id}
                   href={`/shop?category=${cat.slug}`}
-                  className="group rounded-2xl border border-neutral-800 bg-neutral-900 p-6 transition-all hover:border-brand-primary/50 hover:bg-neutral-800/80"
+                  className="group relative overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 p-6 transition-all hover:border-brand-primary/50 hover:bg-neutral-800/80"
                 >
-                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary">
+                  {/* Decorative only — the card already names the category, so
+                      the photo takes an empty alt and sits under a scrim that
+                      keeps the label and count on a near-solid background. */}
+                  {CATEGORY_PHOTOS.has(cat.slug) && (
+                    <>
+                      <Image
+                        src={`/category/${cat.slug}.jpg`}
+                        alt=""
+                        fill
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        className="object-cover opacity-20 transition-opacity duration-300 group-hover:opacity-30"
+                      />
+                      <div
+                        className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/85 to-neutral-900/55"
+                        aria-hidden="true"
+                      />
+                    </>
+                  )}
+                  <span className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary">
                     <CategoryIcon slug={cat.slug} size={22} />
                   </span>
-                  <p className="mt-4 font-semibold text-white transition-colors group-hover:text-brand-primary">
+                  <p className="relative mt-4 font-semibold text-white transition-colors group-hover:text-brand-primary">
                     {localize(locale, cat.name_en, cat.name_rw)}
                   </p>
-                  <p className="mt-1 text-xs text-neutral-400">
+                  <p className="relative mt-1 text-xs text-neutral-400">
                     {t('itemsCount', { count: categoryCounts[cat.id] ?? 0 })}
                   </p>
                 </Link>
@@ -337,7 +361,24 @@ export default async function StoreHomePage() {
       {/* ── Stocked two ways ─────────────────────────────────── */}
       <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
         <SectionHeader title={t('sourceTitle')} subtitle={t('sourceSubtitle')} />
-        <div className="mt-10 grid gap-6 md:grid-cols-2">
+
+        {/* Decorative band. Native size is 850x400, so it is deliberately kept
+            short — stretching it to a full-height hero would show the upscale. */}
+        <div className="relative mt-10 h-36 overflow-hidden rounded-3xl border border-neutral-800 sm:h-48">
+          <Image
+            src="/banner-materials.jpg"
+            alt=""
+            fill
+            sizes="(max-width: 1280px) 100vw, 1280px"
+            className="object-cover"
+          />
+          <div
+            className="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/30 to-transparent"
+            aria-hidden="true"
+          />
+        </div>
+
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
           <div className="flex flex-col rounded-3xl border border-neutral-800 bg-neutral-900 p-8">
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary/10 text-brand-primary">
               <Warehouse size={24} aria-hidden="true" />

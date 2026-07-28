@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getTranslations } from 'next-intl/server'
 import { APP_NAME } from '@/constants/app'
 
@@ -32,11 +33,14 @@ export async function Footer() {
 
           {/* Brand */}
           <div className="col-span-2">
-            <Link href="/" className="flex items-center gap-2 text-lg font-bold text-white">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary text-xs font-black text-neutral-950">
-                IC
-              </span>
-              {APP_NAME}
+            <Link href="/" aria-label={APP_NAME} className="inline-block">
+              <Image
+                src="/logo-on-dark.png"
+                alt=""
+                width={632}
+                height={96}
+                className="h-8 w-auto"
+              />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-neutral-400">{t('description')}</p>
             <p className="mt-3 text-xs text-neutral-400">{t('kigali')}</p>

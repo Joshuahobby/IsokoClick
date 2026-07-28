@@ -20,6 +20,9 @@
 # production
 /build
 
+# scripts/upload-product-images.mjs --dry-run scratch output
+/.tmp-product-images/
+
 # misc
 .DS_Store
 *.pem
