@@ -1,8 +1,13 @@
 import {
   Anvil,
+  Bath,
   BrickWall,
+  CookingPot,
+  Grid2x2,
   Hammer,
   HardHat,
+  HousePlus,
+  Lightbulb,
   Package,
   PaintRoller,
   Trees,
@@ -11,14 +16,25 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 
-// Maps the construction category slugs seeded in the DB to line-style icons.
-// Unknown slugs (new categories added by admins) fall back to a package icon.
+// Maps the category slugs seeded in the DB to line-style icons. Unknown slugs
+// (new categories added by admins) fall back to a package icon.
+//
+// The first block is the live merchandising taxonomy from
+// supabase/migrations/20260801000001_recategorize_catalog.sql; the second is
+// the retired buckets, kept so an archived product still renders an icon.
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  bathroom: Bath,
+  kitchen: CookingPot,
+  tiles: Grid2x2,
+  construction: BrickWall,
+  plumbing: Wrench,
+  lights: Lightbulb,
+  roofing: HousePlus,
+  finishes: PaintRoller,
+
   structure: BrickWall,
   steel: Anvil,
-  plumbing: Wrench,
   electrical: Zap,
-  finishes: PaintRoller,
   tools: Hammer,
   safety: HardHat,
   landscaping: Trees,

@@ -4,11 +4,21 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useCallback } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { localize } from '@/lib/utils/localize'
+import type { CategoryNode } from '@/lib/supabase/queries/products'
 import type { AppLocale } from '@/i18n/locales'
-import type { CategoryRow } from '@/types/database'
 
 type Props = {
-  categories: CategoryRow[]
+  categories: CategoryNode[]
+}
+
+// Flattens the tree into render rows, keeping depth so subcategories can be
+// indented under their parent. Selecting a parent still returns its whole
+// subtree — see getProducts() — so both levels are useful filters.
+function flatten(categories: CategoryNode[], depth = 0): { node: CategoryNode; depth: number }[] {
+  return categories.flatMap((node) => [
+    { node, depth },
+    ...flatten(node.children, depth + 1),
+  ])
 }
 
 export function ShopFilters({ categories }: Props) {
@@ -89,18 +99,20 @@ export function ShopFilters({ categories }: Props) {
           >
             {t('allCategories')}
           </button>
-          {categories.map((cat) => (
+          {flatten(categories).map(({ node, depth }) => (
             <button
-              key={cat.slug}
+              key={node.slug}
               type="button"
-              onClick={() => updateParam('category', cat.slug)}
-              className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                activeCategory === cat.slug
+              onClick={() => updateParam('category', node.slug)}
+              style={depth > 0 ? { paddingLeft: `${0.75 + depth * 1}rem` } : undefined}
+              className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                activeCategory === node.slug
                   ? 'bg-brand-primary/10 text-brand-primary font-medium'
                   : 'text-neutral-400 hover:bg-neutral-800 hover:text-white'
               }`}
             >
-              {localize(locale, cat.name_en, cat.name_rw)}
+              {localize(locale, node.name_en, node.name_rw)}
+              <span className="shrink-0 text-xs">{node.productCount}</span>
             </button>
           ))}
         </div>

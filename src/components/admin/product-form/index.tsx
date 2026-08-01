@@ -7,7 +7,8 @@ import { ChevronLeft } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { ProductFormState } from '@/app/admin/products/actions'
-import type { CategoryRow, ProductRow, UnitType } from '@/types/database'
+import type { CategoryNode } from '@/lib/supabase/queries/products'
+import type { ProductRow, UnitType } from '@/types/database'
 
 const UNIT_TYPES: UnitType[] = ['bag', 'kg', 'tonne', 'm2', 'litre', 'piece', 'roll', 'box']
 
@@ -18,7 +19,7 @@ const INPUT_CLASS =
 
 type Props = {
   action: (prev: ProductFormState, formData: FormData) => Promise<ProductFormState>
-  categories: CategoryRow[]
+  categories: CategoryNode[]
   product?: ProductRow
 }
 
@@ -85,9 +86,22 @@ export function ProductForm({ action, categories, product }: Props) {
                 className={FIELD_CLASS}
               >
                 <option value="">{t('categoryNone')}</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>{category.name_en}</option>
-                ))}
+                {/* Grouped by main category. A parent stays selectable — a
+                    product that fits Plumbing but neither Bathroom nor
+                    Kitchen belongs on the parent, and filtering a parent
+                    returns its subtree either way. */}
+                {categories.map((category) =>
+                  category.children.length === 0 ? (
+                    <option key={category.id} value={category.id}>{category.name_en}</option>
+                  ) : (
+                    <optgroup key={category.id} label={category.name_en}>
+                      <option value={category.id}>{category.name_en}</option>
+                      {category.children.map((child) => (
+                        <option key={child.id} value={child.id}>{child.name_en}</option>
+                      ))}
+                    </optgroup>
+                  )
+                )}
               </select>
             </div>
             <div className="space-y-1.5">

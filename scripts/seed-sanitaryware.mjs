@@ -18,8 +18,15 @@
  */
 import { createAdminClient } from './lib/admin-client.mjs'
 
-const PLUMBING = '60590e17-d0ac-40c3-b0ae-85dde5ba1d48'
-const FINISHES = 'bdba1f13-e38f-4fe2-abe7-6f0a06712b3b'
+// Category *slugs*, resolved to ids at run time. They were hardcoded uuids
+// until the merchandising taxonomy landed, which regenerated the category rows
+// and left those uuids pointing at nothing.
+//
+// These are the landing buckets, not the final ones: this script only has to
+// put every row in a valid category. scripts/apply-catalog-taxonomy.mjs then
+// files them into Bathroom / Kitchen / Tiles, so run it after this one.
+const PLUMBING = 'plumbing'
+const FINISHES = 'finishes'
 
 // name_rw is deliberately omitted throughout. Every existing seeded product
 // leaves it null and `localize()` falls back to English; inventing Kinyarwanda
@@ -532,8 +539,23 @@ const PRODUCTS = [
 async function main() {
   const supabase = await createAdminClient()
 
+  const { data: categories, error: catError } = await supabase
+    .from('categories')
+    .select('id, slug')
+    .in('slug', [PLUMBING, FINISHES])
+  if (catError) throw new Error(`categories lookup: ${catError.message}`)
+
+  const categoryIdBySlug = new Map(categories.map((c) => [c.slug, c.id]))
+  for (const slug of [PLUMBING, FINISHES]) {
+    if (!categoryIdBySlug.has(slug)) {
+      throw new Error(
+        `category "${slug}" not found — apply supabase/migrations first, then re-run`
+      )
+    }
+  }
+
   const rows = PRODUCTS.map((p) => ({
-    category_id: p.categoryId,
+    category_id: categoryIdBySlug.get(p.categoryId),
     source: 'internal',
     name_en: p.nameEn,
     slug: p.slug,

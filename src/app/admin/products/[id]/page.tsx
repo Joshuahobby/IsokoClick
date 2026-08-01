@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { getAdminProductById } from '@/lib/supabase/queries/admin'
-import { getCategories } from '@/lib/supabase/queries/products'
+import { getCategoryTree } from '@/lib/supabase/queries/products'
 import { getProductImages } from '@/lib/supabase/queries/product-images'
 import { ProductForm } from '@/components/admin/product-form'
 import { ProductImageManager } from '@/components/shared/product-image-manager'
@@ -20,7 +20,7 @@ export default async function AdminEditProductPage({ params }: Props) {
   const { id } = await params
   const [product, categories, images] = await Promise.all([
     getAdminProductById(id),
-    getCategories(),
+    getCategoryTree(),
     getProductImages(id),
   ])
 

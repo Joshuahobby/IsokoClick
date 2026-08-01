@@ -22,9 +22,12 @@ import { ROOT } from './lib/admin-client.mjs'
 const SOURCE_DIR =
   process.env.PHOTO_SOURCE_DIR ?? 'C:/Users/Joesure/Downloads/ISOKOCLICK/Pictures'
 
+// Keyed to the *main* categories the home page renders — a photo filed under a
+// subcategory slug would never be shown. The bathroom scene stands in for
+// Plumbing, whose stock is almost entirely bathroom sanitaryware.
 const CATEGORY_TILES = [
   { slug: 'plumbing', file: 'image-gen (7).png' },
-  { slug: 'finishes', file: 'image-gen (53).png' },
+  { slug: 'tiles', file: 'image-gen (53).png' },
 ]
 
 // The one asset in the folder that actually depicts this catalog: cement being
