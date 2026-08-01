@@ -1,18 +1,35 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
+import { getCategoryTree } from '@/lib/supabase/queries/products'
+import { localize } from '@/lib/utils/localize'
 import { APP_NAME } from '@/constants/app'
+import type { AppLocale } from '@/i18n/locales'
 
 export async function Footer() {
-  const t = await getTranslations('footer')
+  const locale = (await getLocale()) as AppLocale
+  const [t, categoryTree] = await Promise.all([
+    getTranslations('footer'),
+    getCategoryTree(),
+  ])
+
+  // Driven by the live taxonomy so retiring or adding a category cannot leave a
+  // dead link down here. Main categories only, and only ones a shopper can
+  // actually buy from today — the mega menu is where the full tree lives.
+  const categoryLinks = categoryTree
+    .filter((category) => category.productCount > 0)
+    .slice(0, 4)
+    .map((category) => ({
+      href: `/shop?category=${category.slug}`,
+      label: localize(locale, category.name_en, category.name_rw),
+    }))
 
   const shopLinks = [
     { href: '/shop', label: t('allMaterials') },
-    { href: '/shop?category=structure', label: t('structure') },
-    { href: '/shop?category=steel', label: t('steel') },
-    { href: '/shop?category=finishes', label: t('finishes') },
-    { href: '/shop?category=plumbing', label: t('plumbing') },
+    ...categoryLinks,
     { href: '/shop?sale=1', label: t('onSale') },
+    { href: '/video-ads', label: t('videoAds') },
+    { href: '/technicians', label: t('technicians') },
   ]
 
   const accountLinks = [

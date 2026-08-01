@@ -4,32 +4,33 @@ import { getLocale, getTranslations } from 'next-intl/server'
 import {
   ArrowRight,
   Building2,
-  Handshake,
   HardHat,
   ShoppingCart,
   Smartphone,
   Store,
   Tag,
   Truck,
-  Warehouse,
 } from 'lucide-react'
 import {
-  getCategories,
-  getCategoryProductCounts,
+  getCategoryTree,
   getProducts,
   type ProductWithImages,
 } from '@/lib/supabase/queries/products'
 import { ProductCard } from '@/components/store/product-card'
 import { CategoryIcon } from '@/components/store/category-icon'
+import { HeroShowcase, type ShowcaseProduct } from '@/components/store/hero-showcase'
 import { formatRwf } from '@/lib/utils/currency'
 import { localize } from '@/lib/utils/localize'
 import type { AppLocale } from '@/i18n/locales'
 
-// Categories with a background photo in public/category/. The asset library is
-// entirely bathroom, kitchen and tile photography, so the other six slugs have
-// nothing honest to show and keep the icon-only card. Kept in sync by hand with
-// CATEGORY_TILES in scripts/build-site-imagery.mjs.
-const CATEGORY_PHOTOS = new Set(['plumbing', 'finishes'])
+// Main categories with a background photo in public/category/. The asset
+// library is entirely bathroom, kitchen and tile photography, so the other
+// slugs have nothing honest to show and keep the icon-only card. Kept in sync
+// by hand with CATEGORY_TILES in scripts/build-site-imagery.mjs.
+const CATEGORY_PHOTOS = new Set(['plumbing', 'tiles'])
+
+// How many featured products the hero rotates through.
+const SHOWCASE_SIZE = 6
 
 // Note: rendered dynamically (not ISR) — the cookie-based locale in
 // src/i18n/request.ts falls back to English during static prerenders.
@@ -81,11 +82,10 @@ async function SectionHeader({
 
 export default async function StoreHomePage() {
   const locale = (await getLocale()) as AppLocale
-  const [t, tCommon, categories, categoryCounts, featuredRes, newestRes, saleRes] = await Promise.all([
+  const [t, tCommon, categoryTree, featuredRes, newestRes, saleRes] = await Promise.all([
     getTranslations('home'),
     getTranslations('common'),
-    getCategories(),
-    getCategoryProductCounts(),
+    getCategoryTree(),
     getProducts({ featured: true, pageSize: 8 }),
     getProducts({ sort: 'newest', pageSize: 12 }),
     getProducts({ onSale: true, pageSize: 4 }),
@@ -103,20 +103,38 @@ export default async function StoreHomePage() {
   const newArrivals = fullRows(
     newestRes.products.filter((p) => !featuredIds.has(p.id) && !saleIds.has(p.id))
   )
-  const visibleCategories = categories.filter((cat) => (categoryCounts[cat.id] ?? 0) > 0)
-  const spotlight: ProductWithImages | undefined = featured[0] ?? newestRes.products[0]
-  const spotlightImage =
-    spotlight?.product_images?.find((img) => img.is_primary) ?? spotlight?.product_images?.[0]
+  // Main categories only, and only stocked ones — the header mega menu is
+  // where the full tree and the ranges still waiting on stock live.
+  const visibleCategories = categoryTree.filter((cat) => cat.productCount > 0)
   const brands = [...new Set(
     [...featured, ...newestRes.products].map((p) => p.brand).filter((b): b is string => Boolean(b))
   )]
 
-  const stats = [
-    { value: t('statDeliveryValue'), label: t('statDelivery') },
-    { value: '30', label: t('statDistricts') },
-    { value: t('statPaymentValue'), label: t('statPayment') },
-    { value: '100%', label: t('statPartners') },
-  ]
+  // The hero rotates the featured shelf rather than pinning one product, so a
+  // repeat visitor does not meet the same basin every time. Prices are
+  // formatted here because the showcase is a client component.
+  const toShowcase = (product: ProductWithImages): ShowcaseProduct => {
+    const image =
+      product.product_images?.find((img) => img.is_primary) ?? product.product_images?.[0]
+    const name = localize(locale, product.name_en, product.name_rw)
+
+    return {
+      slug: product.slug,
+      name,
+      categoryName: product.categories
+        ? localize(locale, product.categories.name_en, product.categories.name_rw)
+        : null,
+      categorySlug: product.categories?.slug ?? null,
+      price: formatRwf(product.sale_price ?? product.base_price),
+      unitLabel: localize(locale, product.unit_label_en, product.unit_label_rw),
+      imageUrl: image?.storage_url ?? null,
+      imageAlt: image?.alt_text ?? name,
+    }
+  }
+
+  const showcase = (featuredRes.products.length > 0 ? featuredRes.products : newestRes.products)
+    .slice(0, SHOWCASE_SIZE)
+    .map(toShowcase)
 
   const steps = [
     { icon: Store, title: t('how1Title'), desc: t('how1Desc') },
@@ -161,129 +179,20 @@ export default async function StoreHomePage() {
                 {t('browseCategories')}
               </Link>
             </div>
-
-            <dl className="mt-14 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4">
-              {stats.map((stat) => (
-                <div key={stat.label} className="flex flex-col-reverse">
-                  <dt className="mt-1 text-xs leading-snug text-neutral-400">{stat.label}</dt>
-                  <dd className="price text-2xl text-white">{stat.value}</dd>
-                </div>
-              ))}
-            </dl>
           </div>
 
-          {/* Spotlight card (desktop) */}
-          {spotlight && (
+          {/* Rotating featured shelf (desktop) */}
+          {showcase.length > 0 && (
             <div className="hidden lg:block">
-              <div className="rounded-3xl border border-neutral-800 bg-neutral-900/80 p-6 shadow-2xl shadow-black/40 backdrop-blur">
-                <p className="text-xs font-semibold uppercase tracking-wider text-brand-primary">
-                  {t('heroSpotlight')}
-                </p>
-                <Link href={`/product/${spotlight.slug}`} className="group mt-4 block">
-                  <div className="arch-top relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-neutral-800">
-                    {spotlightImage ? (
-                      <Image
-                        src={spotlightImage.storage_url}
-                        alt={spotlightImage.alt_text ?? localize(locale, spotlight.name_en, spotlight.name_rw)}
-                        fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        sizes="400px"
-                      />
-                    ) : (
-                      <CategoryIcon slug={spotlight.categories?.slug} size={56} className="text-neutral-600" />
-                    )}
-                  </div>
-                  <div className="mt-4 flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs text-neutral-400">
-                        {spotlight.categories
-                          ? localize(locale, spotlight.categories.name_en, spotlight.categories.name_rw)
-                          : null}
-                      </p>
-                      <h3 className="mt-0.5 font-semibold text-white group-hover:text-neutral-200">
-                        {localize(locale, spotlight.name_en, spotlight.name_rw)}
-                      </h3>
-                    </div>
-                    <div className="text-right">
-                      <p className="price text-lg text-white">
-                        {formatRwf(spotlight.sale_price ?? spotlight.base_price)}
-                      </p>
-                      <p className="text-xs text-neutral-400">
-                        {localize(locale, spotlight.unit_label_en, spotlight.unit_label_rw)}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-                <div className="mt-5 space-y-2.5 border-t border-neutral-800 pt-5 text-sm text-neutral-300">
-                  <p className="flex items-center gap-2.5">
-                    <Truck size={16} className="shrink-0 text-brand-primary" aria-hidden="true" />
-                    {t('trustDelivery')}
-                  </p>
-                  <p className="flex items-center gap-2.5">
-                    <Smartphone size={16} className="shrink-0 text-brand-primary" aria-hidden="true" />
-                    {t('trustPayment')}
-                  </p>
-                </div>
-              </div>
+              <HeroShowcase products={showcase} />
             </div>
           )}
         </div>
       </section>
 
-      {/* ── Categories ───────────────────────────────────────── */}
-      {visibleCategories.length > 0 && (
-        <section id="categories" className="border-t border-neutral-800/70 bg-neutral-900/60 scroll-mt-16">
-          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-            <SectionHeader
-              title={t('categoriesTitle')}
-              subtitle={t('categoriesSubtitle')}
-              href="/shop"
-              linkLabel={t('viewAllProducts')}
-            />
-            <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {visibleCategories.map((cat) => (
-                <Link
-                  key={cat.id}
-                  href={`/shop?category=${cat.slug}`}
-                  className="group relative overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 p-6 transition-all hover:border-brand-primary/50 hover:bg-neutral-800/80"
-                >
-                  {/* Decorative only — the card already names the category, so
-                      the photo takes an empty alt and sits under a scrim that
-                      keeps the label and count on a near-solid background. */}
-                  {CATEGORY_PHOTOS.has(cat.slug) && (
-                    <>
-                      <Image
-                        src={`/category/${cat.slug}.jpg`}
-                        alt=""
-                        fill
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        className="object-cover opacity-20 transition-opacity duration-300 group-hover:opacity-30"
-                      />
-                      <div
-                        className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/85 to-neutral-900/55"
-                        aria-hidden="true"
-                      />
-                    </>
-                  )}
-                  <span className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary">
-                    <CategoryIcon slug={cat.slug} size={22} />
-                  </span>
-                  <p className="relative mt-4 font-semibold text-white transition-colors group-hover:text-brand-primary">
-                    {localize(locale, cat.name_en, cat.name_rw)}
-                  </p>
-                  <p className="relative mt-1 text-xs text-neutral-400">
-                    {t('itemsCount', { count: categoryCounts[cat.id] ?? 0 })}
-                  </p>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* ── Featured materials ───────────────────────────────── */}
       {featured.length > 0 ? (
-        <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+        <section className="mx-auto w-full max-w-7xl border-t border-neutral-800/70 px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
           <SectionHeader
             title={t('featuredTitle')}
             subtitle={t('featuredSubtitle')}
@@ -358,60 +267,68 @@ export default async function StoreHomePage() {
         </section>
       )}
 
-      {/* ── Stocked two ways ─────────────────────────────────── */}
-      <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-        <SectionHeader title={t('sourceTitle')} subtitle={t('sourceSubtitle')} />
-
-        {/* Decorative band. Native size is 850x400, so it is deliberately kept
-            short — stretching it to a full-height hero would show the upscale. */}
-        <div className="relative mt-10 h-36 overflow-hidden rounded-3xl border border-neutral-800 sm:h-48">
-          <Image
-            src="/banner-materials.jpg"
-            alt=""
-            fill
-            sizes="(max-width: 1280px) 100vw, 1280px"
-            className="object-cover"
-          />
-          <div
-            className="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/30 to-transparent"
-            aria-hidden="true"
-          />
-        </div>
-
-        <div className="mt-6 grid gap-6 md:grid-cols-2">
-          <div className="flex flex-col rounded-3xl border border-neutral-800 bg-neutral-900 p-8">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-primary/10 text-brand-primary">
-              <Warehouse size={24} aria-hidden="true" />
-            </span>
-            <h3 className="mt-5 text-xl font-bold text-white">{t('warehouseTitle')}</h3>
-            <p className="mt-2 flex-1 text-sm leading-relaxed text-neutral-400">{t('warehouseDesc')}</p>
-            <Link
-              href="/shop?source=internal"
-              className="group mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-primary hover:text-amber-500"
-            >
-              {t('warehouseCta')}
-              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-            </Link>
+      {/* ── Categories ───────────────────────────────────────── */}
+      {/* Sits below the product shelves on purpose: a shopper landing here
+          meets real products straight after the hero, and reaches the taxonomy
+          once they want to narrow down. The header mega menu covers the
+          shopper who arrives already knowing which range they want. */}
+      {visibleCategories.length > 0 && (
+        <section id="categories" className="border-t border-neutral-800/70 scroll-mt-16">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+            <SectionHeader
+              title={t('categoriesTitle')}
+              subtitle={t('categoriesSubtitle')}
+              href="/shop"
+              linkLabel={t('viewAllProducts')}
+            />
+            <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {visibleCategories.map((cat) => (
+                <Link
+                  key={cat.id}
+                  href={`/shop?category=${cat.slug}`}
+                  className="group relative overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 p-6 transition-all hover:border-brand-primary/50 hover:bg-neutral-800/80"
+                >
+                  {/* Decorative only — the card already names the category, so
+                      the photo takes an empty alt and sits under a scrim that
+                      keeps the label and count on a near-solid background. */}
+                  {CATEGORY_PHOTOS.has(cat.slug) && (
+                    <>
+                      <Image
+                        src={`/category/${cat.slug}.jpg`}
+                        alt=""
+                        fill
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        className="object-cover opacity-20 transition-opacity duration-300 group-hover:opacity-30"
+                      />
+                      <div
+                        className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/85 to-neutral-900/55"
+                        aria-hidden="true"
+                      />
+                    </>
+                  )}
+                  <span className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary">
+                    <CategoryIcon slug={cat.slug} size={22} />
+                  </span>
+                  <p className="relative mt-4 font-semibold text-white transition-colors group-hover:text-brand-primary">
+                    {localize(locale, cat.name_en, cat.name_rw)}
+                  </p>
+                  <p className="relative mt-1 text-xs text-neutral-400">
+                    {t('itemsCount', { count: cat.productCount })}
+                  </p>
+                </Link>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-col rounded-3xl border border-neutral-800 bg-neutral-900 p-8">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-500/10 text-purple-400">
-              <Handshake size={24} aria-hidden="true" />
-            </span>
-            <h3 className="mt-5 text-xl font-bold text-white">{t('partnerSourceTitle')}</h3>
-            <p className="mt-2 flex-1 text-sm leading-relaxed text-neutral-400">{t('partnerSourceDesc')}</p>
-            <Link
-              href="/shop?source=dropship"
-              className="group mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-purple-400 hover:text-purple-300"
-            >
-              {t('partnerSourceCta')}
-              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-            </Link>
-          </div>
-        </div>
+        </section>
+      )}
 
-        {/* Brands strip */}
-        {brands.length >= 2 && (
-          <div className="mt-14 flex flex-wrap items-center gap-x-8 gap-y-4 border-t border-neutral-800/70 pt-8">
+      {/* ── Brands strip ─────────────────────────────────────── */}
+      {/* Was the tail of the "Stocked two ways" section until that block came
+          out; it stands on its own because it is about who makes the stock,
+          not where it ships from. */}
+      {brands.length >= 2 && (
+        <section className="mx-auto w-full max-w-7xl border-t border-neutral-800/70 px-4 py-10 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
               {t('brandsTitle')}
             </p>
@@ -421,8 +338,8 @@ export default async function StoreHomePage() {
               </span>
             ))}
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
       {/* ── How it works ─────────────────────────────────────── */}
       <section className="border-t border-neutral-800/70 bg-neutral-900/60">

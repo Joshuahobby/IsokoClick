@@ -12,6 +12,13 @@ const nextConfig: NextConfig = {
         hostname: '*.supabase.co',
         pathname: '/storage/v1/object/public/**',
       },
+      // Video-ad thumbnails. The player itself is only loaded on press —
+      // see src/components/store/video-embed.
+      {
+        protocol: 'https',
+        hostname: 'i.ytimg.com',
+        pathname: '/vi/**',
+      },
     ],
     formats: ['image/avif', 'image/webp'],
   },
