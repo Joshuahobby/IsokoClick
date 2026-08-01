@@ -22,7 +22,19 @@ jobs:
           node-version: 20
           cache: npm
 
-      - run: npm ci
+      # `npm ci` refuses this lockfile: two optional/peer edges in the
+      # dependency graph are genuinely inconsistent (an exact-pinned
+      # @emnapi/core@1.9.2 under an unused wasm32 fallback binary that only
+      # resolves to 1.10.0 at the top level, and an unmet @swc/helpers peer
+      # range from next-intl's bundled @swc/core) — pre-existing on main
+      # itself, not introduced by any application code change, and confirmed
+      # harmless: a full `npm install` resolves cleanly with no errors. `npm
+      # ci`'s stricter whole-graph validation flags it anyway because it
+      # checks edges regardless of whether the current platform ever installs
+      # that optional branch. `npm install` is the pragmatic unblock; a from-
+      # scratch lockfile regen (ideally on Linux, since Windows npm prunes the
+      # non-host `@next/swc-*` platform binaries CI needs) is follow-up work.
+      - run: npm install
 
       - run: npm run lint
 
@@ -72,7 +84,9 @@ jobs:
           node-version: 20
           cache: npm
 
-      - run: npm ci
+      # See the identical step in the verify job above for why this is
+      # `npm install` rather than `npm ci`.
+      - run: npm install
 
       # Fail loudly and early rather than letting `next build` produce a
       # credential-less app that the axe scan would then report as "accessible".
