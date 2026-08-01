@@ -29,7 +29,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white">{t('title')}</h1>
         <div className="flex items-center gap-3">
-          <span className="text-sm text-neutral-500">{tCommon('countTotal', { count: total.toLocaleString() })}</span>
+          <span className="text-sm text-neutral-400">{tCommon('countTotal', { count: total.toLocaleString() })}</span>
           <Link
             href="/admin/products/new"
             className="flex items-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-medium text-neutral-950 hover:bg-amber-600"
@@ -46,7 +46,8 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
           name="search"
           defaultValue={search}
           placeholder={t('searchPlaceholder')}
-          className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-brand-primary"
+          aria-label={t('searchPlaceholder')}
+          className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-primary"
         />
         <button
           type="submit"
@@ -58,12 +59,12 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
 
       <div className="rounded-xl border border-neutral-800 bg-neutral-900">
         {products.length === 0 ? (
-          <div className="px-6 py-16 text-center text-sm text-neutral-500">{t('noProducts')}</div>
+          <div className="px-6 py-16 text-center text-sm text-neutral-400">{t('noProducts')}</div>
         ) : (
           <>
             <div className="divide-y divide-neutral-800">
               {/* Header */}
-              <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-4 px-6 py-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
+              <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] gap-4 px-6 py-3 text-xs font-medium uppercase tracking-wide text-neutral-400">
                 <span>{t('colProduct')}</span>
                 <span>{t('colCategory')}</span>
                 <span>{t('colSource')}</span>
@@ -82,7 +83,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                   >
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-white">{product.name_en}</p>
-                      <p className="truncate text-xs text-neutral-500">{product.slug}</p>
+                      <p className="truncate text-xs text-neutral-400">{product.slug}</p>
                     </div>
                     <span className="text-xs text-neutral-400">{category?.name_en ?? '—'}</span>
                     <Badge
@@ -97,7 +98,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
                     <div className="text-right">
                       <p className="text-sm text-white">{formatRwf(product.sale_price ?? product.base_price)}</p>
                       {product.sale_price && (
-                        <p className="text-xs text-neutral-600 line-through">{formatRwf(product.base_price)}</p>
+                        <p className="text-xs text-neutral-400 line-through">{formatRwf(product.base_price)}</p>
                       )}
                     </div>
                     <div className="flex gap-1.5">
@@ -130,7 +131,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between border-t border-neutral-800 px-6 py-4">
-                <span className="text-xs text-neutral-500">
+                <span className="text-xs text-neutral-400">
                   {tCommon('pageOf', { page, total: totalPages })}
                 </span>
                 <div className="flex gap-2">

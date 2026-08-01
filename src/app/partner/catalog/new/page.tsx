@@ -27,9 +27,9 @@ export default function PartnerNewProductPage() {
 
   return (
     <div className="max-w-3xl">
-      <nav className="mb-6 flex items-center gap-1.5 text-sm text-neutral-500">
+      <nav className="mb-6 flex items-center gap-1.5 text-sm text-neutral-400">
         <Link href="/partner/catalog" className="flex items-center gap-1 hover:text-white">
-          <ChevronLeft size={16} /> {t('backToCatalog')}
+          <ChevronLeft size={16} aria-hidden="true" /> {t('backToCatalog')}
         </Link>
       </nav>
 
@@ -55,7 +55,7 @@ export default function PartnerNewProductPage() {
               name="name_en"
               type="text"
               required
-              className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary"
+              className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
               placeholder={t('productNamePlaceholder')}
             />
           </div>
@@ -71,7 +71,7 @@ export default function PartnerNewProductPage() {
                 type="number"
                 min="0"
                 required
-                className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary"
+                className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
                 placeholder={t('basePricePlaceholder')}
               />
             </div>
@@ -84,7 +84,7 @@ export default function PartnerNewProductPage() {
                 name="sale_price"
                 type="number"
                 min="0"
-                className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary"
+                className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
                 placeholder={t('salePricePlaceholder')}
               />
             </div>
@@ -115,7 +115,7 @@ export default function PartnerNewProductPage() {
                 name="unit_label_en"
                 type="text"
                 required
-                className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary"
+                className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
                 placeholder={t('unitLabelPlaceholder')}
               />
             </div>
@@ -129,7 +129,7 @@ export default function PartnerNewProductPage() {
               id="description_en"
               name="description_en"
               rows={4}
-              className="w-full rounded-md border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2 focus:ring-offset-neutral-900"
+              className="w-full rounded-md border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2 focus:ring-offset-neutral-900"
               placeholder={t('descriptionPlaceholder')}
             />
           </div>

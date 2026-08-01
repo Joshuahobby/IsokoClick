@@ -35,7 +35,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <aside className="flex w-60 shrink-0 flex-col border-r border-neutral-800 bg-neutral-900">
         {/* Logo */}
         <div className="flex h-16 items-center gap-2.5 border-b border-neutral-800 px-5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary text-xs font-black text-white">
+          {/* Dark ink, not white: white on the brand orange measures 2.28:1.
+              Same rule as docs/design-system.md — orange fills take dark text. */}
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary text-xs font-black text-neutral-950">
             IC
           </span>
           <span className="text-sm font-bold text-white">{t('portalName')}</span>
@@ -60,7 +62,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <form action="/auth/signout" method="POST">
             <button
               type="submit"
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-neutral-500 transition-colors hover:bg-neutral-800 hover:text-white"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-white"
             >
               <LogOut size={15} />
               {t('signOut')}

@@ -2,13 +2,20 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { User, Search, Menu, X, LogOut, LayoutDashboard } from 'lucide-react'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { CartDrawer } from '@/components/store/CartDrawer'
+import {
+  CategoryAccordion,
+  CategoryMegaMenu,
+  type CategoryNavItem,
+} from '@/components/store/category-menu'
 import { LocaleSwitcher } from '@/components/shared/locale-switcher'
 import { Button } from '@/components/ui/button'
+import { APP_NAME } from '@/constants/app'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,22 +25,32 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+// Lets the sign-out control live inside the menu while its <form> stays a
+// sibling — see the DropdownMenuItem below.
+const SIGN_OUT_FORM_ID = 'header-signout'
+
 interface HeaderProps {
   user: SupabaseUser | null
   portalLink: string
   portalLabel: string
+  categories: CategoryNavItem[]
 }
 
-export function Header({ user, portalLink, portalLabel }: HeaderProps) {
+export function Header({ user, portalLink, portalLabel, categories }: HeaderProps) {
   const t = useTranslations('nav')
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [query, setQuery] = useState('')
 
-  const navLinks = [
+  // Categories sits between these two groups and is rendered separately —
+  // it is a disclosure button, not a link.
+  const leadingLinks = [
+    { href: '/', label: t('home') },
     { href: '/shop', label: t('shop') },
-    { href: '/shop?sale=1', label: t('deals') },
-    { href: '/partner/register', label: t('sellOnIsokoClick') },
+  ]
+  const trailingLinks = [
+    { href: '/video-ads', label: t('videoAds') },
+    { href: '/technicians', label: t('technicians') },
   ]
 
   function handleSearch(e: React.FormEvent) {
@@ -50,28 +67,51 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
         <div className="flex items-center gap-6">
           <button
             type="button"
-            className="text-neutral-300 transition-colors hover:text-white lg:hidden"
+            className="-m-2.5 p-2.5 text-neutral-300 transition-colors hover:text-white lg:hidden"
             onClick={() => setMobileOpen((open) => !open)}
             aria-expanded={mobileOpen}
             aria-label={mobileOpen ? t('closeMenu') : t('menu')}
           >
             {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
-          <Link href="/" className="group flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-primary font-black text-white transition-transform group-hover:scale-105">
-              IC
-            </div>
-            <span className="hidden text-xl font-bold tracking-tight text-white sm:block">
-              IsokoClick
-            </span>
+          {/* The lockup already contains the wordmark, so both images carry an
+              empty alt and the link is named once, on the <Link>. That keeps a
+              single accessible name whichever breakpoint is showing. */}
+          <Link href="/" aria-label={APP_NAME} className="group flex shrink-0 items-center">
+            <Image
+              src="/logo-mark.png"
+              alt=""
+              width={512}
+              height={512}
+              priority
+              className="h-9 w-9 transition-transform group-hover:scale-105 sm:hidden"
+            />
+            <Image
+              src="/logo-on-dark.png"
+              alt=""
+              width={632}
+              height={96}
+              priority
+              className="hidden h-7 w-auto transition-transform group-hover:scale-105 sm:block"
+            />
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex" aria-label={t('menu')}>
-            {navLinks.map((link) => (
+            {leadingLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className="rounded-full px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-800 hover:text-white"
+              >
+                {link.label}
+              </Link>
+            ))}
+            <CategoryMegaMenu categories={categories} />
+            {trailingLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-800 hover:text-white"
               >
                 {link.label}
               </Link>
@@ -86,7 +126,8 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t('searchPlaceholder')}
-              className="w-full rounded-full border border-neutral-800 bg-neutral-900 py-2 pl-10 pr-4 text-sm text-white placeholder:text-neutral-500 transition-all focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+              aria-label={t('search')}
+              className="w-full rounded-full border border-neutral-800 bg-neutral-900 py-2 pl-10 pr-4 text-sm text-white placeholder:text-neutral-400 transition-all focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
             />
             <Search className="absolute left-3 top-2.5 text-neutral-500" size={18} aria-hidden="true" />
           </div>
@@ -94,11 +135,19 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
 
         <div className="flex items-center gap-3 sm:gap-4">
           {user ? (
+            <>
             <DropdownMenu>
+              {/* Icon-only trigger, so it needs an explicit accessible name.
+                  This branch only renders for a signed-in user, which is why
+                  the signed-out axe suite in e2e/a11y.spec.ts never reaches it. */}
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:bg-neutral-800">
+                <Button
+                  variant="ghost"
+                  aria-label={t('myAccount')}
+                  className="relative h-10 w-10 rounded-full p-0 hover:bg-neutral-800"
+                >
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-800 text-neutral-300">
-                    <User size={20} />
+                    <User size={20} aria-hidden="true" />
                   </div>
                 </Button>
               </DropdownMenuTrigger>
@@ -106,7 +155,7 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{user.user_metadata?.full_name || t('myAccount')}</p>
-                    <p className="text-xs leading-none text-neutral-500">{user.email}</p>
+                    <p className="text-xs leading-none text-neutral-400">{user.email}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -120,16 +169,25 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
                   <Link href="/account/orders" className="cursor-pointer">{t('myOrders')}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <form action="/auth/signout" method="POST">
-                  <button type="submit" className="w-full">
-                    <DropdownMenuItem className="cursor-pointer text-red-500 focus:text-red-500">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>{t('logOut')}</span>
-                    </DropdownMenuItem>
+                {/* The button *is* the menu item, and submits the sibling form
+                    by id. Wrapping a <button> around the item — or putting the
+                    <form> inside the menu — places elements in the menu that
+                    role="menu" does not allow, which axe reports as
+                    aria-required-children, aria-required-parent and
+                    nested-interactive, all on the signed-in storefront. */}
+                <DropdownMenuItem
+                  asChild
+                  className="cursor-pointer text-red-500 focus:text-red-500"
+                >
+                  <button type="submit" form={SIGN_OUT_FORM_ID} className="w-full">
+                    <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+                    <span>{t('logOut')}</span>
                   </button>
-                </form>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <form id={SIGN_OUT_FORM_ID} action="/auth/signout" method="POST" className="hidden" />
+            </>
           ) : (
             <Link
               href="/login"
@@ -158,13 +216,14 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t('searchPlaceholder')}
-                className="w-full rounded-full border border-neutral-800 bg-neutral-900 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-neutral-500 focus:border-brand-primary focus:outline-none"
+                aria-label={t('search')}
+                className="w-full rounded-full border border-neutral-800 bg-neutral-900 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-neutral-400 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
               />
               <Search className="absolute left-3 top-3 text-neutral-500" size={18} aria-hidden="true" />
             </div>
           </form>
           <nav className="mt-4 flex flex-col gap-1" aria-label={t('menu')}>
-            {navLinks.map((link) => (
+            {leadingLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -174,6 +233,24 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
                 {link.label}
               </Link>
             ))}
+            <CategoryAccordion categories={categories} onNavigate={() => setMobileOpen(false)} />
+            {trailingLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className="rounded-xl px-4 py-3 text-sm font-medium text-neutral-200 transition-colors hover:bg-neutral-800 hover:text-white"
+              >
+                {link.label}
+              </Link>
+            ))}
+            <Link
+              href="/partner/register"
+              onClick={() => setMobileOpen(false)}
+              className="rounded-xl px-4 py-3 text-sm font-medium text-neutral-200 transition-colors hover:bg-neutral-800 hover:text-white"
+            >
+              {t('sellOnIsokoClick')}
+            </Link>
           </nav>
           <div className="mt-4 border-t border-neutral-800 pt-4 sm:hidden">
             <LocaleSwitcher variant="dark" />

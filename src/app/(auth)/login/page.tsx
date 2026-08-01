@@ -54,7 +54,7 @@ function LoginForm() {
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
-            className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-600 focus-visible:ring-brand-primary"
+            className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
           />
         </div>
 
@@ -63,7 +63,7 @@ function LoginForm() {
             <Label htmlFor="password" className="text-neutral-300">{t('password')}</Label>
             <Link
               href="/reset-password"
-              className="text-xs text-neutral-500 hover:text-brand-primary transition-colors"
+              className="text-xs text-neutral-400 hover:text-brand-primary transition-colors"
             >
               {t('forgotPassword')}
             </Link>
@@ -76,7 +76,7 @@ function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="current-password"
-            className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-600 focus-visible:ring-brand-primary"
+            className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
           />
         </div>
 
@@ -91,9 +91,9 @@ function LoginForm() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-neutral-500">
+      <p className="mt-6 text-center text-sm text-neutral-400">
         {t('noAccount')}{' '}
-        <Link href="/signup" className="text-brand-primary hover:text-amber-400 transition-colors">
+        <Link href="/signup" className="text-brand-primary underline hover:text-amber-400 transition-colors">
           {t('signup')}
         </Link>
       </p>

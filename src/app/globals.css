@@ -48,11 +48,11 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 
   /* IsokoClick Brand Tokens */
-  --color-brand-primary: #E07B39;
+  --color-brand-primary: #F7941C;
   --color-brand-secondary: #1A1A1A;
   --color-brand-surface: #242424;
   --color-brand-border: #2E2E2E;
-  --color-internal: #E07B39;
+  --color-internal: #F7941C;
   --color-dropship: #8B5CF6;
 }
 
@@ -64,32 +64,34 @@
   --card-foreground: #F5F5F5;
   --popover: #1A1A1A;
   --popover-foreground: #F5F5F5;
-  --primary: #E07B39;
-  --primary-foreground: #FFFFFF;
+  --primary: #F7941C;
+  /* Dark ink on orange fills — white would be 2.13:1 and fail WCAG AA.
+     See docs/design-system.md: orange fills always take dark text. */
+  --primary-foreground: #0A0A0A;
   --secondary: #2E2E2E;
   --secondary-foreground: #F5F5F5;
   --muted: #2E2E2E;
   --muted-foreground: #737373;
-  --accent: #E07B39;
-  --accent-foreground: #FFFFFF;
+  --accent: #F7941C;
+  --accent-foreground: #0A0A0A;
   --destructive: #EF4444;
   --border: #2E2E2E;
   --input: #2E2E2E;
-  --ring: #E07B39;
+  --ring: #F7941C;
   --radius: 0.75rem;
-  --chart-1: #E07B39;
+  --chart-1: #F7941C;
   --chart-2: #8B5CF6;
   --chart-3: #22C55E;
   --chart-4: #3B82F6;
   --chart-5: #F59E0B;
   --sidebar: #1A1A1A;
   --sidebar-foreground: #F5F5F5;
-  --sidebar-primary: #E07B39;
-  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-primary: #F7941C;
+  --sidebar-primary-foreground: #0A0A0A;
   --sidebar-accent: #2E2E2E;
   --sidebar-accent-foreground: #F5F5F5;
   --sidebar-border: #2E2E2E;
-  --sidebar-ring: #E07B39;
+  --sidebar-ring: #F7941C;
 }
 
 /* Light mode override (user preference) */
@@ -100,18 +102,20 @@
   --card-foreground: #0A0A0A;
   --popover: #FFFFFF;
   --popover-foreground: #0A0A0A;
-  --primary: #E07B39;
-  --primary-foreground: #FFFFFF;
+  --primary: #F7941C;
+  /* Dark ink on orange fills — white would be 2.13:1 and fail WCAG AA.
+     See docs/design-system.md: orange fills always take dark text. */
+  --primary-foreground: #0A0A0A;
   --secondary: #F0F0F0;
   --secondary-foreground: #0A0A0A;
   --muted: #F0F0F0;
   --muted-foreground: #737373;
-  --accent: #E07B39;
-  --accent-foreground: #FFFFFF;
+  --accent: #F7941C;
+  --accent-foreground: #0A0A0A;
   --destructive: #EF4444;
   --border: #E5E5E5;
   --input: #E5E5E5;
-  --ring: #E07B39;
+  --ring: #F7941C;
   --sidebar: #FFFFFF;
   --sidebar-foreground: #0A0A0A;
   --sidebar-border: #E5E5E5;
@@ -154,8 +158,8 @@
 /* Hero section background grid texture */
 .bg-grid-texture {
   background-image:
-    linear-gradient(#E07B39 1px, transparent 1px),
-    linear-gradient(90deg, #E07B39 1px, transparent 1px);
+    linear-gradient(#F7941C 1px, transparent 1px),
+    linear-gradient(90deg, #F7941C 1px, transparent 1px);
   background-size: 60px 60px;
 }
 

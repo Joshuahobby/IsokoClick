@@ -69,7 +69,7 @@ export default async function PartnerOrdersPage(
             <tbody className="divide-y divide-neutral-800">
               {items.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-neutral-500">
+                  <td colSpan={5} className="px-6 py-8 text-center text-neutral-400">
                     <ShoppingBag size={24} className="mx-auto mb-2 text-neutral-700" />
                     {t('noOrders')}
                   </td>
@@ -107,7 +107,7 @@ export default async function PartnerOrdersPage(
         </div>
         {/* Simple Pagination Placeholder */}
         {total > 25 && (
-          <div className="border-t border-neutral-800 p-4 text-center text-xs text-neutral-500">
+          <div className="border-t border-neutral-800 p-4 text-center text-xs text-neutral-400">
             {tCommon('pageOf', { page: currentPage, total: Math.ceil(total / 25) })}
           </div>
         )}

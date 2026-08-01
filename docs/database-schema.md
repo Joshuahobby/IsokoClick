@@ -112,7 +112,13 @@ CREATE TABLE categories (
   created_at  timestamptz DEFAULT now(),
   updated_at  timestamptz DEFAULT now()
 );
--- Root categories: Structure, Finishes, Plumbing, Electrical, Tools, Safety, Landscaping
+-- Root categories: Construction, Plumbing, Tiles, Finishes, Lights
+-- Subcategories via parent_id: Roofing (→ Construction), Bathroom and Kitchen (→ Plumbing)
+--
+-- Products attach to the most specific category that fits, so a parent owns
+-- almost nothing directly — filtering one has to include its descendants.
+-- getProducts() in src/lib/supabase/queries/products.ts resolves a slug to its
+-- whole subtree; getCategoryTree() rolls the counts up to match.
 ```
 
 ### products

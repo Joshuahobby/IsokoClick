@@ -81,7 +81,7 @@ export default async function AdminDashboardPage() {
     <div>
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white">{t('title')}</h1>
-        <span className="text-sm text-neutral-500">
+        <span className="text-sm text-neutral-400">
           {new Date().toLocaleDateString('en-RW', {
             weekday: 'long',
             day: 'numeric',
@@ -99,11 +99,11 @@ export default async function AdminDashboardPage() {
             className="rounded-xl border border-neutral-800 bg-neutral-900 p-5"
           >
             <div className="mb-3 flex items-center justify-between">
-              <span className="text-sm text-neutral-500">{label}</span>
+              <span className="text-sm text-neutral-400">{label}</span>
               <Icon size={16} className={color} />
             </div>
             <p className="text-2xl font-bold text-white">{value}</p>
-            <p className="mt-1 text-xs text-neutral-600">{sub}</p>
+            <p className="mt-1 text-xs text-neutral-400">{sub}</p>
           </div>
         ))}
       </div>
@@ -121,7 +121,7 @@ export default async function AdminDashboardPage() {
         </div>
 
         {recentOrders.length === 0 ? (
-          <div className="px-6 py-10 text-center text-sm text-neutral-500">{t('noOrders')}</div>
+          <div className="px-6 py-10 text-center text-sm text-neutral-400">{t('noOrders')}</div>
         ) : (
           <div className="divide-y divide-neutral-800">
             {recentOrders.map((order) => {
@@ -136,7 +136,7 @@ export default async function AdminDashboardPage() {
                 >
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-white">{order.order_number}</p>
-                    <p className="text-xs text-neutral-500">
+                    <p className="text-xs text-neutral-400">
                       {customer?.full_name ?? t('unknownCustomer')} · {customer?.email ?? ''}
                     </p>
                   </div>
@@ -151,7 +151,7 @@ export default async function AdminDashboardPage() {
                   <span className="shrink-0 text-sm font-semibold text-white">
                     {formatRwf(order.total_amount)}
                   </span>
-                  <span className="text-xs text-neutral-600">
+                  <span className="text-xs text-neutral-400">
                     {new Date(order.created_at).toLocaleDateString('en-RW', {
                       day: 'numeric',
                       month: 'short',

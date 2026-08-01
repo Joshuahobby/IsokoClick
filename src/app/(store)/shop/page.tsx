@@ -1,7 +1,7 @@
 import { getLocale, getTranslations } from 'next-intl/server'
 import { PackageSearch, SlidersHorizontal } from 'lucide-react'
 import {
-  getCategories,
+  getCategoryTree,
   getProducts,
   type ProductFilters,
 } from '@/lib/supabase/queries/products'
@@ -51,7 +51,7 @@ export default async function ShopPage({ searchParams }: Props) {
   const locale = (await getLocale()) as AppLocale
   const [t, categories, { products, total }] = await Promise.all([
     getTranslations('shop'),
-    getCategories(),
+    getCategoryTree(),
     getProducts({ category, sort, source, onSale, search, page, pageSize: PAGE_SIZE }),
   ])
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
@@ -91,7 +91,7 @@ export default async function ShopPage({ searchParams }: Props) {
             <div className="flex flex-col items-center justify-center rounded-3xl border border-neutral-800 bg-neutral-900/50 py-24 text-center">
               <PackageSearch size={48} className="mb-4 text-neutral-700" aria-hidden="true" />
               <h2 className="text-lg font-medium text-white">{t('noResults')}</h2>
-              <p className="mt-1 text-sm text-neutral-500">{t('noResultsHint')}</p>
+              <p className="mt-1 text-sm text-neutral-400">{t('noResultsHint')}</p>
             </div>
           ) : (
             <>

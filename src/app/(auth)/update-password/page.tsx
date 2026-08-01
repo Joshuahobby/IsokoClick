@@ -56,7 +56,7 @@ export default function UpdatePasswordPage() {
             required
             minLength={8}
             autoComplete="new-password"
-            className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-600 focus-visible:ring-brand-primary"
+            className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
           />
         </div>
 
@@ -71,7 +71,7 @@ export default function UpdatePasswordPage() {
             required
             minLength={8}
             autoComplete="new-password"
-            className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-600 focus-visible:ring-brand-primary"
+            className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
           />
         </div>
 

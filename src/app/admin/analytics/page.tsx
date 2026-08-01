@@ -12,7 +12,7 @@ export default async function AdminAnalyticsPage() {
     <div>
       <h1 className="mb-6 text-2xl font-bold text-white">{t('title')}</h1>
       <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-8 text-center">
-        <p className="text-neutral-500">{t('comingSoon')}</p>
+        <p className="text-neutral-400">{t('comingSoon')}</p>
       </div>
     </div>
   )

@@ -47,13 +47,13 @@ export default async function PartnerPayoutsPage() {
 
           <div className="space-y-4">
             <div>
-              <p className="text-sm text-neutral-500">{t('totalRevenue')}</p>
+              <p className="text-sm text-neutral-400">{t('totalRevenue')}</p>
               <p className="text-2xl font-bold text-white">{formatRwf(stats.revenueTotal)}</p>
             </div>
             <div className="border-t border-neutral-800 pt-4">
-              <p className="text-sm text-neutral-500">{t('estimatedEarnings')}</p>
+              <p className="text-sm text-neutral-400">{t('estimatedEarnings')}</p>
               <p className="text-2xl font-bold text-green-400">{formatRwf(estimatedEarnings)}</p>
-              <p className="text-xs text-neutral-500 mt-1">
+              <p className="text-xs text-neutral-400 mt-1">
                 {t('commissionNote', { rate: commissionRate })}
               </p>
             </div>
@@ -79,7 +79,7 @@ export default async function PartnerPayoutsPage() {
       {/* Payout History Placeholder */}
       <div className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900 p-6">
         <h2 className="mb-4 font-semibold text-white">{t('recentPayouts')}</h2>
-        <div className="text-center text-sm text-neutral-500 py-8">
+        <div className="text-center text-sm text-neutral-400 py-8">
           {t('noPayouts')}
         </div>
       </div>

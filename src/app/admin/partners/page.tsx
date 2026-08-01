@@ -38,7 +38,7 @@ export default async function AdminPartnersPage({ searchParams }: { searchParams
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white">{t('title')}</h1>
-        <span className="text-sm text-neutral-500">{tCommon('countTotal', { count: total.toLocaleString() })}</span>
+        <span className="text-sm text-neutral-400">{tCommon('countTotal', { count: total.toLocaleString() })}</span>
       </div>
 
       {/* Status filter tabs */}
@@ -60,12 +60,12 @@ export default async function AdminPartnersPage({ searchParams }: { searchParams
 
       <div className="rounded-xl border border-neutral-800 bg-neutral-900">
         {partners.length === 0 ? (
-          <div className="px-6 py-16 text-center text-sm text-neutral-500">{t('noPartners')}</div>
+          <div className="px-6 py-16 text-center text-sm text-neutral-400">{t('noPartners')}</div>
         ) : (
           <>
             <div className="divide-y divide-neutral-800">
               {/* Header */}
-              <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 px-6 py-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
+              <div className="grid grid-cols-[1fr_auto_auto_auto_auto] gap-4 px-6 py-3 text-xs font-medium uppercase tracking-wide text-neutral-400">
                 <span>{t('colPartner')}</span>
                 <span>{t('colDistrict')}</span>
                 <span>{t('colCommission')}</span>
@@ -80,7 +80,7 @@ export default async function AdminPartnersPage({ searchParams }: { searchParams
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-white">{partner.business_name}</p>
-                    <p className="text-xs text-neutral-500">
+                    <p className="text-xs text-neutral-400">
                       {partner.email ?? '—'} · {partner.phone ?? '—'}
                     </p>
                   </div>
@@ -89,11 +89,14 @@ export default async function AdminPartnersPage({ searchParams }: { searchParams
                   <Badge className={`border-0 text-xs ${PARTNER_STATUS_CLASS[partner.status]}`}>
                     {tPartner(partner.status)}
                   </Badge>
+                  {/* Icon-only, and one per row — the business name keeps the
+                      names distinct so a link list is navigable. */}
                   <Link
                     href={`/admin/partners/${partner.id}`}
-                    className="flex items-center text-neutral-500 hover:text-white"
+                    aria-label={t('viewPartner', { partner: partner.business_name })}
+                    className="flex items-center text-neutral-400 hover:text-white"
                   >
-                    <ChevronRight size={16} />
+                    <ChevronRight size={16} aria-hidden="true" />
                   </Link>
                 </div>
               ))}
@@ -101,7 +104,7 @@ export default async function AdminPartnersPage({ searchParams }: { searchParams
 
             {totalPages > 1 && (
               <div className="flex items-center justify-between border-t border-neutral-800 px-6 py-4">
-                <span className="text-xs text-neutral-500">
+                <span className="text-xs text-neutral-400">
                   {tCommon('pageOf', { page, total: totalPages })}
                 </span>
                 <div className="flex gap-2">

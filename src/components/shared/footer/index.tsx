@@ -1,17 +1,35 @@
 import Link from 'next/link'
-import { getTranslations } from 'next-intl/server'
+import Image from 'next/image'
+import { getLocale, getTranslations } from 'next-intl/server'
+import { getCategoryTree } from '@/lib/supabase/queries/products'
+import { localize } from '@/lib/utils/localize'
 import { APP_NAME } from '@/constants/app'
+import type { AppLocale } from '@/i18n/locales'
 
 export async function Footer() {
-  const t = await getTranslations('footer')
+  const locale = (await getLocale()) as AppLocale
+  const [t, categoryTree] = await Promise.all([
+    getTranslations('footer'),
+    getCategoryTree(),
+  ])
+
+  // Driven by the live taxonomy so retiring or adding a category cannot leave a
+  // dead link down here. Main categories only, and only ones a shopper can
+  // actually buy from today — the mega menu is where the full tree lives.
+  const categoryLinks = categoryTree
+    .filter((category) => category.productCount > 0)
+    .slice(0, 4)
+    .map((category) => ({
+      href: `/shop?category=${category.slug}`,
+      label: localize(locale, category.name_en, category.name_rw),
+    }))
 
   const shopLinks = [
     { href: '/shop', label: t('allMaterials') },
-    { href: '/shop?category=structure', label: t('structure') },
-    { href: '/shop?category=steel', label: t('steel') },
-    { href: '/shop?category=finishes', label: t('finishes') },
-    { href: '/shop?category=plumbing', label: t('plumbing') },
+    ...categoryLinks,
     { href: '/shop?sale=1', label: t('onSale') },
+    { href: '/video-ads', label: t('videoAds') },
+    { href: '/technicians', label: t('technicians') },
   ]
 
   const accountLinks = [
@@ -32,16 +50,19 @@ export async function Footer() {
 
           {/* Brand */}
           <div className="col-span-2">
-            <Link href="/" className="flex items-center gap-2 text-lg font-bold text-white">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary text-xs font-black text-white">
-                IC
-              </span>
-              {APP_NAME}
+            <Link href="/" aria-label={APP_NAME} className="inline-block">
+              <Image
+                src="/logo-on-dark.png"
+                alt=""
+                width={632}
+                height={96}
+                className="h-8 w-auto"
+              />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-neutral-400">{t('description')}</p>
-            <p className="mt-3 text-xs text-neutral-600">{t('kigali')}</p>
+            <p className="mt-3 text-xs text-neutral-400">{t('kigali')}</p>
 
-            <p className="mt-6 text-xs font-semibold uppercase tracking-wider text-neutral-500">
+            <p className="mt-6 text-xs font-semibold uppercase tracking-wider text-neutral-400">
               {t('payWith')}
             </p>
             <div className="mt-2 flex gap-2">
@@ -98,12 +119,12 @@ export async function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-neutral-800 pt-6 sm:flex-row">
-          <p className="text-xs text-neutral-600">{t('copyright', { year: new Date().getFullYear() })}</p>
+          <p className="text-xs text-neutral-400">{t('copyright', { year: new Date().getFullYear() })}</p>
           <div className="flex items-center gap-6">
-            <Link href="/privacy" className="text-xs text-neutral-600 transition-colors hover:text-neutral-400">
+            <Link href="/privacy" className="text-xs text-neutral-400 transition-colors hover:text-white">
               {t('privacyPolicy')}
             </Link>
-            <Link href="/terms" className="text-xs text-neutral-600 transition-colors hover:text-neutral-400">
+            <Link href="/terms" className="text-xs text-neutral-400 transition-colors hover:text-white">
               {t('termsOfService')}
             </Link>
           </div>

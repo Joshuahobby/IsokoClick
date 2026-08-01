@@ -42,7 +42,7 @@ export function PayoutForm({ currentPhone }: { currentPhone: string | null }) {
           type="tel"
           defaultValue={currentPhone || ''}
           placeholder={t('phonePlaceholder')}
-          className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary"
+          className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
         />
       </div>
 

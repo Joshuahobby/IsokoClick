@@ -1,0 +1,130 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Lint, types and unit tests need no external services.
+  verify:
+    name: Lint, types, unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # `npm ci` refuses this lockfile: two optional/peer edges in the
+      # dependency graph are genuinely inconsistent (an exact-pinned
+      # @emnapi/core@1.9.2 under an unused wasm32 fallback binary that only
+      # resolves to 1.10.0 at the top level, and an unmet @swc/helpers peer
+      # range from next-intl's bundled @swc/core) — pre-existing on main
+      # itself, not introduced by any application code change, and confirmed
+      # harmless: a full `npm install` resolves cleanly with no errors. `npm
+      # ci`'s stricter whole-graph validation flags it anyway because it
+      # checks edges regardless of whether the current platform ever installs
+      # that optional branch. `npm install` is the pragmatic unblock; a from-
+      # scratch lockfile regen (ideally on Linux, since Windows npm prunes the
+      # non-host `@next/swc-*` platform binaries CI needs) is follow-up work.
+      - run: npm install
+
+      - run: npm run lint
+
+      # tsc exhausts the default heap on this project.
+      - run: npm run type-check
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+
+      - run: npm run test
+
+  # The accessibility gate needs an app to scan. There are two ways to give it
+  # one, chosen entirely by configuration under
+  # Settings > Secrets and variables > Actions:
+  #
+  #   1. Set PLAYWRIGHT_BASE_URL to a deployed URL (e.g. a Vercel preview).
+  #      playwright.config.ts then skips its webServer entirely — no build here,
+  #      no Supabase values needed, and the scan hits the artifact that ships.
+  #
+  #   2. Otherwise set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
+  #      and this job builds and serves the app itself.
+  #
+  # The names match .env.local exactly so values can be copied across as-is.
+  # Both Supabase values carry the NEXT_PUBLIC_ prefix, meaning Next inlines
+  # them into the client bundle and every visitor's browser already has them —
+  # so repository *variables* are appropriate here. They are read as variables
+  # first and fall back to secrets, so either choice works unchanged.
+  a11y:
+    name: Accessibility (axe-core)
+    runs-on: ubuntu-latest
+    env:
+      PLAYWRIGHT_BASE_URL: ${{ vars.PLAYWRIGHT_BASE_URL }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL || secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY || secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      # Signed-in scans (e2e/a11y-authenticated.spec.ts). Unlike the pair above
+      # these are real passwords, so secrets rather than variables. Absent, the
+      # authenticated tests skip and the step below says so out loud.
+      E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+      E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+      E2E_PARTNER_EMAIL: ${{ secrets.E2E_PARTNER_EMAIL }}
+      E2E_PARTNER_PASSWORD: ${{ secrets.E2E_PARTNER_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # See the identical step in the verify job above for why this is
+      # `npm install` rather than `npm ci`.
+      - run: npm install
+
+      # Fail loudly and early rather than letting `next build` produce a
+      # credential-less app that the axe scan would then report as "accessible".
+      # This job must never skip silently — a gate that quietly does not run is
+      # the exact problem it was added to solve.
+      - name: Check the a11y job has something to scan
+        run: |
+          if [ -n "$PLAYWRIGHT_BASE_URL" ]; then
+            echo "Scanning deployed app at $PLAYWRIGHT_BASE_URL — skipping local build."
+            exit 0
+          fi
+          if [ -z "$NEXT_PUBLIC_SUPABASE_URL" ] || [ -z "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ]; then
+            echo "::error::The a11y job needs either PLAYWRIGHT_BASE_URL (scan a deployment) or NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY (build here). Add them under Settings > Secrets and variables > Actions. The Supabase pair is NEXT_PUBLIC_ and already public in the client bundle, so repository variables are fine — secrets are not required."
+            exit 1
+          fi
+          echo "Building and serving the app locally for the scan."
+
+      # The signed-in portals hold markup the guest scan cannot reach at all —
+      # an icon-only account menu, the admin and partner shells. Skipping those
+      # tests is survivable; not knowing they were skipped is not.
+      - name: Note whether the signed-in scans will run
+        run: |
+          if [ -z "$E2E_ADMIN_EMAIL" ] || [ -z "$E2E_ADMIN_PASSWORD" ]; then
+            echo "::warning::Admin a11y scans skipped — set E2E_ADMIN_EMAIL and E2E_ADMIN_PASSWORD under Settings > Secrets and variables > Actions to cover the admin portal."
+          fi
+          if [ -z "$E2E_PARTNER_EMAIL" ] || [ -z "$E2E_PARTNER_PASSWORD" ]; then
+            echo "::warning::Partner a11y scans skipped — set E2E_PARTNER_EMAIL and E2E_PARTNER_PASSWORD to cover the partner portal."
+          fi
+
+      - run: npx playwright install --with-deps chromium
+
+      # With PLAYWRIGHT_BASE_URL set this hits the deployment directly;
+      # otherwise playwright.config.ts runs `next build && next start`.
+      - run: npm run test:a11y
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7

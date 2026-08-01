@@ -53,17 +53,17 @@ export default async function PartnerDashboardPage() {
               <span>{t('step1')}</span>
             </li>
             <li className="flex gap-3">
-              <span className="flex-shrink-0 h-5 w-5 rounded-full bg-neutral-800 text-neutral-500 flex items-center justify-center text-xs">2</span>
+              <span className="flex-shrink-0 h-5 w-5 rounded-full bg-neutral-800 text-neutral-400 flex items-center justify-center text-xs">2</span>
               <span>{t('step2')}</span>
             </li>
             <li className="flex gap-3">
-              <span className="flex-shrink-0 h-5 w-5 rounded-full bg-neutral-800 text-neutral-500 flex items-center justify-center text-xs">3</span>
+              <span className="flex-shrink-0 h-5 w-5 rounded-full bg-neutral-800 text-neutral-400 flex items-center justify-center text-xs">3</span>
               <span>{t('step3')}</span>
             </li>
           </ul>
         </div>
         <div className="mt-10">
-          <Link href="/auth/signout" className="text-sm text-neutral-500 hover:text-white transition-colors">
+          <Link href="/auth/signout" className="text-sm text-neutral-400 hover:text-white transition-colors">
             {t('signOut')}
           </Link>
         </div>
@@ -100,7 +100,7 @@ export default async function PartnerDashboardPage() {
         {statsCards.map(({ label, value, icon: Icon, color }) => (
           <div key={label} className="rounded-xl border border-neutral-800 bg-neutral-900 p-5">
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-sm text-neutral-500">{label}</span>
+              <span className="text-sm text-neutral-400">{label}</span>
               <Icon size={16} className={color} />
             </div>
             <div className="text-2xl font-bold text-white">{value}</div>
@@ -109,7 +109,7 @@ export default async function PartnerDashboardPage() {
       </div>
 
       {/* Could add recent orders or top selling products here eventually */}
-      <div className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900 p-6 text-center text-sm text-neutral-500">
+      <div className="mt-8 rounded-xl border border-neutral-800 bg-neutral-900 p-6 text-center text-sm text-neutral-400">
         {t('moreSoon')}
       </div>
     </div>

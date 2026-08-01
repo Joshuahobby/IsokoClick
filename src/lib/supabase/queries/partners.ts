@@ -144,6 +144,29 @@ export type PartnerProduct = Pick<
   'id' | 'name_en' | 'slug' | 'base_price' | 'sale_price' | 'is_active' | 'is_featured' | 'created_at'
 >
 
+/**
+ * Scoped to the partner on purpose: passing a product id alone would let one
+ * partner load another's listing by guessing a UUID. The caller supplies the
+ * partner id it already resolved from the session.
+ */
+export async function getPartnerProductById(
+  partnerId: string,
+  productId: string
+): Promise<ProductRow | null> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', productId)
+    .eq('partner_id', partnerId)
+    .is('deleted_at', null)
+    .maybeSingle()
+
+  if (error) return null
+  return data
+}
+
 export async function getPartnerProducts(
   partnerId: string,
   page = 1,

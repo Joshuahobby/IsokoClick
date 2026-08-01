@@ -1,6 +1,12 @@
 import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { buildCategoryTree, collectSubtreeIds } from '@/lib/utils/category-tree'
+import type { CategoryNode } from '@/lib/utils/category-tree'
 import type { ProductRow, CategoryRow } from '@/types/database'
+
+// Re-exported so callers keep importing their category types from the query
+// module they already use, rather than reaching into lib/utils for a type.
+export type { CategoryNode }
 
 export type ProductWithImages = ProductRow & {
   product_images: { storage_url: string; alt_text: string | null; is_primary: boolean }[]
@@ -30,24 +36,27 @@ export async function getProducts(filters: ProductFilters = {}): Promise<{
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
 
-  // Filtering on an embedded resource only removes parent rows when the
-  // join is `!inner` — a plain embed would return every product with
-  // `categories: null` and silently ignore the category filter.
-  const categoriesEmbed = filters.category
-    ? 'categories:category_id!inner(name_en, name_rw, slug)'
-    : 'categories:category_id(name_en, name_rw, slug)'
+  // A category filter has to match the whole subtree: products hang off the
+  // most specific category that fits them, so every basin is filed under
+  // Bathroom and none directly under its parent, Plumbing. Filtering on the
+  // embedded slug would return one PVC pipe for /shop?category=plumbing.
+  let categoryIds: string[] | null = null
+  if (filters.category) {
+    categoryIds = await getCategorySubtreeIds(filters.category)
+    if (categoryIds.length === 0) return { products: [], total: 0 }
+  }
 
   let query = supabase
     .from('products')
     .select(
-      `*, product_images(storage_url, alt_text, is_primary), ${categoriesEmbed}`,
+      '*, product_images(storage_url, alt_text, is_primary), categories:category_id(name_en, name_rw, slug)',
       { count: 'exact' }
     )
     .eq('is_active', true)
     .is('deleted_at', null)
 
-  if (filters.category) {
-    query = query.eq('categories.slug', filters.category)
+  if (categoryIds) {
+    query = query.in('category_id', categoryIds)
   }
   if (filters.source) {
     query = query.eq('source', filters.source)
@@ -148,8 +157,9 @@ export async function getRelatedProducts(
   return (data ?? []) as unknown as ProductWithImages[]
 }
 
-// Active-product count per category id, computed in one round-trip.
-export async function getCategoryProductCounts(): Promise<Record<string, number>> {
+// Active-product count per category id, computed in one round-trip. Direct
+// members only — getCategoryTree() rolls these up through the subtree.
+export const getCategoryProductCounts = cache(async (): Promise<Record<string, number>> => {
   const supabase = await createClient()
   const { data } = await supabase
     .from('products')
@@ -162,9 +172,11 @@ export async function getCategoryProductCounts(): Promise<Record<string, number>
     if (row.category_id) counts[row.category_id] = (counts[row.category_id] ?? 0) + 1
   }
   return counts
-}
+})
 
-export async function getCategories(): Promise<CategoryRow[]> {
+// cache() so the layout, the page and the footer share one round-trip, and so
+// getCategorySubtreeIds() below is free when the caller already loaded them.
+export const getCategories = cache(async (): Promise<CategoryRow[]> => {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('categories')
@@ -174,4 +186,22 @@ export async function getCategories(): Promise<CategoryRow[]> {
 
   if (error) throw new Error(`getCategories: ${error.message}`)
   return data ?? []
+})
+
+// A category plus everything nested under it. Returns [] for an unknown slug,
+// which callers read as "no such category" rather than "no filter".
+export async function getCategorySubtreeIds(slug: string): Promise<string[]> {
+  return collectSubtreeIds(await getCategories(), slug)
+}
+
+// The active categories as a tree, each node carrying its subtree product
+// count — the number a shopper expects to see after clicking it, which is what
+// getProducts() returns for that slug.
+export async function getCategoryTree(): Promise<CategoryNode[]> {
+  const [categories, directCounts] = await Promise.all([
+    getCategories(),
+    getCategoryProductCounts(),
+  ])
+
+  return buildCategoryTree(categories, directCounts)
 }

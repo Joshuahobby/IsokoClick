@@ -77,7 +77,7 @@ export default function ResetPasswordPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
-            className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-600 focus-visible:ring-brand-primary"
+            className="border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary"
           />
         </div>
 
@@ -93,7 +93,7 @@ export default function ResetPasswordPage() {
       </form>
 
       <div className="mt-8 text-center">
-        <Link href="/login" className="text-sm text-neutral-500 hover:text-brand-primary transition-colors">
+        <Link href="/login" className="text-sm text-neutral-400 hover:text-brand-primary transition-colors">
           {t('backToLogin')}
         </Link>
       </div>

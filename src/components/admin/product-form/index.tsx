@@ -7,18 +7,19 @@ import { ChevronLeft } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { ProductFormState } from '@/app/admin/products/actions'
-import type { CategoryRow, ProductRow, UnitType } from '@/types/database'
+import type { CategoryNode } from '@/lib/supabase/queries/products'
+import type { ProductRow, UnitType } from '@/types/database'
 
 const UNIT_TYPES: UnitType[] = ['bag', 'kg', 'tonne', 'm2', 'litre', 'piece', 'roll', 'box']
 
 const FIELD_CLASS =
-  'w-full rounded-md border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-brand-primary'
+  'w-full rounded-md border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-primary'
 const INPUT_CLASS =
-  'border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-500 focus-visible:ring-brand-primary'
+  'border-neutral-700 bg-neutral-800 text-white placeholder:text-neutral-400 focus-visible:ring-brand-primary'
 
 type Props = {
   action: (prev: ProductFormState, formData: FormData) => Promise<ProductFormState>
-  categories: CategoryRow[]
+  categories: CategoryNode[]
   product?: ProductRow
 }
 
@@ -28,9 +29,9 @@ export function ProductForm({ action, categories, product }: Props) {
 
   return (
     <div className="max-w-3xl">
-      <nav className="mb-6 flex items-center gap-1.5 text-sm text-neutral-500">
+      <nav className="mb-6 flex items-center gap-1.5 text-sm text-neutral-400">
         <Link href="/admin/products" className="flex items-center gap-1 hover:text-white">
-          <ChevronLeft size={16} /> {t('backToProducts')}
+          <ChevronLeft size={16} aria-hidden="true" /> {t('backToProducts')}
         </Link>
       </nav>
 
@@ -85,9 +86,22 @@ export function ProductForm({ action, categories, product }: Props) {
                 className={FIELD_CLASS}
               >
                 <option value="">{t('categoryNone')}</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>{category.name_en}</option>
-                ))}
+                {/* Grouped by main category. A parent stays selectable — a
+                    product that fits Plumbing but neither Bathroom nor
+                    Kitchen belongs on the parent, and filtering a parent
+                    returns its subtree either way. */}
+                {categories.map((category) =>
+                  category.children.length === 0 ? (
+                    <option key={category.id} value={category.id}>{category.name_en}</option>
+                  ) : (
+                    <optgroup key={category.id} label={category.name_en}>
+                      <option value={category.id}>{category.name_en}</option>
+                      {category.children.map((child) => (
+                        <option key={child.id} value={child.id}>{child.name_en}</option>
+                      ))}
+                    </optgroup>
+                  )
+                )}
               </select>
             </div>
             <div className="space-y-1.5">
@@ -132,7 +146,7 @@ export function ProductForm({ action, categories, product }: Props) {
                 defaultValue={product?.sale_price ?? ''}
                 className={INPUT_CLASS}
               />
-              <p className="text-xs text-neutral-500">{t('salePriceHint')}</p>
+              <p className="text-xs text-neutral-400">{t('salePriceHint')}</p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="min_order_qty" className="text-neutral-300">{t('minOrderQty')}</Label>
@@ -218,7 +232,7 @@ export function ProductForm({ action, categories, product }: Props) {
             />
             <span>
               {t('isHeavyGoods')}
-              <span className="block text-xs text-neutral-500">{t('isHeavyGoodsHint')}</span>
+              <span className="block text-xs text-neutral-400">{t('isHeavyGoodsHint')}</span>
             </span>
           </label>
         </fieldset>

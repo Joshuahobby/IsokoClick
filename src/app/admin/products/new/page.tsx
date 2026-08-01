@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server'
-import { getCategories } from '@/lib/supabase/queries/products'
+import { getCategoryTree } from '@/lib/supabase/queries/products'
 import { ProductForm } from '@/components/admin/product-form'
 import { createAdminProduct } from '../actions'
 
@@ -11,7 +11,7 @@ export async function generateMetadata() {
 }
 
 export default async function AdminNewProductPage() {
-  const categories = await getCategories()
+  const categories = await getCategoryTree()
 
   return <ProductForm action={createAdminProduct} categories={categories} />
 }

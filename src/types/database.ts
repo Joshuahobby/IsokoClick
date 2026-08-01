@@ -74,6 +74,7 @@ export interface Database {
     Tables: {
       users:          DbEntry<UserRow,         UserInsert,         UserUpdate>
       products:       DbEntry<ProductRow,      ProductInsert,      ProductUpdate>
+      product_images: DbEntry<ProductImageRow, ProductImageInsert, ProductImageUpdate>
       orders:         DbEntry<OrderRow,        OrderInsert,        OrderUpdate>
       order_items:    DbEntry<OrderItemRow,    OrderItemInsert,    OrderItemUpdate>
       payments:       DbEntry<PaymentRow,      PaymentInsert,      PaymentUpdate>
@@ -158,6 +159,21 @@ export interface ProductRow {
 }
 export type ProductInsert = Omit<ProductRow, 'id' | 'created_at' | 'updated_at'>
 export type ProductUpdate = Partial<ProductInsert>
+
+// `storage_url` is the fully-qualified public URL, not a bucket path — the
+// storefront hands it straight to next/image, and next.config.ts whitelists
+// the Supabase storage host for exactly this reason.
+export interface ProductImageRow {
+  id: string
+  product_id: string
+  storage_url: string
+  alt_text: string | null
+  sort_order: number
+  is_primary: boolean
+  created_at: string
+}
+export type ProductImageInsert = Omit<ProductImageRow, 'id' | 'created_at'>
+export type ProductImageUpdate = Partial<ProductImageInsert>
 
 export interface OrderRow {
   id: string

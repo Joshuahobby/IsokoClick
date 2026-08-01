@@ -86,7 +86,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
   return (
     <div className="max-w-4xl">
       {/* Breadcrumb */}
-      <nav className="mb-6 flex items-center gap-1.5 text-sm text-neutral-500">
+      <nav className="mb-6 flex items-center gap-1.5 text-sm text-neutral-400">
         <Link href="/admin/orders" className="hover:text-white">{t('breadcrumb')}</Link>
         <ChevronRight size={14} />
         <span className="text-neutral-300">{order.order_number}</span>
@@ -96,7 +96,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">{order.order_number}</h1>
-          <p className="mt-1 text-sm text-neutral-500">
+          <p className="mt-1 text-sm text-neutral-400">
             {t('placedOn', {
               date: new Date(order.created_at).toLocaleDateString('en-RW', {
                 day: 'numeric',
@@ -117,7 +117,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
       {/* Status actions */}
       {nextStatuses.length > 0 && (
         <div className="mb-6 flex flex-wrap gap-2 rounded-xl border border-neutral-800 bg-neutral-900 p-4">
-          <span className="flex items-center text-sm text-neutral-500">{t('updateStatus')}</span>
+          <span className="flex items-center text-sm text-neutral-400">{t('updateStatus')}</span>
           {nextStatuses.map((s) => {
             const action = changeStatus.bind(null, order.id, s)
             return (
@@ -158,10 +158,10 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               {delivery.address && <p className="text-neutral-400">{delivery.address}</p>}
               {delivery.district && <p className="text-neutral-400">{delivery.district}</p>}
               {delivery.phone && <p className="text-neutral-400">{delivery.phone}</p>}
-              {delivery.notes && <p className="text-neutral-500">{delivery.notes}</p>}
+              {delivery.notes && <p className="text-neutral-400">{delivery.notes}</p>}
             </div>
           ) : (
-            <p className="text-sm text-neutral-500">{t('noDelivery')}</p>
+            <p className="text-sm text-neutral-400">{t('noDelivery')}</p>
           )}
         </div>
 
@@ -173,26 +173,26 @@ export default async function AdminOrderDetailPage({ params }: Props) {
           {payment ? (
             <dl className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm sm:grid-cols-4">
               <div>
-                <dt className="text-neutral-500">{t('phone')}</dt>
+                <dt className="text-neutral-400">{t('phone')}</dt>
                 <dd className="text-white">{payment.phone_number}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">{t('operator')}</dt>
+                <dt className="text-neutral-400">{t('operator')}</dt>
                 <dd className="text-white">{payment.operator ?? '—'}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">{t('amount')}</dt>
+                <dt className="text-neutral-400">{t('amount')}</dt>
                 <dd className="text-white">{formatRwf(payment.amount)}</dd>
               </div>
               <div>
-                <dt className="text-neutral-500">{t('depositId')}</dt>
+                <dt className="text-neutral-400">{t('depositId')}</dt>
                 <dd className="truncate font-mono text-xs text-neutral-400">
                   {payment.pawapay_deposit_id ?? '—'}
                 </dd>
               </div>
               {payment.initiated_at && (
                 <div>
-                  <dt className="text-neutral-500">{t('initiated')}</dt>
+                  <dt className="text-neutral-400">{t('initiated')}</dt>
                   <dd className="text-white">
                     {new Date(payment.initiated_at).toLocaleString('en-RW')}
                   </dd>
@@ -200,7 +200,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               )}
               {payment.completed_at && (
                 <div>
-                  <dt className="text-neutral-500">{t('completed')}</dt>
+                  <dt className="text-neutral-400">{t('completed')}</dt>
                   <dd className="text-white">
                     {new Date(payment.completed_at).toLocaleString('en-RW')}
                   </dd>
@@ -208,13 +208,13 @@ export default async function AdminOrderDetailPage({ params }: Props) {
               )}
               {payment.failure_reason && (
                 <div className="sm:col-span-4">
-                  <dt className="text-neutral-500">{t('failureReason')}</dt>
+                  <dt className="text-neutral-400">{t('failureReason')}</dt>
                   <dd className="text-red-400">{payment.failure_reason}</dd>
                 </div>
               )}
             </dl>
           ) : (
-            <p className="text-sm text-neutral-500">{t('noPayment')}</p>
+            <p className="text-sm text-neutral-400">{t('noPayment')}</p>
           )}
         </div>
       </div>
@@ -229,7 +229,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
             <div key={item.id} className="flex items-center justify-between gap-4 text-sm">
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-white">{item.product?.name_en ?? tCommon('product')}</p>
-                <p className="text-xs text-neutral-500">
+                <p className="text-xs text-neutral-400">
                   {item.source === 'dropship' ? t('dropship') : t('internal')} ·{' '}
                   {formatRwf(item.unit_price)} × {item.quantity}
                   {item.product?.sku ? ` · ${t('sku', { sku: item.product.sku })}` : ''}
@@ -255,7 +255,7 @@ export default async function AdminOrderDetailPage({ params }: Props) {
           )}
           <div className="flex justify-between">
             <span className="text-neutral-400">{t('deliveryFee')}</span>
-            <span className="text-neutral-500 italic">
+            <span className="text-neutral-400 italic">
               {order.delivery_fee > 0 ? formatRwf(order.delivery_fee) : t('tbd')}
             </span>
           </div>
