@@ -41,6 +41,8 @@ function seedCart(page: Page, count: number, qty = 1) {
 const PUBLIC_PAGES = [
   { name: 'home', path: '/' },
   { name: 'shop', path: '/shop' },
+  { name: 'video ads', path: '/video-ads' },
+  { name: 'technicians', path: '/technicians' },
   { name: 'login', path: '/login' },
   { name: 'signup', path: '/signup' },
   { name: 'reset password', path: '/reset-password' },
@@ -67,6 +69,67 @@ test('storefront a11y: product detail (reached from shop)', async ({ page }) => 
   await page.waitForURL(/\/product\//)
 
   await expectNoBlockingViolations(page, 'product detail')
+})
+
+// ── Categories mega menu ─────────────────────────────────────────────────
+//
+// The panel is closed in the static home scan above, so none of its markup is
+// covered there. It is a disclosure button controlling a list of links rather
+// than an ARIA menu — see the rationale in src/components/store/category-menu.
+
+test.describe('categories mega menu', () => {
+  async function openMenu(page: Page) {
+    await page.goto('/', { waitUntil: 'load' })
+
+    const trigger = page.getByRole('button', { name: /^categories$/i })
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    await trigger.click()
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+
+    return trigger
+  }
+
+  test('opens with no axe violations', async ({ page }) => {
+    await openMenu(page)
+
+    // Scoped to the header: the "Shop by category" section further down the
+    // page carries a "View all products" link with an overlapping name.
+    await expect(
+      page.locator('header').getByRole('link', { name: 'All products', exact: true })
+    ).toBeVisible()
+    await expectNoBlockingViolations(page, 'home with categories menu open')
+  })
+
+  // A mouse click is preceded by a pointerenter that already opened the panel.
+  // Toggling on that click would close it again, so the panel would look like
+  // it never opened at all — this asserts the click keeps it open.
+  test('stays open when a hover-opened panel is clicked', async ({ page }) => {
+    const trigger = await openMenu(page)
+
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    // Scoped to the header: the "Shop by category" section further down the
+    // page carries a "View all products" link with an overlapping name.
+    await expect(
+      page.locator('header').getByRole('link', { name: 'All products', exact: true })
+    ).toBeVisible()
+  })
+
+  test('closes on Escape and restores focus to the trigger', async ({ page }) => {
+    const trigger = await openMenu(page)
+
+    await page.keyboard.press('Escape')
+
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    await expect(trigger).toBeFocused()
+  })
+
+  test('closes when a click lands outside the panel', async ({ page }) => {
+    const trigger = await openMenu(page)
+
+    await page.locator('h1').first().click()
+
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  })
 })
 
 // ── Skip link ────────────────────────────────────────────────────────────

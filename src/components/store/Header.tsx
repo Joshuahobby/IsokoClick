@@ -8,6 +8,11 @@ import { useTranslations } from 'next-intl'
 import { User, Search, Menu, X, LogOut, LayoutDashboard } from 'lucide-react'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { CartDrawer } from '@/components/store/CartDrawer'
+import {
+  CategoryAccordion,
+  CategoryMegaMenu,
+  type CategoryNavItem,
+} from '@/components/store/category-menu'
 import { LocaleSwitcher } from '@/components/shared/locale-switcher'
 import { Button } from '@/components/ui/button'
 import { APP_NAME } from '@/constants/app'
@@ -28,18 +33,24 @@ interface HeaderProps {
   user: SupabaseUser | null
   portalLink: string
   portalLabel: string
+  categories: CategoryNavItem[]
 }
 
-export function Header({ user, portalLink, portalLabel }: HeaderProps) {
+export function Header({ user, portalLink, portalLabel, categories }: HeaderProps) {
   const t = useTranslations('nav')
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [query, setQuery] = useState('')
 
-  const navLinks = [
+  // Categories sits between these two groups and is rendered separately —
+  // it is a disclosure button, not a link.
+  const leadingLinks = [
+    { href: '/', label: t('home') },
     { href: '/shop', label: t('shop') },
-    { href: '/shop?sale=1', label: t('deals') },
-    { href: '/partner/register', label: t('sellOnIsokoClick') },
+  ]
+  const trailingLinks = [
+    { href: '/video-ads', label: t('videoAds') },
+    { href: '/technicians', label: t('technicians') },
   ]
 
   function handleSearch(e: React.FormEvent) {
@@ -86,11 +97,21 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex" aria-label={t('menu')}>
-            {navLinks.map((link) => (
+            {leadingLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className="rounded-full px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-800 hover:text-white"
+              >
+                {link.label}
+              </Link>
+            ))}
+            <CategoryMegaMenu categories={categories} />
+            {trailingLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-800 hover:text-white"
               >
                 {link.label}
               </Link>
@@ -202,7 +223,7 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
             </div>
           </form>
           <nav className="mt-4 flex flex-col gap-1" aria-label={t('menu')}>
-            {navLinks.map((link) => (
+            {leadingLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -212,6 +233,24 @@ export function Header({ user, portalLink, portalLabel }: HeaderProps) {
                 {link.label}
               </Link>
             ))}
+            <CategoryAccordion categories={categories} onNavigate={() => setMobileOpen(false)} />
+            {trailingLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className="rounded-xl px-4 py-3 text-sm font-medium text-neutral-200 transition-colors hover:bg-neutral-800 hover:text-white"
+              >
+                {link.label}
+              </Link>
+            ))}
+            <Link
+              href="/partner/register"
+              onClick={() => setMobileOpen(false)}
+              className="rounded-xl px-4 py-3 text-sm font-medium text-neutral-200 transition-colors hover:bg-neutral-800 hover:text-white"
+            >
+              {t('sellOnIsokoClick')}
+            </Link>
           </nav>
           <div className="mt-4 border-t border-neutral-800 pt-4 sm:hidden">
             <LocaleSwitcher variant="dark" />
