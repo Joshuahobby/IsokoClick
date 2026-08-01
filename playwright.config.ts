@@ -15,7 +15,13 @@ const PORT = Number.isFinite(rawPort) && rawPort > 0 ? rawPort : 3000
 // (e.g. a Vercel preview). In that case we must NOT also boot a local server:
 // Playwright would spawn a build nothing uses and leave it running for the
 // duration of the run.
-const EXTERNAL_BASE_URL = process.env.PLAYWRIGHT_BASE_URL
+//
+// `||`, not `??`: GitHub Actions expands `${{ vars.PLAYWRIGHT_BASE_URL }}` to
+// an EMPTY STRING when the variable is unset, and `??` only falls back on
+// null/undefined. That left baseURL as '' in CI, so every page.goto('/') died
+// with "Cannot navigate to invalid URL" — while locally, where the variable is
+// genuinely absent, the same config worked fine.
+const EXTERNAL_BASE_URL = process.env.PLAYWRIGHT_BASE_URL || undefined
 const BASE_URL = EXTERNAL_BASE_URL ?? `http://localhost:${PORT}`
 
 export default defineConfig({
