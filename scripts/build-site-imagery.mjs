@@ -1,16 +1,14 @@
 /**
- * Builds the static site chrome imagery: category card backgrounds and the
- * materials banner.
+ * Builds the static site chrome imagery: the category card backgrounds.
  *
  * These live in public/ rather than Supabase Storage because they are layout
  * decoration keyed to a hardcoded category slug, not catalog data an admin
  * would ever edit.
  *
- * Only `plumbing` and `finishes` get a photo. The asset library is entirely
+ * Only `plumbing` and `tiles` get a photo. The asset library is entirely
  * bathroom, kitchen and tile photography, so there is nothing honest to put
- * behind Structure, Steel, Electrical, Tools, Safety or Landscaping — those
- * keep the icon-only card, which `CategoryIcon` already renders as the
- * fallback.
+ * behind Construction, Finishes or Lights — those keep the icon-only card,
+ * which `CategoryIcon` already renders as the fallback.
  *
  * Run:  node scripts/build-site-imagery.mjs
  */
@@ -30,10 +28,10 @@ const CATEGORY_TILES = [
   { slug: 'tiles', file: 'image-gen (53).png' },
 ]
 
-// The one asset in the folder that actually depicts this catalog: cement being
-// poured, rebar, paving blocks and clay bricks on a site. Native size is
-// 850x400, so it is never upscaled beyond the decorative band it sits in.
-const BANNER = 'IsokoClick-Building-Materials-850x400.jpg-1.webp'
+// A materials banner (public/banner-materials.jpg) used to be built here too.
+// It decorated the "Stocked two ways" section, which has since been removed
+// from the home page, leaving the asset with no consumer — so the build step
+// went with it rather than regenerating an orphan on every run.
 
 async function main() {
   await mkdir(path.join(ROOT, 'public', 'category'), { recursive: true })
@@ -45,11 +43,6 @@ async function main() {
       .toFile(path.join(ROOT, 'public', 'category', `${tile.slug}.jpg`))
     console.log(`  category/${tile.slug}.jpg`)
   }
-
-  await sharp(path.join(SOURCE_DIR, BANNER))
-    .jpeg({ quality: 82, mozjpeg: true })
-    .toFile(path.join(ROOT, 'public', 'banner-materials.jpg'))
-  console.log('  banner-materials.jpg')
 }
 
 main().catch((err) => {
